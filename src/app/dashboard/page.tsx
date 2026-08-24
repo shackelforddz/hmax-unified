@@ -28,14 +28,14 @@ export default function DashboardPage() {
     <ConversationLauncherContext.Provider value={openConversation}>
     <div className="h-screen bg-[#F3F4F6] font-patrick-hand relative overflow-hidden">
 
-      {/* Left conversations panel — anchored below nav, never scrolls under it */}
-      <div className="absolute top-[64px] left-4 bottom-4 w-[400px]">
+      {/* Right conversations panel — anchored below nav, never scrolls under it */}
+      <div className="absolute top-[64px] right-4 bottom-4 w-[400px]">
         <ConversationsPanel onNewConversation={() => openConversation()} />
       </div>
 
-      {/* Right content — starts at top-0 so it can scroll under the nav */}
-      {/* left = 16px page pad + 400px panel + 16px gap = 432px */}
-      <div className="no-scrollbar absolute top-0 right-0 bottom-0 overflow-y-auto" style={{ left: 432 }}>
+      {/* Left content — starts at top-0 so it can scroll under the nav */}
+      {/* right = 16px page pad + 400px panel + 16px gap = 432px */}
+      <div className="no-scrollbar absolute top-0 left-0 bottom-0 overflow-y-auto" style={{ right: 432 }}>
         <div className="px-4 pb-4 pt-[64px] flex flex-col gap-4">
           {isSales ? (
             <SalesDashboard />

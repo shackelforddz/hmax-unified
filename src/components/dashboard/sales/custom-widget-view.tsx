@@ -68,7 +68,7 @@ function ChartBody({ config }: { config: CustomWidgetConfig }) {
           <XAxis type="number" domain={[0, max]} hide />
           <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 12, fill: "#4B5563" }} tickLine={false} axisLine={false} />
           <Bar dataKey="value" fill="#111827" radius={[4, 4, 4, 4]} barSize={12}>
-            <LabelList dataKey="value" position="right" fontSize={12} fill="#111827" formatter={(v: number) => formatValue(v, unit)} />
+            <LabelList dataKey="value" position="right" fontSize={12} fill="#111827" formatter={(v) => formatValue(Number(v ?? 0), unit)} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

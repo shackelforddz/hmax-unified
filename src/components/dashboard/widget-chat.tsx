@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { MessageCircle, ArrowUp } from "lucide-react";
 import { useConversationLauncher } from "./conversation-launcher";
 import { Button } from "@/components/ui/button";
+import { widgetStarters } from "@/lib/knowledge-base";
 
 interface Props {
   /** The widget name used as conversation context. */
@@ -46,7 +47,12 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
         setOpen(false);
       }
     };
-    const onScroll = () => setOpen(false);
+    // Close when the page scrolls (the fixed popover would detach), but ignore
+    // scrolling that happens inside the popover itself (e.g. the chips row).
+    const onScroll = (e: Event) => {
+      if (popRef.current && e.target instanceof Node && popRef.current.contains(e.target)) return;
+      setOpen(false);
+    };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("mousedown", onDown);
     window.addEventListener("scroll", onScroll, true);
@@ -58,11 +64,16 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
     };
   }, [open]);
 
-  const submit = () => {
-    launch({ context: title, prompt: text.trim() || `Tell me about ${title}` });
+  // Starter prompts tailored to the widget's topic.
+  const starters = useMemo(() => widgetStarters(title), [title]);
+
+  const startWith = (prompt: string) => {
+    launch({ context: title, prompt });
     setOpen(false);
     setText("");
   };
+
+  const submit = () => startWith(text.trim() || `Tell me about ${title}`);
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -94,6 +105,7 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
             <p className="text-xs text-gray-400 mb-3">
               Start a conversation with this widget&apos;s data as context.
             </p>
+
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -102,7 +114,25 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
               placeholder={`e.g. What's driving ${title.toLowerCase()}?`}
               className="w-full h-20 px-3 py-2 text-sm text-gray-700 placeholder-gray-300 border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none"
             />
-            <Button onClick={submit} className="w-full mt-2 rounded-full h-auto py-2 text-sm cursor-pointer">
+
+            {starters.length > 0 && (
+              <div className="mt-3">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">Suggested</p>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
+                  {starters.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => startWith(p)}
+                      className="shrink-0 whitespace-nowrap text-xs text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Button onClick={submit} className="w-full mt-3 rounded-full h-auto py-2 text-sm cursor-pointer">
               Start conversation
               <ArrowUp size={13} strokeWidth={2} />
             </Button>

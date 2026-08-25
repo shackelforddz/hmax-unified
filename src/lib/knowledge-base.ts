@@ -435,3 +435,33 @@ export function visualFor(prompt: string, context?: string): CustomWidgetConfig 
 
   return null;
 }
+
+// Starter prompts tailored to a specific widget, matched by its title/topic.
+export function widgetStarters(title: string): string[] {
+  const q = title.toLowerCase();
+
+  if (/vendor|supplier|concentration/.test(q))
+    return ["Which projects depend on Delta Coils?", "Are there alternative suppliers?", "What's the total revenue exposure?"];
+  if (/sla|renewal|pipeline/.test(q))
+    return ["Which renewals need attention first?", "Show the AEP Ohio status", "What's the total renewal value?"];
+  if (/map/.test(q))
+    return ["Where are the critical assets?", "Which regions are most at risk?", "Show fleet health by location"];
+  if (/(on.?time|delivery)/.test(q))
+    return ["Why is on-time delivery falling?", "Which projects are running late?", "How do we get back to the 85% target?"];
+  if (/margin|profit/.test(q))
+    return ["Which contracts drag margin the most?", "What's the Siemens change-order impact?", "How does margin compare to plan?"];
+  if (/milestone/.test(q))
+    return ["What's overdue right now?", "Which milestones are at risk this week?", "What's blocking Xcel's mobilization?"];
+  if (/revenue/.test(q))
+    return ["What's driving revenue at risk?", "What's blocking the Xcel invoice?", "Which invoices can be released now?"];
+  if (/contract/.test(q))
+    return ["Which contracts are at risk?", "Show contracts by status", "Which need action this week?"];
+  if (/repair/.test(q))
+    return ["Which assets repeat-fail the most?", "Show AST-002's repair history", "What's the replacement recommendation?"];
+  if (/asset|critical|fleet|health|score|at.?risk|alert/.test(q))
+    return ["Which assets are critical?", "Show the health trend", "What's driving the decline?"];
+  if (/assigned|attention/.test(q))
+    return ["What needs my attention first?", "Which items are critical?", "What action should I take?"];
+
+  return ["What needs my attention today?", "Show the portfolio overview", "Which contracts are at risk?"];
+}

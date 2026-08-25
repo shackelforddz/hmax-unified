@@ -10,7 +10,7 @@ import { type CustomWidgetConfig, formatValue } from "@/lib/custom-widget";
 
 const GRAYS = ["#111827", "#6B7280", "#9CA3AF", "#D1D5DB", "#E5E7EB"];
 
-function ChartBody({ config }: { config: CustomWidgetConfig }) {
+export function ChartBody({ config }: { config: CustomWidgetConfig }) {
   const { type, series, unit } = config;
 
   if (type === "kpi") {

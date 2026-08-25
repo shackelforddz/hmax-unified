@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { Sparkles, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, GripVertical, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type Suggestions } from "@/lib/knowledge-base";
+import { type CustomWidgetConfig } from "@/lib/custom-widget";
+import { ChartBody } from "@/components/dashboard/sales/custom-widget-view";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -764,6 +766,7 @@ export interface ChatMsg {
   kind?: "text" | "wizard";
   text?: string;
   suggestions?: Suggestions;
+  visual?: CustomWidgetConfig;
 }
 
 /** A conversation saved to the panel so it can be revisited. */
@@ -869,6 +872,12 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
               <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3">
                 <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{m.text}</p>
               </div>
+              {m.visual && (
+                <div className="mt-2 bg-white border border-gray-100 rounded-2xl p-4">
+                  <p className="text-xs text-gray-400 mb-3">{m.visual.title}</p>
+                  <ChartBody config={m.visual} />
+                </div>
+              )}
               <div className="mt-2 ml-1">
                 <SourcesLine />
               </div>

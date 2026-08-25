@@ -8,7 +8,7 @@ import {
 import ContextPanel from "./context-panel";
 import DocPanel from "./doc-panel";
 import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
-import { answerQuery, detectCustomer, suggestNext } from "@/lib/knowledge-base";
+import { answerQuery, detectCustomer, suggestNext, visualFor } from "@/lib/knowledge-base";
 import { Button } from "@/components/ui/button";
 
 const SUGGESTIONS = [
@@ -79,7 +79,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
       timers.current.push(
         setTimeout(() => {
           setTyping(false);
-          push({ role: "ai", kind: "text", text: answerQuery(text, ctx), suggestions: suggestNext(text, ctx) });
+          push({ role: "ai", kind: "text", text: answerQuery(text, ctx), suggestions: suggestNext(text, ctx), visual: visualFor(text, ctx) ?? undefined });
         }, 1000)
       );
     }

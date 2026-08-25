@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import KpiCard from "@/components/dashboard/kpi-card";
 import FleetMap from "@/components/dashboard/sales/fleet-map";
 import FleetHealth from "@/components/dashboard/sales/fleet-health";
@@ -6,8 +9,14 @@ import RepeatedRepairs from "@/components/dashboard/sales/repeated-repairs";
 import SlaPipeline from "@/components/dashboard/sales/sla-pipeline";
 import SlaRenewals from "@/components/dashboard/sales/sla-renewals";
 import CustomWidget from "@/components/dashboard/sales/custom-widget";
+import CustomWidgetView from "@/components/dashboard/sales/custom-widget-view";
+import CustomWidgetBuilder from "@/components/dashboard/sales/custom-widget-builder";
+import { type CustomWidgetConfig } from "@/lib/custom-widget";
 
 export default function SalesDashboard() {
+  const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
+  const [building, setBuilding] = useState(false);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Top row: fleet map + stacked KPI cards */}
@@ -33,11 +42,24 @@ export default function SalesDashboard() {
         </div>
       </div>
 
-      {/* Renewals + custom widget */}
+      {/* Renewals + custom widgets */}
       <div className="grid grid-cols-2 gap-4">
         <SlaRenewals />
-        <CustomWidget />
+        {widgets.map((w) => (
+          <CustomWidgetView key={w.id} config={w} />
+        ))}
+        <CustomWidget onClick={() => setBuilding(true)} />
       </div>
+
+      {building && (
+        <CustomWidgetBuilder
+          onAdd={(config) => {
+            setWidgets((ws) => [...ws, config]);
+            setBuilding(false);
+          }}
+          onClose={() => setBuilding(false)}
+        />
+      )}
     </div>
   );
 }

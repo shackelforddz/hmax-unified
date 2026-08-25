@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Sparkles, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, GripVertical, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { type Suggestions } from "@/lib/knowledge-base";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -762,6 +763,7 @@ export interface ChatMsg {
   role: "user" | "ai";
   kind?: "text" | "wizard";
   text?: string;
+  suggestions?: Suggestions;
 }
 
 /** A conversation saved to the panel so it can be revisited. */
@@ -777,6 +779,42 @@ export interface StoredConversation {
   seedPrompt?: string;
 }
 
+function SuggestionBlock({ suggestions, onSend }: { suggestions: Suggestions; onSend?: (t: string) => void }) {
+  const { prompts, actions } = suggestions;
+  if (prompts.length === 0 && actions.length === 0) return null;
+  return (
+    <div className="mt-3 ml-1 flex flex-col gap-2.5 animate-message-in">
+      {prompts.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {prompts.map((p) => (
+            <button
+              key={p}
+              onClick={() => onSend?.(p)}
+              className="text-xs text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+      {actions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Next steps</span>
+          {actions.map((a) => (
+            <Button
+              key={a.label}
+              onClick={() => onSend?.(a.prompt)}
+              className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer"
+            >
+              {a.label}
+            </Button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ThreadProps {
   messages: ChatMsg[];
   typing: boolean;
@@ -784,9 +822,11 @@ interface ThreadProps {
   wizardStep: number;
   onWizardStep: (n: number) => void;
   onGenerate: () => void;
+  onSend?: (text: string) => void;
 }
 
-export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate }: ThreadProps) {
+export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onSend }: ThreadProps) {
+  const lastId = messages[messages.length - 1]?.id;
   return (
     <>
       {/* Widget context pinned to the top */}
@@ -832,6 +872,10 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
               <div className="mt-2 ml-1">
                 <SourcesLine />
               </div>
+              {/* Proactive suggestions — only under the newest reply, once it has streamed in */}
+              {m.id === lastId && !typing && m.suggestions && (
+                <SuggestionBlock suggestions={m.suggestions} onSend={onSend} />
+              )}
             </div>
           </div>
         )

@@ -190,8 +190,16 @@ export function customerSummary(name: string): string | null {
   return c ? c.note : null;
 }
 
+// Action CTAs resolve to a confirmation rather than a lookup.
+const ACTION_RE = /^(escalate|request|raise|draft|schedule|generate|prepare|flag|propose|review|order|assign|mark|add|create)\b/i;
+
 export function answerQuery(prompt: string, context?: string): string {
   const q = prompt.toLowerCase();
+
+  // Proactive action taken from a CTA — acknowledge it.
+  if (ACTION_RE.test(prompt.trim())) {
+    return `On it. I've actioned "${prompt.trim()}" and notified the relevant owners — you'll see it reflected in the project record.`;
+  }
 
   // Asset code lookup (AST-001, S-12, etc.)
   const assetMatch = q.match(/\b([a-z]{1,3}-?\s?0*\d{1,3})\b/);
@@ -217,4 +225,96 @@ export function answerQuery(prompt: string, context?: string): string {
   if (/(contract|portfolio|account|overview)/.test(q)) return portfolioAnswer();
 
   return contextFallback(context, prompt);
+}
+
+/* ── Proactive suggestions ───────────────────────────────────────── */
+
+export interface Suggestions {
+  /** Quick follow-up questions the user can tap to keep exploring. */
+  prompts: string[];
+  /** Proactive next-step CTAs that trigger an action. */
+  actions: { label: string; prompt: string }[];
+}
+
+// Given the user's prompt (and optional widget context), suggest where to go next.
+export function suggestNext(prompt: string, context?: string): Suggestions {
+  const q = prompt.toLowerCase();
+  const cust = detectCustomer(prompt);
+  const assetMatch = q.match(/\b([a-z]{1,3}-?\s?0*\d{1,3})\b/);
+  const asset = assetMatch ? normalizeAssetCode(assetMatch[1]) : null;
+  const assetExists = !!asset && ASSETS.some((a) => a.code.toLowerCase() === asset!.toLowerCase());
+
+  if (assetExists) {
+    return {
+      prompts: [`Show repair history for ${asset}`, `What's the health trend for ${asset}?`, "Recommend the next action"],
+      actions: [
+        { label: "Schedule inspection", prompt: `Schedule an inspection for ${asset}` },
+        { label: "Create work order", prompt: `Create a work order for ${asset}` },
+      ],
+    };
+  }
+  if (/(vendor|delta coils|supplier|concentration)/.test(q)) {
+    return {
+      prompts: ["Which projects depend on Delta Coils?", "Are there alternative suppliers?", "What's the total revenue exposure?"],
+      actions: [
+        { label: "Request vendor update", prompt: "Request a delivery update from Delta Coils Inc." },
+        { label: "Draft risk summary", prompt: "Draft a vendor concentration risk summary" },
+      ],
+    };
+  }
+  if (/(on.?time|delivery|late|cotd)/.test(q)) {
+    return {
+      prompts: ["Why is Xcel Energy late?", "Which milestones are at risk?", "Compare delivery against target"],
+      actions: [
+        { label: "Escalate delivery risk", prompt: "Escalate the delivery risk to the account owner" },
+        { label: "Adjust schedule", prompt: "Propose an adjusted mobilization schedule for Xcel Energy" },
+      ],
+    };
+  }
+  if (/margin/.test(q)) {
+    return {
+      prompts: ["Which contracts drag margin the most?", "Show the Siemens change-order impact", "How does this compare to plan?"],
+      actions: [{ label: "Flag for review", prompt: "Flag the low-margin contracts for portfolio review" }],
+    };
+  }
+  if (/(invoice|billing|revenue|risk\b)/.test(q)) {
+    return {
+      prompts: ["What's blocking the Xcel invoice?", "Which invoices can be released now?", "Show revenue at risk by customer"],
+      actions: [
+        { label: "Raise purchase order", prompt: "Raise the purchase order for the transformer gasket set" },
+        { label: "Create invoice", prompt: "Create an invoice for the completed Xcel milestones" },
+      ],
+    };
+  }
+  if (/(sla|renewal|pipeline)/.test(q)) {
+    return {
+      prompts: ["Which renewals need attention first?", "Show the AEP Ohio status", "What's the total renewal value?"],
+      actions: [{ label: "Prepare renewal pack", prompt: "Prepare the SLA renewal pack for the at-risk accounts" }],
+    };
+  }
+  if (/(fleet|health|score|asset|critical|repair)/.test(q)) {
+    return {
+      prompts: ["Which assets are critical?", "Show the fleet health trend", "What's driving the decline?"],
+      actions: [{ label: "Review critical assets", prompt: "Review the critical assets and recommend actions" }],
+    };
+  }
+  if (cust) {
+    return {
+      prompts: [`Show open risks for ${cust}`, `What are the next milestones for ${cust}?`, `Who owns the ${cust} account?`],
+      actions: [
+        { label: "Generate project status", prompt: `Generate a project status report for ${cust}` },
+        { label: "Start a mobilization plan", prompt: `Create a mobilization plan for ${cust}` },
+      ],
+    };
+  }
+  if (context) {
+    return {
+      prompts: [`Break down ${context} by driver`, `How does ${context} compare to plan?`, `What should I do about ${context}?`],
+      actions: [{ label: "Add to my report", prompt: `Add ${context} to my weekly report` }],
+    };
+  }
+  return {
+    prompts: ["What needs my attention today?", "Show the portfolio overview", "Which contracts are at risk?"],
+    actions: [],
+  };
 }

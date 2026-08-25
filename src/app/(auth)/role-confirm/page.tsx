@@ -9,6 +9,7 @@ import {
   Cog,
 } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
+import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/store/hooks";
 import { setSelectedRole } from "@/store/slices/authSlice";
 import {
@@ -112,18 +113,19 @@ export default function RoleConfirmPage() {
 
           {/* Bottom actions */}
           <div className="flex items-center justify-between mt-8">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => router.push("/login")}
-              className="text-sm text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+              className="h-auto px-0 text-sm text-gray-500 hover:bg-transparent hover:text-gray-800 cursor-pointer"
             >
               Sign in with another account
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleContinue}
-              className="bg-black text-white text-sm font-medium rounded-full px-6 py-2.5 hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="rounded-full h-auto px-6 py-2.5 text-sm cursor-pointer"
             >
               Continue with {selected.label}
-            </button>
+            </Button>
           </div>
         </div>
       </main>

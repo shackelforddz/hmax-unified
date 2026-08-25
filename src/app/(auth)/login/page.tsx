@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { KeyRound, ShieldAlert } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,13 +23,13 @@ export default function LoginPage() {
             Access your Hitachi HMAX cockpit
           </p>
 
-          <button
+          <Button
             onClick={() => router.push("/loading-profile")}
-            className="w-full bg-black text-white rounded-full py-3 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="w-full rounded-full h-auto py-3 gap-2 text-sm cursor-pointer"
           >
             <KeyRound size={15} strokeWidth={2} />
             Sign in with Single Sign-On
-          </button>
+          </Button>
 
           <p className="text-sm text-center text-gray-400 mt-4 hover:text-gray-600 cursor-pointer transition-colors">
             Other sign-in options

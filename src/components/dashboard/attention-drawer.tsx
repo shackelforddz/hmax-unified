@@ -12,6 +12,7 @@ import {
   type RiskLevel,
   type InfoStatus,
 } from "@/lib/dashboard-data";
+import { Button } from "@/components/ui/button";
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -289,24 +290,25 @@ function ActionsMenu() {
 
   return (
     <div className="relative flex-1" ref={ref}>
-      <button
+      <Button
         onClick={() => setOpen((o) => !o)}
-        className="w-full bg-black text-white text-sm py-2.5 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer flex items-center justify-center gap-2"
+        className="w-full rounded-full h-auto py-2.5 text-sm cursor-pointer"
       >
         Actions <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute bottom-full mb-2 right-0 w-full min-w-[230px] bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-10 animate-message-in">
           {ACTIONS.map(({ label, icon: Icon }) => (
-            <button
+            <Button
               key={label}
+              variant="ghost"
               onClick={() => setOpen(false)}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-left"
+              className="w-full justify-start gap-2.5 px-4 py-2.5 h-auto text-sm text-gray-700 rounded-none cursor-pointer"
             >
               <Icon size={15} strokeWidth={1.5} className="text-gray-400 shrink-0" />
               {label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -358,7 +360,7 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -396,9 +398,9 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
 
             {/* Footer */}
             <div className="shrink-0 flex gap-3 px-6 py-4 border-t border-gray-100">
-              <button className="flex-1 border border-gray-200 text-gray-700 text-sm py-2.5 rounded-full hover:border-gray-400 transition-colors cursor-pointer">
+              <Button variant="outline" className="flex-1 rounded-full h-auto py-2.5 text-sm text-gray-700 cursor-pointer">
                 Create A Conversation
-              </button>
+              </Button>
               <ActionsMenu />
             </div>
           </>

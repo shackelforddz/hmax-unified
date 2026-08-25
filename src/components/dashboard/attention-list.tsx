@@ -11,6 +11,7 @@ import {
 } from "@/lib/dashboard-data";
 import AttentionDrawer from "./attention-drawer";
 import { useConversationLauncher } from "./conversation-launcher";
+import { Button } from "@/components/ui/button";
 
 function StatusBadge({ status }: { status: AttentionStatus }) {
   if (status === "critical") {
@@ -95,18 +96,19 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
                   <p className="text-sm text-gray-900 mb-2 leading-snug">{flag.title}</p>
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
                   <div className="flex gap-2">
-                    <button
+                    <Button
                       onClick={() => launch({ context: item.customer, prompt: flag.title })}
-                      className="bg-black text-white text-sm px-5 py-2 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer"
+                      className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       Start A Conversation
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
                       onClick={() => onOpenDrawer(item.id)}
-                      className="border border-gray-300 text-gray-700 text-sm px-5 py-2 rounded-xl hover:border-gray-400 transition-colors cursor-pointer"
+                      className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
                     >
                       See Details
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -45,19 +45,19 @@ export default function RepeatedRepairs() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => scrollBy(-1)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Previous"
           >
             <ChevronLeft size={15} />
           </button>
           <button
             onClick={() => scrollBy(1)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Next"
           >
             <ChevronRight size={15} />
           </button>
-          <WidgetChat title="Repeated Repair Assets" triggerClassName="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors cursor-pointer" />
+          <WidgetChat title="Repeated Repair Assets" triggerClassName="w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors cursor-pointer" />
         </div>
       </div>
 

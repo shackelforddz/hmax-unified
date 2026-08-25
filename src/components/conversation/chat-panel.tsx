@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Sparkles, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, GripVertical, BarChart2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -115,7 +116,7 @@ function StepCase() {
             <button
               key={t}
               onClick={() => setCaseType(t)}
-              className={`px-4 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
                 caseType === t ? "bg-black text-white" : "border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
@@ -169,7 +170,7 @@ function StepScope() {
             <button
               key={u}
               onClick={() => setUrgency(u)}
-              className={`px-4 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
                 urgency === u ? "bg-black text-white" : "border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
@@ -192,7 +193,7 @@ function StepScope() {
               <button
                 key={w}
                 onClick={() => setWorkTypes((p) => (active ? p.filter((x) => x !== w) : [...p, w]))}
-                className={`px-3.5 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
+                className={`px-3.5 py-2 rounded-full text-sm cursor-pointer transition-colors ${
                   active ? "bg-black text-white" : "border border-gray-200 text-gray-600 hover:border-gray-400"
                 }`}
               >
@@ -211,7 +212,7 @@ function StepScope() {
             <button
               key={o}
               onClick={() => setOutage(o)}
-              className={`px-4 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
                 outage === o ? "bg-black text-white" : "border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
@@ -387,9 +388,9 @@ function StepStaffing() {
       </div>
 
       {/* Add specialist */}
-      <button className="self-start flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-xl hover:border-gray-400 transition-colors cursor-pointer">
+      <Button variant="outline" className="self-start gap-1.5 rounded-full h-auto px-4 py-2 text-sm text-gray-600 cursor-pointer">
         <Plus size={14} /> Add specialist or sub-contractor not in system
-      </button>
+      </Button>
     </div>
   );
 }
@@ -503,9 +504,9 @@ function StepParts() {
       </div>
 
       {/* Add part */}
-      <button className="self-start flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-xl hover:border-gray-400 transition-colors cursor-pointer">
+      <Button variant="outline" className="self-start gap-1.5 rounded-full h-auto px-4 py-2 text-sm text-gray-600 cursor-pointer">
         <Plus size={14} /> Add part not in ERP
-      </button>
+      </Button>
 
       {/* Notes */}
       <div>
@@ -603,11 +604,11 @@ function StepSchedule() {
       <div className="border border-gray-200 rounded-xl overflow-hidden">
         {/* Nav */}
         <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100">
-          <button className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer">
+          <button className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer">
             <ChevronLeft size={14} />
           </button>
           <span className="text-sm text-gray-800">August 2026</span>
-          <button className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer">
+          <button className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer">
             <ChevronRight size={14} />
           </button>
         </div>
@@ -696,30 +697,21 @@ function WizardCard({
       {(!isFirst || !isLast) && (
         <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
           {!isFirst ? (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-5 py-2 rounded-xl hover:border-gray-400 transition-colors cursor-pointer"
-            >
+            <Button variant="outline" onClick={onBack} className="gap-1.5 rounded-full h-auto px-5 py-2 text-sm text-gray-600 cursor-pointer">
               <ChevronLeft size={14} />
               Back
-            </button>
+            </Button>
           ) : (
             <span />
           )}
           {isLast ? (
-            <button
-              onClick={onGenerate}
-              className="bg-black text-white text-sm px-6 py-2 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
+            <Button onClick={onGenerate} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
               Generate
-            </button>
+            </Button>
           ) : (
-            <button
-              onClick={onContinue}
-              className="bg-black text-white text-sm px-6 py-2 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
+            <Button onClick={onContinue} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
               Continue
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -770,6 +762,19 @@ export interface ChatMsg {
   role: "user" | "ai";
   kind?: "text" | "wizard";
   text?: string;
+}
+
+/** A conversation saved to the panel so it can be revisited. */
+export interface StoredConversation {
+  id: string;
+  title: string;
+  preview: string;
+  date: string;
+  context?: string;
+  detectedCustomer?: string | null;
+  messages: ChatMsg[];
+  /** For seed conversations with no thread yet: the prompt to run on open. */
+  seedPrompt?: string;
 }
 
 interface ThreadProps {

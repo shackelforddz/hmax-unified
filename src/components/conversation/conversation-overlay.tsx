@@ -7,8 +7,9 @@ import {
 } from "lucide-react";
 import ContextPanel from "./context-panel";
 import DocPanel from "./doc-panel";
-import { ChatThread, type ChatMsg } from "./chat-panel";
+import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
 import { answerQuery, detectCustomer } from "@/lib/knowledge-base";
+import { Button } from "@/components/ui/button";
 
 const SUGGESTIONS = [
   { icon: Calendar, label: "Create a new mobilization plan" },
@@ -28,9 +29,13 @@ interface Props {
   context?: string;
   /** When launched from a widget: the user's typed prompt to seed the chat. */
   initialPrompt?: string;
+  /** When reopening from the list: the stored conversation to restore. */
+  restore?: StoredConversation | null;
+  /** Called as the conversation is created/updated so it can be saved to the list. */
+  onPersist?: (record: StoredConversation) => void;
 }
 
-export default function ConversationOverlay({ visible, onClose, context, initialPrompt }: Props) {
+export default function ConversationOverlay({ visible, onClose, context, initialPrompt, restore, onPersist }: Props) {
   const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -43,6 +48,9 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const idRef = useRef(0);
   const nextId = () => ++idRef.current;
+  const sessionIdRef = useRef<string | null>(null);
+  const onPersistRef = useRef(onPersist);
+  onPersistRef.current = onPersist;
 
   const clearTimers = () => {
     timers.current.forEach(clearTimeout);
@@ -80,6 +88,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   const send = (text: string, ctx?: string) => {
     const t = text.trim();
     if (!t) return;
+    if (!sessionIdRef.current) sessionIdRef.current = `conv-${Date.now()}`;
     setStarted(true);
     setInput("");
     push({ role: "user", text: t });
@@ -102,18 +111,57 @@ export default function ConversationOverlay({ visible, onClose, context, initial
       setActiveContext(undefined);
       setDetectedCustomer(null);
       idRef.current = 0;
+      sessionIdRef.current = null;
     }
   }, [visible]);
+
+  // Reopen a saved conversation from the list.
+  useEffect(() => {
+    if (visible && restore && !started) {
+      sessionIdRef.current = restore.id;
+      setActiveContext(restore.context);
+      setDetectedCustomer(restore.detectedCustomer ?? null);
+      if (restore.messages.length > 0) {
+        // Restore the existing thread
+        idRef.current = restore.messages.reduce((m, x) => Math.max(m, x.id), 0);
+        setMessages(restore.messages);
+        setStarted(true);
+      } else {
+        // Seed conversation with no thread yet — run its prompt fresh
+        send(restore.seedPrompt || restore.title, restore.context);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, restore]);
 
   // When launched from a widget, skip the welcome screen and start immediately
   // with the widget context pinned to the top of the conversation.
   useEffect(() => {
-    if (visible && context && !started) {
+    if (visible && context && !restore && !started) {
       setActiveContext(context);
       send((initialPrompt || "").trim() || `Tell me about ${context}`, context);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, context, initialPrompt]);
+
+  // Persist the conversation to the list as it's created and updated.
+  useEffect(() => {
+    if (!started || !sessionIdRef.current || messages.length === 0) return;
+    const firstUser = messages.find((m) => m.role === "user")?.text ?? "";
+    const last = messages[messages.length - 1];
+    const title = activeContext || firstUser || "Conversation";
+    const preview = last.kind === "wizard" ? "Guided plan in progress…" : (last.text ?? firstUser);
+    onPersistRef.current?.({
+      id: sessionIdRef.current,
+      title,
+      preview,
+      date: "Now",
+      context: activeContext,
+      detectedCustomer,
+      messages,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, started, activeContext, detectedCustomer]);
 
   useEffect(() => clearTimers, []);
 
@@ -187,6 +235,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
               </button>
               <button
                 onClick={onClose}
+                aria-label="Close conversation"
                 className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:bg-black/5 transition-colors cursor-pointer"
               >
                 <X size={17} strokeWidth={1.5} />
@@ -245,12 +294,9 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                 autoFocus
               />
               <Library size={16} strokeWidth={1.5} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
-              <button
-                onClick={handleSend}
-                className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
-              >
+              <Button onClick={handleSend} className="rounded-full size-8 p-0 shrink-0 cursor-pointer">
                 <ArrowUp size={14} strokeWidth={2} />
-              </button>
+              </Button>
             </div>
           </div>
         </div>

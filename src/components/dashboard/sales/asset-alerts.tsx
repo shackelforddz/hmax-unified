@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ASSET_ALERTS, type AssetAlert, type AssetStatus } from "@/lib/sales-data";
 import WidgetChat from "@/components/dashboard/widget-chat";
+import { Button } from "@/components/ui/button";
 
 function AssetThumb() {
   return (
@@ -67,9 +68,9 @@ function AssetRow({ asset }: { asset: AssetAlert }) {
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-900 mb-2">{asset.alert.title}</p>
               <p className="text-sm text-gray-500 leading-relaxed mb-4">{asset.alert.detail}</p>
-              <button className="bg-black text-white text-sm px-5 py-2 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer">
+              <Button className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
                 {asset.alert.action}
-              </button>
+              </Button>
             </div>
           </div>
         </>

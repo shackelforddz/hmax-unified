@@ -11,17 +11,40 @@ import UpcomingMilestones from "@/components/dashboard/upcoming-milestones";
 import VendorConcentration from "@/components/dashboard/vendor-concentration";
 import SalesDashboard from "@/components/dashboard/sales-dashboard";
 import ConversationOverlay from "@/components/conversation/conversation-overlay";
+import { type StoredConversation } from "@/components/conversation/chat-panel";
 import { ConversationLauncherContext, type LaunchArgs } from "@/components/dashboard/conversation-launcher";
-import { KPI_DATA } from "@/lib/dashboard-data";
+import { KPI_DATA, CONVERSATIONS } from "@/lib/dashboard-data";
 import { useAppSelector } from "@/store/hooks";
 
+// Seed the panel with the demo conversations (no thread yet — they run on open).
+const SEED_CONVERSATIONS: StoredConversation[] = CONVERSATIONS.map((c) => ({
+  ...c,
+  messages: [],
+  seedPrompt: c.title,
+}));
+
 export default function DashboardPage() {
-  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string }>({ visible: false });
+  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; restore?: StoredConversation | null }>({ visible: false });
+  const [conversations, setConversations] = useState<StoredConversation[]>(SEED_CONVERSATIONS);
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const isSales = selectedRole === "Sales";
 
   const openConversation = useCallback((args?: LaunchArgs) => {
-    setConv({ visible: true, context: args?.context, prompt: args?.prompt });
+    setConv({ visible: true, context: args?.context, prompt: args?.prompt, restore: null });
+  }, []);
+
+  const openStored = useCallback((rec: StoredConversation) => {
+    setConv({ visible: true, restore: rec });
+  }, []);
+
+  const persist = useCallback((record: StoredConversation) => {
+    setConversations((prev) => {
+      const idx = prev.findIndex((c) => c.id === record.id);
+      if (idx === -1) return [record, ...prev];
+      const next = [...prev];
+      next[idx] = record;
+      return next;
+    });
   }, []);
 
   return (
@@ -30,7 +53,11 @@ export default function DashboardPage() {
 
       {/* Right conversations panel — anchored below nav, never scrolls under it */}
       <div className="absolute top-[64px] right-4 bottom-4 w-[400px]">
-        <ConversationsPanel onNewConversation={() => openConversation()} />
+        <ConversationsPanel
+          conversations={conversations}
+          onNewConversation={() => openConversation()}
+          onSelect={openStored}
+        />
       </div>
 
       {/* Left content — starts at top-0 so it can scroll under the nav */}
@@ -100,6 +127,8 @@ export default function DashboardPage() {
         visible={conv.visible}
         context={conv.context}
         initialPrompt={conv.prompt}
+        restore={conv.restore}
+        onPersist={persist}
         onClose={() => setConv((c) => ({ ...c, visible: false }))}
       />
     </div>

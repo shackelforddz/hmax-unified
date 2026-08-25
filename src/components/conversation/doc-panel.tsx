@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Download, Share2, AlertTriangle, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   onClose: () => void;
@@ -52,15 +53,15 @@ export default function DocPanel({ onClose }: Props) {
           <p className="text-xs text-gray-400 mt-0.5">Generated plan · Aug 2024</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer">
+          <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer">
             <Download size={14} />
           </button>
-          <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer">
+          <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer">
             <Share2 size={14} />
           </button>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-400 transition-colors cursor-pointer"
           >
             <X size={14} />
           </button>
@@ -151,12 +152,12 @@ export default function DocPanel({ onClose }: Props) {
 
         {/* Action buttons */}
         <div className="flex gap-2 pb-2">
-          <button className="flex-1 bg-black text-white text-sm py-2.5 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer flex items-center justify-center gap-2">
+          <Button className="flex-1 gap-2 rounded-full h-auto py-2.5 text-sm cursor-pointer">
             <Download size={14} /> Download
-          </button>
-          <button className="flex-1 border border-gray-200 text-gray-700 text-sm py-2.5 rounded-xl hover:border-gray-400 transition-colors cursor-pointer flex items-center justify-center gap-2">
+          </Button>
+          <Button variant="outline" className="flex-1 gap-2 rounded-full h-auto py-2.5 text-sm text-gray-700 cursor-pointer">
             <Share2 size={14} /> Share
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,13 +1,16 @@
 "use client";
 
 import { SlidersVertical } from "lucide-react";
-import { CONVERSATIONS } from "@/lib/dashboard-data";
+import { Button } from "@/components/ui/button";
+import type { StoredConversation } from "@/components/conversation/chat-panel";
 
 interface Props {
+  conversations: StoredConversation[];
   onNewConversation?: () => void;
+  onSelect?: (conversation: StoredConversation) => void;
 }
 
-export default function ConversationsPanel({ onNewConversation }: Props) {
+export default function ConversationsPanel({ conversations, onNewConversation, onSelect }: Props) {
   return (
     <div className="h-full bg-zinc-900 rounded-xl flex flex-col overflow-hidden">
       {/* Header */}
@@ -27,9 +30,10 @@ export default function ConversationsPanel({ onNewConversation }: Props) {
 
       {/* Conversation list */}
       <div className="flex-1 overflow-y-auto px-3 flex flex-col gap-2 pb-2">
-        {CONVERSATIONS.map((conv) => (
+        {conversations.map((conv) => (
           <button
             key={conv.id}
+            onClick={() => onSelect?.(conv)}
             className="w-full text-left px-3 py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
           >
             <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -43,12 +47,12 @@ export default function ConversationsPanel({ onNewConversation }: Props) {
 
       {/* New Conversation button */}
       <div className="p-4 shrink-0">
-        <button
+        <Button
           onClick={onNewConversation}
-          className="w-full bg-white text-black text-sm rounded-full py-3 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="w-full rounded-full h-auto py-3 text-sm bg-white text-black hover:bg-zinc-100 cursor-pointer"
         >
           New Conversation
-        </button>
+        </Button>
       </div>
     </div>
   );

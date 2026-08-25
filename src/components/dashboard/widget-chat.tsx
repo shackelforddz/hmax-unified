@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { MessageCircle, ArrowUp } from "lucide-react";
 import { useConversationLauncher } from "./conversation-launcher";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   /** The widget name used as conversation context. */
@@ -101,13 +102,10 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
               placeholder={`e.g. What's driving ${title.toLowerCase()}?`}
               className="w-full h-20 px-3 py-2 text-sm text-gray-700 placeholder-gray-300 border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none"
             />
-            <button
-              onClick={submit}
-              className="w-full mt-2 bg-black text-white text-sm py-2 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-            >
+            <Button onClick={submit} className="w-full mt-2 rounded-full h-auto py-2 text-sm cursor-pointer">
               Start conversation
               <ArrowUp size={13} strokeWidth={2} />
-            </button>
+            </Button>
           </div>,
           document.body
         )}

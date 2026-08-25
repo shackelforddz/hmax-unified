@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, LineChart, BarChart3, PieChart, Hash, Sparkles } from "lucide-react";
 import CustomWidgetView from "./custom-widget-view";
 import { buildWidget, type WidgetType, type CustomWidgetConfig } from "@/lib/custom-widget";
+import { Button } from "@/components/ui/button";
 
 const VISUALS: { type: WidgetType; label: string; icon: typeof LineChart }[] = [
   { type: "line", label: "Line", icon: LineChart },
@@ -56,7 +57,7 @@ export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -105,13 +106,10 @@ export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
               </div>
             </div>
 
-            <button
-              onClick={generate}
-              className="self-start flex items-center gap-2 bg-black text-white text-sm px-5 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
+            <Button onClick={generate} className="self-start gap-2 rounded-full h-auto px-5 py-2.5 text-sm cursor-pointer">
               <Sparkles size={14} strokeWidth={1.5} />
               {preview ? "Regenerate preview" : "Generate preview"}
-            </button>
+            </Button>
           </div>
 
           {/* Preview */}
@@ -133,21 +131,12 @@ export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
 
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
-          <button
-            onClick={onClose}
-            className="text-sm text-gray-600 border border-gray-200 px-5 py-2 rounded-full hover:border-gray-400 transition-colors cursor-pointer"
-          >
+          <Button variant="outline" onClick={onClose} className="rounded-full h-auto px-5 py-2 text-sm text-gray-600 cursor-pointer">
             Cancel
-          </button>
-          <button
-            onClick={add}
-            disabled={!preview}
-            className={`text-sm px-5 py-2 rounded-full transition-colors ${
-              preview ? "bg-black text-white hover:bg-zinc-800 cursor-pointer" : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
-          >
+          </Button>
+          <Button onClick={add} disabled={!preview} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
             Add to dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

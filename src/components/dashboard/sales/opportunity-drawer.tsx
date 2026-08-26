@@ -4,13 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { X, ChevronDown, Check, Circle, Cpu, FileText, ClipboardCheck, UserPlus, ArrowUpRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
-import {
-  OPPORTUNITIES,
-  OPPORTUNITY_DETAILS,
-  OPP_STAGES,
-  type Opportunity,
-  type OpportunityDetail,
-} from "@/lib/sales-data";
+import { OPP_STAGES, type Opportunity, type OpportunityDetail } from "@/lib/sales-data";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -169,13 +163,12 @@ function DrawerBody({ opp, detail, onAction }: { opp: Opportunity; detail: Oppor
 }
 
 interface Props {
-  oppId: string | null;
+  opp: Opportunity | null;
+  detail: OpportunityDetail | null;
   onClose: () => void;
 }
 
-export default function OpportunityDrawer({ oppId, onClose }: Props) {
-  const opp = oppId ? OPPORTUNITIES.find((o) => o.id === oppId) : null;
-  const detail = oppId ? OPPORTUNITY_DETAILS[oppId] : null;
+export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
   const open = !!(opp && detail);
   const launch = useConversationLauncher();
 

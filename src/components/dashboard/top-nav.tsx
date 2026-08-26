@@ -3,10 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { MessageCircle, Bell, Search, Banknote, LogOut, ChevronDown } from "lucide-react";
+import { MessageCircle, Bell, Search, Briefcase, Banknote, Cog, LogOut, ChevronDown, Check } from "lucide-react";
 import { MOCK_USER } from "@/lib/roles";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedRole } from "@/store/slices/authSlice";
+
+const PERSONAS = [
+  { label: "Project Manager", icon: Briefcase },
+  { label: "Sales", icon: Banknote },
+  { label: "Operations", icon: Cog },
+] as const;
 
 export default function TopNav() {
   const router = useRouter();
@@ -25,9 +31,8 @@ export default function TopNav() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
-  const isSales = selectedRole === "Sales";
-  const switchPersona = () => {
-    dispatch(setSelectedRole(isSales ? "Project Manager" : "Sales"));
+  const switchPersona = (label: string) => {
+    dispatch(setSelectedRole(label));
     setOpen(false);
     router.push("/dashboard");
   };
@@ -96,20 +101,21 @@ export default function TopNav() {
                 </div>
               </div>
 
-              {/* Current persona */}
+              {/* Persona switcher */}
               <div className="px-4 pt-2.5 pb-1">
                 <p className="text-[11px] text-gray-400 uppercase tracking-wider">Persona</p>
-                <p className="text-sm text-gray-700">{selectedRole}</p>
               </div>
-
-              {/* Switch persona */}
-              <button
-                onClick={switchPersona}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <Banknote size={15} strokeWidth={1.5} className="text-gray-400" />
-                {isSales ? "Switch to Project Manager persona" : "Switch to Sales persona"}
-              </button>
+              {PERSONAS.map(({ label, icon: Icon }) => (
+                <button
+                  key={label}
+                  onClick={() => switchPersona(label)}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <Icon size={15} strokeWidth={1.5} className="text-gray-400" />
+                  {label}
+                  {selectedRole === label && <Check size={14} className="text-gray-500 ml-auto" />}
+                </button>
+              ))}
 
               <hr className="border-gray-100 my-1" />
 

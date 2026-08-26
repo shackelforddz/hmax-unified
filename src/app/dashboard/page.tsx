@@ -3,17 +3,13 @@
 import { useState, useCallback } from "react";
 import TopNav from "@/components/dashboard/top-nav";
 import ConversationsPanel from "@/components/dashboard/conversations-panel";
-import KpiCard from "@/components/dashboard/kpi-card";
-import AttentionList from "@/components/dashboard/attention-list";
-import DeliveryTrend from "@/components/dashboard/delivery-trend";
-import RevenueAtRisk from "@/components/dashboard/revenue-at-risk";
-import UpcomingMilestones from "@/components/dashboard/upcoming-milestones";
-import VendorConcentration from "@/components/dashboard/vendor-concentration";
+import PmDashboard from "@/components/dashboard/pm-dashboard";
 import SalesDashboard from "@/components/dashboard/sales-dashboard";
+import OperationsDashboard from "@/components/dashboard/operations-dashboard";
 import ConversationOverlay from "@/components/conversation/conversation-overlay";
 import { type StoredConversation } from "@/components/conversation/chat-panel";
 import { ConversationLauncherContext, type LaunchArgs } from "@/components/dashboard/conversation-launcher";
-import { KPI_DATA, CONVERSATIONS } from "@/lib/dashboard-data";
+import { CONVERSATIONS } from "@/lib/dashboard-data";
 import { useAppSelector } from "@/store/hooks";
 
 // Seed the panel with the demo conversations (no thread yet — they run on open).
@@ -28,6 +24,7 @@ export default function DashboardPage() {
   const [conversations, setConversations] = useState<StoredConversation[]>(SEED_CONVERSATIONS);
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const isSales = selectedRole === "Sales";
+  const isOps = selectedRole === "Operations";
 
   const openConversation = useCallback((args?: LaunchArgs) => {
     setConv({ visible: true, context: args?.context, prompt: args?.prompt, restore: null });
@@ -64,28 +61,7 @@ export default function DashboardPage() {
       {/* right = 16px page pad + 400px panel + 16px gap = 432px */}
       <div className="no-scrollbar absolute top-0 left-0 bottom-0 overflow-y-auto" style={{ right: 432 }}>
         <div className="px-4 pb-4 pt-[64px] flex flex-col gap-4">
-          {isSales ? (
-            <SalesDashboard />
-          ) : (
-            <>
-              <div className="grid grid-cols-4 gap-4">
-                {KPI_DATA.map((kpi) => (
-                  <KpiCard key={kpi.id} {...kpi} />
-                ))}
-              </div>
-              <AttentionList />
-
-              {/* PM data visuals */}
-              <div className="grid grid-cols-2 gap-4">
-                <DeliveryTrend />
-                <RevenueAtRisk />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <UpcomingMilestones />
-                <VendorConcentration />
-              </div>
-            </>
-          )}
+          {isSales ? <SalesDashboard /> : isOps ? <OperationsDashboard /> : <PmDashboard />}
         </div>
       </div>
 

@@ -1,0 +1,255 @@
+/* ── Operations persona data ─────────────────────────────────────── */
+
+/* Portfolio Health Overview */
+export const PORTFOLIO_HEALTH = {
+  activeContracts: 14,
+  onTrack: 8,
+  atRisk: 4,
+  critical: 2,
+  contractValue: "£18.4m",
+  slaPerformance: "91%",
+  resourceCoverage: "87%",
+};
+
+/* Contracts that need attention */
+export type OpsStatus = "at-risk" | "critical";
+export type RiskLevel = "low" | "med" | "high";
+export interface RiskProfile {
+  schedule: RiskLevel;
+  cost: RiskLevel;
+  quality: RiskLevel;
+  safety: RiskLevel;
+}
+export interface OpsContractFlag {
+  title: string;
+  detail: string;
+  action: string;
+}
+export interface OpsContract {
+  id: string;
+  name: string;
+  customer: string;
+  owner: string;
+  value: string;
+  status: OpsStatus;
+  progress: number; // % complete
+  baseline: number; // planned % at this point
+  risk: RiskProfile;
+  flags: OpsContractFlag[];
+}
+
+export const OPS_CONTRACTS: OpsContract[] = [
+  {
+    id: "ct-sherco",
+    name: "Sherco HVDC winding replacement",
+    customer: "Xcel Energy",
+    owner: "Daniel Brooks",
+    value: "£4.2m",
+    status: "critical",
+    progress: 55,
+    baseline: 73,
+    risk: { schedule: "high", cost: "med", quality: "low", safety: "med" },
+    flags: [
+      {
+        title: "18 days behind baseline — outage window at risk",
+        detail:
+          "Field mobilization slipped and the work is now tracking 18 days behind. Missing the 14 September outage window pushes delivery into February and defers a £1.2m milestone invoice.",
+        action: "Adjust Schedule",
+      },
+      {
+        title: "Delta Coils is the critical path on winding sets",
+        detail: "A single vendor gates the remaining scope; a further slip cascades across six projects.",
+        action: "Reassign Vendor",
+      },
+    ],
+  },
+  {
+    id: "ct-northsea",
+    name: "North Sea switchgear refurbishment",
+    customer: "Siemens",
+    owner: "Sarah Mitchell",
+    value: "£2.4m",
+    status: "critical",
+    progress: 62,
+    baseline: 78,
+    risk: { schedule: "high", cost: "high", quality: "med", safety: "low" },
+    flags: [
+      {
+        title: "Change order CO-118 unsigned — £680k held",
+        detail: "Progress invoicing is blocked and reported margin sits 14pts under baseline until the change order is booked.",
+        action: "Raise Change Order",
+      },
+      {
+        title: "Crew over-allocated across the platform cluster",
+        detail: "Field Service is at 96% utilisation with no slack for the additional protection-relay scope.",
+        action: "Rebalance Crew",
+      },
+    ],
+  },
+  {
+    id: "ct-baltic",
+    name: "Baltic array transformer maintenance",
+    customer: "Baltic Wind NL",
+    owner: "Sarah Mitchell",
+    value: "£2.4m",
+    status: "at-risk",
+    progress: 80,
+    baseline: 82,
+    risk: { schedule: "low", cost: "low", quality: "med", safety: "high" },
+    flags: [
+      {
+        title: "Two HSE certificates expire before the next visit",
+        detail: "Offshore crew certifications lapse ahead of the planned window; remobilisation is blocked until they renew.",
+        action: "Schedule Cert Renewal",
+      },
+    ],
+  },
+  {
+    id: "ct-pacific",
+    name: "Protection relay upgrade",
+    customer: "Pacific Gas",
+    owner: "Lena Fischer",
+    value: "£440k",
+    status: "at-risk",
+    progress: 40,
+    baseline: 45,
+    risk: { schedule: "med", cost: "low", quality: "low", safety: "med" },
+    flags: [
+      {
+        title: "Site access unresolved — verbal only",
+        detail: "Only a verbal change order is in place; a written access agreement is required before the crew can mobilise.",
+        action: "Request Written Access",
+      },
+    ],
+  },
+];
+
+export interface OpsContractDetail {
+  summary: string;
+  recommendedActions: string[];
+  milestones: { label: string; done: boolean; planned: string; actual?: string }[];
+  risks: { title: string; detail: string; level: "Critical" | "High" | "Medium" }[];
+  team: { role: string; name: string }[];
+  related: { customer: string; value: string; region: string };
+}
+
+export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
+  "ct-sherco": {
+    summary:
+      "HVDC converter-transformer winding replacement at Sherco. Execution is 18 days behind baseline after a field-mobilization slip, putting the contractually-tied autumn outage window at risk and deferring a £1.2m milestone invoice.",
+    recommendedActions: ["Adjust schedule", "Escalate delivery risk", "Reassign vendor"],
+    milestones: [
+      { label: "Engineering approval", done: true, planned: "2026-06-12", actual: "2026-06-16" },
+      { label: "Material delivery (Delta Coils)", done: true, planned: "2026-04-20", actual: "2026-08-01" },
+      { label: "Field mobilization", done: false, planned: "2026-08-10" },
+      { label: "Site commissioning", done: false, planned: "2026-08-28" },
+    ],
+    risks: [
+      { title: "Outage window slip", detail: "Missing 14 Sep pushes delivery into February.", level: "Critical" },
+      { title: "Vendor concentration", detail: "Delta Coils gates the remaining scope across six projects.", level: "High" },
+    ],
+    team: [
+      { role: "Project Manager", name: "Daniel Brooks" },
+      { role: "Lead Engineer", name: "Jordan P." },
+      { role: "Field Supervisor", name: "Liam O." },
+    ],
+    related: { customer: "Xcel Energy", value: "£4.2m", region: "North America" },
+  },
+  "ct-northsea": {
+    summary:
+      "Switchgear refurbishment across the North Sea platform cluster. A signed change order is outstanding, holding a £680k progress invoice and dragging reported margin 14pts under baseline; the crew is also over-allocated for the added scope.",
+    recommendedActions: ["Raise change order", "Rebalance crew", "Flag margin for review"],
+    milestones: [
+      { label: "Engineering approval", done: true, planned: "2026-05-02", actual: "2026-05-05" },
+      { label: "Material delivery", done: true, planned: "2026-06-14", actual: "2026-06-20" },
+      { label: "Field execution", done: false, planned: "2026-08-18" },
+      { label: "Change order sign-off", done: false, planned: "2026-08-25" },
+    ],
+    risks: [
+      { title: "Invoice blocked", detail: "£680k held until CO-118 is signed.", level: "High" },
+      { title: "Crew over-allocation", detail: "Field Service at 96% with no slack.", level: "Medium" },
+    ],
+    team: [
+      { role: "Project Manager", name: "Sarah Mitchell" },
+      { role: "Lead Engineer", name: "Tom H." },
+      { role: "Field Supervisor", name: "Sara B." },
+    ],
+    related: { customer: "Siemens", value: "£2.4m", region: "North Sea" },
+  },
+  "ct-baltic": {
+    summary:
+      "Offshore transformer maintenance across the Baltic Wind NL array. Delivery is close to baseline, but two HSE certificates expire before the next visit, which would block remobilisation of the offshore crew.",
+    recommendedActions: ["Schedule cert renewal", "Confirm crew availability"],
+    milestones: [
+      { label: "Engineering approval", done: true, planned: "2026-05-20", actual: "2026-05-19" },
+      { label: "Material delivery", done: true, planned: "2026-06-28", actual: "2026-06-28" },
+      { label: "Field execution", done: true, planned: "2026-07-30", actual: "2026-07-31" },
+      { label: "HSE certificate renewal", done: false, planned: "2026-08-30" },
+    ],
+    risks: [{ title: "Certificate lapse", detail: "Two crew certs expire before the next window.", level: "Medium" }],
+    team: [
+      { role: "Project Manager", name: "Sarah Mitchell" },
+      { role: "HSE Officer", name: "Kara M." },
+      { role: "Field Engineer", name: "Dev K." },
+    ],
+    related: { customer: "Baltic Wind NL", value: "£2.4m", region: "North Sea" },
+  },
+  "ct-pacific": {
+    summary:
+      "Protection relay upgrade for Pacific Gas. On schedule but early, with site access unresolved — only a verbal change order is in place. A written agreement is needed before the crew can mobilise.",
+    recommendedActions: ["Request written access", "Review access terms"],
+    milestones: [
+      { label: "Engineering approval", done: true, planned: "2026-06-01", actual: "2026-06-01" },
+      { label: "Material delivery", done: true, planned: "2026-07-05", actual: "2026-07-04" },
+      { label: "Site access agreement", done: false, planned: "2026-08-20" },
+      { label: "Field execution", done: false, planned: "2026-09-01" },
+    ],
+    risks: [{ title: "Verbal-only access", detail: "Mobilisation delay risk without a written agreement.", level: "Medium" }],
+    team: [
+      { role: "Project Manager", name: "Lena Fischer" },
+      { role: "Lead Engineer", name: "Priya K." },
+    ],
+    related: { customer: "Pacific Gas", value: "£440k", region: "North Sea" },
+  },
+};
+
+/* Financial Performance */
+export const FINANCIALS = {
+  forecastMargin: "18.6%",
+  revenue: "£18.4m",
+  cost: "£15.0m",
+  marginVsPlan: "-0.8pp",
+  trend: [
+    { label: "Mar", value: 19.4 },
+    { label: "Apr", value: 19.1 },
+    { label: "May", value: 18.9 },
+    { label: "Jun", value: 18.8 },
+    { label: "Jul", value: 18.6 },
+    { label: "Aug", value: 18.6 },
+  ],
+  planMargin: 19.4,
+  causes: [
+    { label: "Siemens change order unbooked", impact: "−0.5pp" },
+    { label: "Delta Coils vendor delay", impact: "−0.2pp" },
+    { label: "Scope creep (unbilled)", impact: "−0.1pp" },
+  ],
+};
+
+/* Resource & Capacity */
+export interface Team {
+  name: string;
+  utilization: number; // %
+  headcount: number;
+  allocated: number;
+}
+export const TEAMS: Team[] = [
+  { name: "Engineering", utilization: 82, headcount: 24, allocated: 20 },
+  { name: "Field Service", utilization: 96, headcount: 40, allocated: 38 },
+  { name: "Reliability", utilization: 74, headcount: 12, allocated: 9 },
+  { name: "PM", utilization: 88, headcount: 10, allocated: 9 },
+];
+export const CAPACITY_RISKS: { title: string; detail: string; severity: "High" | "Medium" }[] = [
+  { title: "Field Service over-allocated in the North Sea", detail: "96% utilised with no slack for the Sherco outage window.", severity: "High" },
+  { title: "PM capacity tight", detail: "One PM is covering three critical contracts this quarter.", severity: "High" },
+  { title: "Reliability short 2 engineers for the Q4 program", detail: "Duke monitoring rollout needs two more reliability engineers.", severity: "Medium" },
+];

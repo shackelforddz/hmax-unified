@@ -511,3 +511,33 @@ export const OPPORTUNITY_DETAILS: Record<string, OpportunityDetail> = {
     related: { customer: "Pacific Gas", contract: "Protection Relay Upgrade", region: "North Sea" },
   },
 };
+
+// System-generated opportunities surfaced for the user to review.
+export interface ProposedOpportunity {
+  id: string;
+  account: string;
+  title: string;
+  estimatedValue: string;
+  rationale: string;
+  signals: string[];
+}
+export const PROPOSED_OPPORTUNITIES: ProposedOpportunity[] = [
+  {
+    id: "prop-xcel-s19",
+    account: "Xcel Energy",
+    title: "S-19 converter transformer replacement",
+    estimatedValue: "$2.4M",
+    rationale:
+      "S-19 is showing the same partial-discharge signature that drove the S-12 upgrade. At over 35 years old it's a strong replacement candidate to bundle into the SLA renewal before the autumn outage window.",
+    signals: ["Asset health", "DGA trend", "SLA renewal"],
+  },
+  {
+    id: "prop-comed-spares",
+    account: "ComEd",
+    title: "Standby spares program",
+    estimatedValue: "$3.1M",
+    rationale:
+      "AST-001 and AST-002 are both Critical with no standby capacity on the site. A spares program de-risks an unplanned outage worth ~$0.9M and fits the existing service agreement.",
+    signals: ["2 critical assets", "No standby", "Outage risk"],
+  },
+];

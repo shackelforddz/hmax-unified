@@ -20,7 +20,7 @@ export interface AttentionFlag {
 }
 
 export type AttentionStatus = "critical" | "at-risk" | "healthy";
-export type AttentionCategory = "progress" | "invoice-triggers" | "site-access" | "scope-creep";
+export type AttentionCategory = "progress" | "budget-invoicing" | "site-access" | "scope-variations";
 
 export interface AttentionItem {
   id: string;
@@ -76,6 +76,7 @@ export interface CustomerDetail {
   subtitle: string;
   stats: { owner: string; value: string; margin: string; schedule: string; healthPct: number };
   contextSummary: string;
+  recommendedActions?: string[];
   deliveryStatus: DeliveryStep[];
   invoice?: { readiness: string; blocker: string; criticalVendor: string };
   ownership: { currentOwner: string; nextOwner: string; handoverStatus: string };
@@ -99,6 +100,7 @@ export const CUSTOMER_DETAILS: Record<string, CustomerDetail> = {
     stats: { owner: "Daniel Brooks", value: "$2.4m", margin: "14.2%", schedule: "18 days late", healthPct: 28 },
     contextSummary:
       "Replacement of converter transformer windings on Units S-12 and S-14 at Sherco. The customer delivery date is contractually tied to the autumn outage window; slipping past 14 September pushes the work into the next available window in February.",
+    recommendedActions: ["Adjust schedule", "Escalate delivery risk", "Raise gasket-set PO"],
     deliveryStatus: [
       { label: "Engineering approval", done: true, planned: "2026-06-12", actual: "2026-06-16" },
       { label: "Material delivery (Delta Coils)", done: true, planned: "2026-04-20", actual: "2026-08-01" },
@@ -196,6 +198,7 @@ export const CUSTOMER_DETAILS: Record<string, CustomerDetail> = {
     stats: { owner: "Sarah Mitchell", value: "£2.4m", margin: "11.8%", schedule: "In execution", healthPct: 46 },
     contextSummary:
       "Switchgear panel refurbishment across the North Sea platform cluster. A signed change order is outstanding, holding a £680k progress invoice below the trigger threshold and dragging reported margin 14 points under baseline.",
+    recommendedActions: ["Raise change order", "Flag margin for review", "Document scope"],
     deliveryStatus: [
       { label: "Engineering approval", done: true, planned: "2026-05-02", actual: "2026-05-05" },
       { label: "Material delivery", done: true, planned: "2026-06-14", actual: "2026-06-20" },
@@ -270,6 +273,7 @@ export const CUSTOMER_DETAILS: Record<string, CustomerDetail> = {
     stats: { owner: "Sarah Mitchell", value: "£2.4m", margin: "19.4%", schedule: "In execution", healthPct: 72 },
     contextSummary:
       "Offshore transformer maintenance across the Baltic Wind NL array. Delivery is healthy, but two HSE certificates are approaching expiry and a verbally-agreed inspection extension has not been captured, creating a scope-creep watch item.",
+    recommendedActions: ["Schedule cert renewal", "Document inspection extension"],
     deliveryStatus: [
       { label: "Engineering approval", done: true, planned: "2026-05-20", actual: "2026-05-19" },
       { label: "Material delivery", done: true, planned: "2026-06-28", actual: "2026-06-28" },
@@ -330,6 +334,7 @@ export const CUSTOMER_DETAILS: Record<string, CustomerDetail> = {
     stats: { owner: "Lena Fischer", value: "£440k", margin: "21.0%", schedule: "On schedule", healthPct: 81 },
     contextSummary:
       "Protection relay upgrade programme for Pacific Gas. Delivery is healthy and on schedule, but site access remains unresolved with only a verbal change order in place — a scope-creep item to formalise before the next mobilisation.",
+    recommendedActions: ["Request written access", "Review access terms"],
     deliveryStatus: [
       { label: "Engineering approval", done: true, planned: "2026-06-01", actual: "2026-06-01" },
       { label: "Material delivery", done: true, planned: "2026-07-05", actual: "2026-07-04" },
@@ -463,13 +468,13 @@ export const ATTENTION_ITEMS: AttentionItem[] = [
         title: "Will miss the customer delivery date by 18 days",
         detail:
           "Slipping past 14 September pushes the work out of the autumn outage window into February. A $1.2m invoice moves into the next quarter and the Xcel SLA negotiation loses its delivery reference.",
-        action: "Investigate",
+        action: "Adjust Schedule",
       },
       {
         title: "Delta Coils Inc. is now the critical dependency on 6 projects",
         detail:
           "A single vendor accounts for $4.8m of revenue at delivery risk across the portfolio. This is a concentration problem, not six separate delays.",
-        action: "Investigate",
+        action: "Reassign Vendor",
       },
     ],
   },
@@ -478,21 +483,35 @@ export const ATTENTION_ITEMS: AttentionItem[] = [
     customer: "Siemens",
     meta: "Sarah M. · North Sea · £2.4M · In execution",
     status: "critical",
-    category: "invoice-triggers",
+    category: "budget-invoicing",
+    flags: [
+      {
+        title: "Change order CO-118 unsigned — £680k invoice held",
+        detail:
+          "The progress invoice can't be raised until CO-118 is signed, and reported margin sits 14pts under baseline until it's booked. Every week it stays unbooked pushes revenue into the next quarter.",
+        action: "Raise Change Order",
+      },
+      {
+        title: "Verbal scope extension not yet documented",
+        detail:
+          "Additional protection-relay work was agreed on site with no written authorisation on file, exposing the contract to unbilled scope creep.",
+        action: "Document Scope",
+      },
+    ],
   },
   {
     id: "baltic-wind-nl",
     customer: "Baltic Wind NL",
     meta: "Sarah M. · North Sea · £2.4M · In execution",
     status: "healthy",
-    category: "scope-creep",
+    category: "scope-variations",
   },
   {
     id: "pacific-gas",
     customer: "Pacific Gas",
     meta: "Lena F. · North Sea · £440k",
     status: "healthy",
-    category: "scope-creep",
+    category: "site-access",
   },
 ];
 

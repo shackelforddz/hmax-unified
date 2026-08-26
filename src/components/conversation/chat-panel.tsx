@@ -32,10 +32,10 @@ const STEP_DEFS = [
   { num: 5, label: "Schedule" },
 ];
 
-function StepTabs({ current }: { current: number }) {
+function StepTabs({ current, steps = STEP_DEFS }: { current: number; steps?: { num: number; label: string }[] }) {
   return (
     <div className="flex border-b border-gray-100">
-      {STEP_DEFS.map(({ num, label }) => {
+      {steps.map(({ num, label }) => {
         const active = num === current;
         const done = num < current;
         return (
@@ -722,6 +722,175 @@ function WizardCard({
   );
 }
 
+/* ── Opportunity creation wizard ─────────────────────────────────── */
+const OPP_STEP_DEFS = [
+  { num: 1, label: "Account" },
+  { num: 2, label: "Scope" },
+  { num: 3, label: "Commercials" },
+  { num: 4, label: "Review" },
+];
+
+function OppFieldGroup({ children }: { children: React.ReactNode }) {
+  return <div className="flex flex-col gap-4 px-5 pt-4 pb-1">{children}</div>;
+}
+function OppHeader({ n, title, sub }: { n: number; title: string; sub: string }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP {n} OF 4</p>
+      <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">{title}</h3>
+      <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
+    </div>
+  );
+}
+function OppInput({ label, value, star }: { label: string; value: string; star?: boolean }) {
+  return (
+    <div>
+      <label className="text-xs text-gray-500 mb-1.5 block">
+        {label} {star && <span className="text-gray-400">*</span>}
+      </label>
+      <input
+        type="text"
+        defaultValue={value}
+        className="w-full h-9 px-3 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 bg-white"
+      />
+    </div>
+  );
+}
+function OppChips({ label, options, initial }: { label: string; options: string[]; initial: string }) {
+  const [sel, setSel] = useState(initial);
+  return (
+    <div>
+      <label className="text-xs text-gray-500 mb-2 block">{label}</label>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => (
+          <button
+            key={o}
+            onClick={() => setSel(o)}
+            className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
+              sel === o ? "bg-black text-white" : "border border-gray-200 text-gray-600 hover:border-gray-400"
+            }`}
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OppStepAccount() {
+  return (
+    <OppFieldGroup>
+      <OppHeader n={1} title="Account & opportunity" sub="Start with who the opportunity is for. The system has suggested details from portfolio signals." />
+      <InfoBanner title="Suggested from portfolio signals" sub="Duke Energy fleet health is declining — a strong reliability-program candidate." />
+      <div className="grid grid-cols-2 gap-3">
+        <OppInput label="Customer" value="Duke Energy" star />
+        <OppInput label="Region" value="North America" />
+      </div>
+      <OppInput label="Opportunity title" value="Fleet reliability program" star />
+      <OppInput label="Estimated value" value="$5.4M" />
+    </OppFieldGroup>
+  );
+}
+function OppStepScope() {
+  return (
+    <OppFieldGroup>
+      <OppHeader n={2} title="Scope & assets" sub="Define what the opportunity covers and which assets are involved." />
+      <OppChips label="Opportunity type" options={["Service agreement", "Replacement", "Upgrade", "Retrofit"]} initial="Service agreement" />
+      <OppInput label="Assets in scope" value="Fleet-wide · 12 converter stations" />
+      <div>
+        <label className="text-xs text-gray-500 mb-1.5 block">Technical requirements</label>
+        <textarea
+          placeholder="Summarise the scope of work and technical requirements..."
+          defaultValue="Condition-based maintenance across the converter fleet, prioritising units with declining DGA and PD trends."
+          className="w-full h-20 px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none bg-white placeholder-gray-300"
+        />
+      </div>
+    </OppFieldGroup>
+  );
+}
+function OppStepCommercials() {
+  return (
+    <OppFieldGroup>
+      <OppHeader n={3} title="Commercials" sub="Set the pricing approach and terms for the offer." />
+      <OppChips label="Costing model" options={["Standard", "Premium", "Custom"]} initial="Premium" />
+      <div className="grid grid-cols-2 gap-3">
+        <OppInput label="Target margin" value="18%" />
+        <OppInput label="Duration" value="5 years" />
+      </div>
+      <OppChips label="Payment terms" options={["Net 30", "Net 60", "Milestone-based"]} initial="Milestone-based" />
+    </OppFieldGroup>
+  );
+}
+function OppStepReview() {
+  const rows = [
+    { label: "Customer", value: "Duke Energy · North America" },
+    { label: "Opportunity", value: "Fleet reliability program" },
+    { label: "Value", value: "$5.4M · Premium · 18% margin" },
+    { label: "Scope", value: "Service agreement · fleet-wide (12 stations)" },
+    { label: "Entry stage", value: "Discovery" },
+  ];
+  return (
+    <OppFieldGroup>
+      <OppHeader n={4} title="Review & create" sub="Confirm the details — the opportunity will enter your pipeline at Discovery." />
+      <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+        {rows.map((r, i) => (
+          <div key={r.label} className={`flex items-start gap-4 px-4 py-3 ${i < rows.length - 1 ? "border-b border-gray-100" : ""}`}>
+            <span className="text-xs text-gray-400 w-28 shrink-0 pt-0.5">{r.label}</span>
+            <span className="text-sm text-gray-800 flex-1">{r.value}</span>
+          </div>
+        ))}
+      </div>
+    </OppFieldGroup>
+  );
+}
+
+function OppWizardCard({
+  step,
+  onContinue,
+  onBack,
+  onCreate,
+}: {
+  step: number;
+  onContinue: () => void;
+  onBack: () => void;
+  onCreate: () => void;
+}) {
+  const isLast = step === 4;
+  const isFirst = step === 1;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <StepTabs current={step} steps={OPP_STEP_DEFS} />
+      <div key={step} className="animate-step-in">
+        {step === 1 && <OppStepAccount />}
+        {step === 2 && <OppStepScope />}
+        {step === 3 && <OppStepCommercials />}
+        {step === 4 && <OppStepReview />}
+      </div>
+      <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+        {!isFirst ? (
+          <Button variant="outline" onClick={onBack} className="gap-1.5 rounded-full h-auto px-5 py-2 text-sm text-gray-600 cursor-pointer">
+            <ChevronLeft size={14} />
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        {isLast ? (
+          <Button onClick={onCreate} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
+            Create opportunity
+          </Button>
+        ) : (
+          <Button onClick={onContinue} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
+            Continue
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Context card (widget-launched conversations) ────────────────── */
 function ContextCard({ context }: { context: string }) {
   return (
@@ -763,7 +932,7 @@ function SourcesLine() {
 export interface ChatMsg {
   id: number;
   role: "user" | "ai";
-  kind?: "text" | "wizard";
+  kind?: "text" | "wizard" | "opp-wizard";
   text?: string;
   suggestions?: Suggestions;
   visual?: CustomWidgetConfig;
@@ -825,10 +994,11 @@ interface ThreadProps {
   wizardStep: number;
   onWizardStep: (n: number) => void;
   onGenerate: () => void;
+  onOppCreate?: () => void;
   onSend?: (text: string) => void;
 }
 
-export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onSend }: ThreadProps) {
+export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onOppCreate, onSend }: ThreadProps) {
   const lastId = messages[messages.length - 1]?.id;
   return (
     <>
@@ -858,6 +1028,23 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
                   onContinue={() => onWizardStep(Math.min(5, wizardStep + 1))}
                   onBack={() => onWizardStep(Math.max(1, wizardStep - 1))}
                   onGenerate={onGenerate}
+                />
+              </div>
+            </div>
+            <div className="ml-11">
+              <SourcesLine />
+            </div>
+          </div>
+        ) : m.kind === "opp-wizard" ? (
+          <div key={m.id} className="mb-8">
+            <div className="flex items-start gap-3 mb-2 animate-message-in">
+              <AiAvatar />
+              <div className="flex-1 min-w-0">
+                <OppWizardCard
+                  step={wizardStep}
+                  onContinue={() => onWizardStep(Math.min(4, wizardStep + 1))}
+                  onBack={() => onWizardStep(Math.max(1, wizardStep - 1))}
+                  onCreate={() => onOppCreate?.()}
                 />
               </div>
             </div>

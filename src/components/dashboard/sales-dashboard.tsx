@@ -5,6 +5,7 @@ import KpiCard from "@/components/dashboard/kpi-card";
 import FleetMap from "@/components/dashboard/sales/fleet-map";
 import FleetHealth from "@/components/dashboard/sales/fleet-health";
 import AssetAlerts from "@/components/dashboard/sales/asset-alerts";
+import Opportunities from "@/components/dashboard/sales/opportunities";
 import RepeatedRepairs from "@/components/dashboard/sales/repeated-repairs";
 import SlaPipeline from "@/components/dashboard/sales/sla-pipeline";
 import SlaRenewals from "@/components/dashboard/sales/sla-renewals";
@@ -33,6 +34,9 @@ export default function SalesDashboard() {
 
       {/* Asset alerts */}
       <AssetAlerts />
+
+      {/* Opportunities */}
+      <Opportunities />
 
       {/* Repeated repairs + SLA pipeline */}
       <div className="grid grid-cols-3 gap-4">

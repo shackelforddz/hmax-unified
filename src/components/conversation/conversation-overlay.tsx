@@ -22,6 +22,16 @@ const SUGGESTIONS = [
 
 const DEFAULT_PROMPT = "Create a mobilization plan for Xcel Energy";
 
+// Quick-start prompts shown above the input on the welcome screen.
+const WELCOME_STARTERS = [
+  "What needs my attention today?",
+  "Show the portfolio overview",
+  "Which contracts are at risk?",
+  "Why is on-time delivery falling?",
+  "What's driving revenue at risk?",
+  "Show vendor concentration",
+];
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -59,12 +69,14 @@ export default function ConversationOverlay({ visible, onClose, context, initial
 
   const push = (msg: Omit<ChatMsg, "id">) => setMessages((m) => [...m, { id: nextId(), ...msg }]);
 
-  // Generate the assistant's reply — mobilization prompts open the wizard,
-  // everything else is answered from the knowledge base.
+  // Generate the assistant's reply — mobilization / opportunity prompts open a
+  // guided wizard, everything else is answered from the knowledge base.
   const respond = (text: string, ctx?: string) => {
     setTyping(true);
     clearTimers();
-    const isMob = /mobili[sz]|mobilization plan|mobilisation plan/.test(text.toLowerCase());
+    const q = text.toLowerCase();
+    const isMob = /mobili[sz]|mobilization plan|mobilisation plan/.test(q);
+    const isOpp = /opportunit/.test(q) && /(build|create|new|start|open)/.test(q);
     if (isMob) {
       timers.current.push(
         setTimeout(() => push({ role: "ai", kind: "text", text: "Of course — let's confirm a few details and I'll draft the plan." }), 1000)
@@ -73,6 +85,17 @@ export default function ConversationOverlay({ visible, onClose, context, initial
         setTimeout(() => {
           setTyping(false);
           push({ role: "ai", kind: "wizard" });
+        }, 2100)
+      );
+    } else if (isOpp) {
+      setWizardStep(1);
+      timers.current.push(
+        setTimeout(() => push({ role: "ai", kind: "text", text: "Let's build a new opportunity — I'll walk you through it and pre-fill what I can." }), 1000)
+      );
+      timers.current.push(
+        setTimeout(() => {
+          setTyping(false);
+          push({ role: "ai", kind: "opp-wizard" });
         }, 2100)
       );
     } else {
@@ -165,6 +188,14 @@ export default function ConversationOverlay({ visible, onClose, context, initial
 
   useEffect(() => clearTimers, []);
 
+  // Close the overlay on Escape
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [visible, onClose]);
+
   // Keep pinned to the newest content as the conversation streams in
   useEffect(() => {
     const el = scrollRef.current;
@@ -175,6 +206,30 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     const t = input.trim();
     if (!t && !started) send(DEFAULT_PROMPT);
     else if (t) send(t);
+  };
+
+  // Final step of the opportunity wizard — confirm creation.
+  const oppCreate = () => {
+    setTyping(true);
+    clearTimers();
+    timers.current.push(
+      setTimeout(() => {
+        setTyping(false);
+        push({
+          role: "ai",
+          kind: "text",
+          text:
+            "✓ Opportunity created and added to your pipeline.\n\nDuke Energy — Fleet reliability program is now in Discovery ($5.4M, Premium). Next steps: qualify the budget and capture the account & shipping details to move it toward Scoping.",
+          suggestions: {
+            prompts: ["What's needed to reach the Offer stage?", "Show the Duke Energy fleet", "Draft a qualification plan"],
+            actions: [
+              { label: "Capture account details", prompt: "Capture account and shipping details for Duke Energy" },
+              { label: "Assign owner", prompt: "Assign an owner to the Duke Energy opportunity" },
+            ],
+          },
+        });
+      }, 1000)
+    );
   };
 
   // Widget-launched chats (activeContext set) hide the context panel until a
@@ -202,6 +257,17 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     >
       {/* Backdrop click closes only before a conversation has started */}
       {!started && <div className="absolute inset-0" onClick={onClose} />}
+
+      {/* Close button — the header X only exists once a conversation starts */}
+      {!started && (
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-6 right-6 z-20 w-9 h-9 rounded-full bg-white/70 backdrop-blur flex items-center justify-center text-gray-500 hover:bg-white transition-colors cursor-pointer"
+        >
+          <X size={18} strokeWidth={1.5} />
+        </button>
+      )}
 
       {/* Left — customer context. For widget-launched chats it stays hidden
           until the conversation is tied to a specific customer. */}
@@ -275,6 +341,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                 wizardStep={wizardStep}
                 onWizardStep={setWizardStep}
                 onGenerate={() => setDocVisible(true)}
+                onOppCreate={oppCreate}
                 onSend={(t) => send(t)}
               />
             )}
@@ -283,6 +350,22 @@ export default function ConversationOverlay({ visible, onClose, context, initial
 
         {/* Persistent prompt box — the anchor that never swaps out */}
         <div className="shrink-0 pb-6 pt-2">
+          {/* Suggested starter prompts (welcome screen only) */}
+          {!started && (
+            <div className="max-w-[640px] mx-auto w-full px-4 mb-2">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                {WELCOME_STARTERS.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => send(p)}
+                    className="shrink-0 whitespace-nowrap text-xs text-gray-600 bg-white border border-gray-200 rounded-full px-3 py-1.5 hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="max-w-[640px] mx-auto w-full px-4">
             <div className="bg-white border border-gray-200 rounded-2xl flex items-center gap-3 px-4 py-3 shadow-sm">
               <input

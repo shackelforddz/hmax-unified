@@ -39,50 +39,62 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
   const [expanded, setExpanded] = useState(item.id === "xcel-energy");
   const launch = useConversationLauncher();
 
+  // Healthy customers have no issues to work — no accordion.
+  const needsAttention = item.status !== "healthy" && !!item.flags?.length;
+
+  const header = (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <h4 className="text-base text-gray-900 mb-1.5">
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDrawer(item.id);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpenDrawer(item.id);
+              }
+            }}
+            className="underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer transition-colors"
+          >
+            {item.customer}
+          </span>
+        </h4>
+        <p className="text-sm text-gray-400">{item.meta}</p>
+      </div>
+      <div className="flex items-center gap-3 shrink-0 pt-0.5">
+        <StatusBadge status={item.status} />
+        {needsAttention &&
+          (expanded ? (
+            <ChevronUp size={16} strokeWidth={1.5} className="text-gray-400" />
+          ) : (
+            <ChevronDown size={16} strokeWidth={1.5} className="text-gray-400" />
+          ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer"
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h4 className="text-base text-gray-900 mb-1.5">
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenDrawer(item.id);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onOpenDrawer(item.id);
-                  }
-                }}
-                className="underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer transition-colors"
-              >
-                {item.customer}
-              </span>
-            </h4>
-            <p className="text-sm text-gray-400">{item.meta}</p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0 pt-0.5">
-            <StatusBadge status={item.status} />
-            {expanded ? (
-              <ChevronUp size={16} strokeWidth={1.5} className="text-gray-400" />
-            ) : (
-              <ChevronDown size={16} strokeWidth={1.5} className="text-gray-400" />
-            )}
-          </div>
-        </div>
-      </button>
+      {/* Header — a toggle only for customers that need attention */}
+      {needsAttention ? (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-left px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          {header}
+        </button>
+      ) : (
+        <div className="px-6 py-5">{header}</div>
+      )}
 
       {/* Expanded flags */}
-      {expanded && item.flags && (
+      {needsAttention && expanded && item.flags && (
         <>
           <hr className="border-gray-200" />
           <div className="px-6 py-5 flex flex-col gap-6">
@@ -95,10 +107,18 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-900 mb-2 leading-snug">{flag.title}</p>
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {/* Recommended action — primary CTA */}
                     <Button
-                      onClick={() => launch({ context: item.customer, prompt: flag.title })}
+                      onClick={() => launch({ context: item.customer, prompt: flag.action })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
+                    >
+                      {flag.action}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => launch({ context: item.customer, prompt: flag.title })}
+                      className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
                     >
                       Start A Conversation
                     </Button>
@@ -129,9 +149,9 @@ const PRIORITY_OPTIONS: { label: string; value: AttentionStatus | "all" }[] = [
 const CATEGORY_OPTIONS: { label: string; value: AttentionCategory | "all" }[] = [
   { label: "All", value: "all" },
   { label: "Progress", value: "progress" },
-  { label: "Invoice triggers", value: "invoice-triggers" },
+  { label: "Budget & invoicing", value: "budget-invoicing" },
   { label: "Site & access", value: "site-access" },
-  { label: "Scope creep", value: "scope-creep" },
+  { label: "Scope & variations", value: "scope-variations" },
 ];
 
 export default function AttentionList() {
@@ -157,7 +177,7 @@ export default function AttentionList() {
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">Assigned to you</h3>
+            <h3 className="text-base text-gray-900">Customers assigned to you</h3>
             <p className="text-sm text-gray-400 mt-0.5">{filtered.length} need your attention</p>
           </div>
           <WidgetChat title="Assigned to you" />

@@ -248,7 +248,7 @@ export function customerSummary(name: string): string | null {
 }
 
 // Action CTAs resolve to a confirmation rather than a lookup.
-const ACTION_RE = /^(escalate|request|raise|draft|schedule|generate|prepare|flag|propose|review|order|assign|mark|add|create)\b/i;
+const ACTION_RE = /^(escalate|request|raise|draft|schedule|generate|prepare|flag|propose|review|order|assign|reassign|adjust|document|mark|add|create)\b/i;
 
 export function answerQuery(prompt: string, context?: string): string {
   const q = prompt.toLowerCase();

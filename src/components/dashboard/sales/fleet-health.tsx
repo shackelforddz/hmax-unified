@@ -9,8 +9,8 @@ export default function FleetHealth() {
     <div className="bg-white rounded-xl p-4 flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-base text-gray-900">Portfolio health</h3>
-        <WidgetChat title="Portfolio health" />
+        <h3 className="text-base text-gray-900">Fleet health</h3>
+        <WidgetChat title="Fleet health" />
       </div>
 
       {/* Stats */}

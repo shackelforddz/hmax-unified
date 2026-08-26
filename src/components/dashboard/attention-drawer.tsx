@@ -13,6 +13,7 @@ import {
   type InfoStatus,
 } from "@/lib/dashboard-data";
 import { Button } from "@/components/ui/button";
+import { useConversationLauncher } from "./conversation-launcher";
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -64,13 +65,30 @@ function SectionTitle({ children, action }: { children: React.ReactNode; action?
   );
 }
 
-function DrawerBody({ d }: { d: CustomerDetail }) {
+function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: string) => void }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Context summary */}
       <Card>
         <SectionTitle>Context summary</SectionTitle>
         <p className="text-sm text-gray-500 leading-relaxed">{d.contextSummary}</p>
+
+        {d.recommendedActions && d.recommendedActions.length > 0 && (
+          <div className="mt-4">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommended actions</p>
+            <div className="flex flex-wrap gap-2">
+              {d.recommendedActions.map((a) => (
+                <Button
+                  key={a}
+                  onClick={() => onAction(a)}
+                  className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer"
+                >
+                  {a}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Delivery & commercial status */}
@@ -324,6 +342,12 @@ interface Props {
 export default function AttentionDrawer({ itemId, onClose }: Props) {
   const detail = itemId ? CUSTOMER_DETAILS[itemId] : null;
   const open = !!detail;
+  const launch = useConversationLauncher();
+
+  const runAction = (prompt: string) => {
+    onClose();
+    launch({ context: detail?.name, prompt });
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -393,7 +417,7 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-5 bg-white">
-              <DrawerBody d={detail} />
+              <DrawerBody d={detail} onAction={runAction} />
             </div>
 
             {/* Footer */}

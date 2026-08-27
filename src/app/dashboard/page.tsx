@@ -20,14 +20,14 @@ const SEED_CONVERSATIONS: StoredConversation[] = CONVERSATIONS.map((c) => ({
 }));
 
 export default function DashboardPage() {
-  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; restore?: StoredConversation | null }>({ visible: false });
+  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; entity?: LaunchArgs["entity"]; restore?: StoredConversation | null }>({ visible: false });
   const [conversations, setConversations] = useState<StoredConversation[]>(SEED_CONVERSATIONS);
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const isSales = selectedRole === "Sales";
   const isOps = selectedRole === "Operations";
 
   const openConversation = useCallback((args?: LaunchArgs) => {
-    setConv({ visible: true, context: args?.context, prompt: args?.prompt, restore: null });
+    setConv({ visible: true, context: args?.context, prompt: args?.prompt, entity: args?.entity, restore: null });
   }, []);
 
   const openStored = useCallback((rec: StoredConversation) => {
@@ -49,7 +49,7 @@ export default function DashboardPage() {
     <div className="h-screen bg-[#F3F4F6] font-patrick-hand relative overflow-hidden">
 
       {/* Right conversations panel — anchored below nav, never scrolls under it */}
-      <div className="absolute top-[64px] right-4 bottom-4 w-[400px]">
+      <div className="absolute top-[80px] right-4 bottom-4 w-[400px]">
         <ConversationsPanel
           conversations={conversations}
           onNewConversation={() => openConversation()}
@@ -60,7 +60,7 @@ export default function DashboardPage() {
       {/* Left content — starts at top-0 so it can scroll under the nav */}
       {/* right = 16px page pad + 400px panel + 16px gap = 432px */}
       <div className="no-scrollbar absolute top-0 left-0 bottom-0 overflow-y-auto" style={{ right: 432 }}>
-        <div className="px-4 pb-4 pt-[64px] flex flex-col gap-4">
+        <div className="pl-4 pb-4 pt-[80px] flex flex-col gap-4">
           {isSales ? <SalesDashboard /> : isOps ? <OperationsDashboard /> : <PmDashboard />}
         </div>
       </div>
@@ -103,6 +103,7 @@ export default function DashboardPage() {
         visible={conv.visible}
         context={conv.context}
         initialPrompt={conv.prompt}
+        entity={conv.entity}
         restore={conv.restore}
         onPersist={persist}
         onClose={() => setConv((c) => ({ ...c, visible: false }))}

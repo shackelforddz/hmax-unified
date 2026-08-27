@@ -213,6 +213,249 @@ export const ASSET_DETAILS: Record<string, AssetDetail> = {
   },
 };
 
+/* ── Asset condition monitoring (APM-style visuals) ──────────────── */
+export interface AgingData {
+  age: number;           // years
+  manufacturerLife: number;
+  customerLife: number;
+  scaleMax: number;
+}
+export interface ScoreFactor {
+  factor: string;
+  pctOfMax: number;      // 0–100
+  value: number;
+}
+export interface RiskSummary {
+  importance: number;    // 0–100
+  condition: number;     // 0–100 (lower = worse)
+  replacementRank: number;
+  replacementOf: number;
+  lastUpdate: string;
+}
+export interface ConditionPoint {
+  date: string;
+  dielectric: number;
+  mechanical: number;
+  other: number;
+  wear: number;
+}
+export interface ParameterPoint {
+  date: string;
+  value: number;
+}
+export interface ParameterRow {
+  factor: string;
+  name: string;
+  unit: string;
+  prev: string;
+  current: string;
+  up: boolean;
+}
+export interface BulletMetric {
+  label: string;
+  value: number;
+  warning: number;
+  alarm: number;
+  max: number;
+}
+export interface PhasePoint {
+  date: string;
+  a: number;
+  b: number;
+  c: number;
+}
+export interface AssetDiagnostics {
+  operations: BulletMetric[];
+  contactWear: { series: PhasePoint[]; warning: number; alert: number };
+  sf6Pressure?: { unit: string; series: PhasePoint[]; informational: number; warning: number };
+  sf6Moisture?: { unit: string; series: PhasePoint[]; warning: number; alert: number };
+}
+export interface AssetCondition {
+  aging: AgingData;
+  scoreFactors: ScoreFactor[];
+  scoreTotal: number;
+  risk: RiskSummary;
+  conditionTrend: ConditionPoint[];
+  conditionTotals: { dielectric: number; mechanical: number; other: number; wear: number };
+  parameterTrend: ParameterPoint[];
+  parameterRows: ParameterRow[];
+  diagnostics?: AssetDiagnostics;
+}
+
+const COND_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function conditionSeries(dielectricBase: number, wearBase: number): ConditionPoint[] {
+  const dWave = [0, -0.2, -1.6, 0.4, -0.9, -0.3, -0.2, 0.7, -1.1, 1.0, 0.6, -2.4];
+  const wWave = [0, 0.4, -1.0, 0.6, -0.3, 0.1, 0.2, 1.3, -0.4, 1.1, 0.3, -1.8];
+  return COND_MONTHS.map((date, i) => ({
+    date,
+    dielectric: Math.max(0, +(dielectricBase + dWave[i]).toFixed(2)),
+    mechanical: 0,
+    other: 0,
+    wear: Math.max(0, +(wearBase + wWave[i]).toFixed(2)),
+  }));
+}
+
+function paramSeries(vals: number[]): ParameterPoint[] {
+  return COND_MONTHS.map((date, i) => ({ date, value: vals[i] }));
+}
+
+function phaseSeries(base: number[], spread: number, points: number): PhasePoint[] {
+  // Deterministic pseudo-random phases around a shared trend.
+  const dates = ["1/24", "2/21", "3/20", "4/17", "5/15", "6/12", "7/9", "8/6", "9/3", "10/1", "10/29", "11/26", "12/24"];
+  return Array.from({ length: points }, (_, i) => {
+    const t = base[i % base.length];
+    const j = (i * 7) % 5;
+    return {
+      date: dates[i % dates.length],
+      a: +(t + (j - 2) * spread * 0.4).toFixed(1),
+      b: +(t + ((j + 2) % 5 - 2) * spread * 0.5).toFixed(1),
+      c: +(t + ((j + 4) % 5 - 2) * spread * 0.45).toFixed(1),
+    };
+  });
+}
+
+// Sawtooth contact-wear (I²t) — resets after each maintenance.
+function wearSawtooth(): PhasePoint[] {
+  const raw = [2, 6, 10, 16, 18, 24, 31, 33, 40, 45, 70, 105, 2, 5, 9, 14, 18, 26, 32, 36, 42, 46, 51, 2, 4, 8, 11, 15, 19, 25, 30, 34, 45, 52, 2, 4, 9, 11, 15];
+  return raw.map((v, i) => ({
+    date: `p${i}`,
+    a: v,
+    b: +(v + (i % 3 === 0 ? 1 : -1)).toFixed(0),
+    c: +(v + (i % 2 === 0 ? -1 : 1.5)).toFixed(0),
+  }));
+}
+
+export const ASSET_CONDITION: Record<string, AssetCondition> = {
+  "ast-001": {
+    aging: { age: 25.7, manufacturerLife: 20, customerLife: 25, scaleMax: 29 },
+    scoreFactors: [
+      { factor: "Financial", pctOfMax: 100, value: 20.0 },
+      { factor: "Importance", pctOfMax: 90, value: 18.0 },
+      { factor: "Age", pctOfMax: 60, value: 12.0 },
+      { factor: "Degradation", pctOfMax: 39.1, value: 7.8 },
+      { factor: "Obsolescence", pctOfMax: 0, value: 0.0 },
+    ],
+    scoreTotal: 57.8,
+    risk: { importance: 90, condition: 39.1, replacementRank: 1, replacementOf: 10, lastUpdate: "9 days ago" },
+    conditionTrend: conditionSeries(21.5, 13.5),
+    conditionTotals: { dielectric: 19.74, mechanical: 0.0, other: 0.0, wear: 19.41 },
+    parameterTrend: paramSeries([9, 9, 8, 9, 8, 10, 8, 9, 7, 8, 7, 8]),
+    parameterRows: [
+      { factor: "Wear", name: "Number of Fault Operations", unit: "", prev: "7.0", current: "8.0", up: true },
+      { factor: "Wear", name: "Number of Total Operations", unit: "", prev: "1,800.0", current: "1,850.0", up: true },
+      { factor: "Mechanical", name: "Close Time P1", unit: "milliseconds", prev: "36.0", current: "54.0", up: true },
+      { factor: "Mechanical", name: "Open Time P1", unit: "milliseconds", prev: "22.0", current: "24.0", up: true },
+      { factor: "Dielectric", name: "SF₆ Moisture P1", unit: "ppm", prev: "465.0", current: "538.0", up: true },
+    ],
+    diagnostics: {
+      operations: [
+        { label: "Total Operations", value: 1850, warning: 1600, alarm: 2000, max: 2200 },
+        { label: "Fault Operations", value: 8, warning: 4, alarm: 5, max: 9 },
+      ],
+      contactWear: { series: wearSawtooth(), warning: 80, alert: 95 },
+      sf6Pressure: {
+        unit: "psi",
+        informational: 81,
+        warning: 78.2,
+        series: phaseSeries([85, 86, 84, 87, 85, 86, 84, 86, 85, 86, 84], 3, 12),
+      },
+      sf6Moisture: {
+        unit: "ppm",
+        warning: 450,
+        alert: 500,
+        series: [
+          { date: "1/24", a: 500, b: 200, c: 105 },
+          { date: "2/21", a: 510, b: 105, c: 105 },
+          { date: "3/20", a: 490, b: 120, c: 90 },
+          { date: "4/17", a: 600, b: 105, c: 105 },
+          { date: "5/15", a: 545, b: 125, c: 95 },
+          { date: "6/12", a: 478, b: 108, c: 106 },
+          { date: "7/9", a: 450, b: 122, c: 88 },
+          { date: "8/6", a: 464, b: 105, c: 104 },
+          { date: "9/3", a: 523, b: 123, c: 94 },
+          { date: "10/1", a: 447, b: 104, c: 103 },
+          { date: "10/29", a: 527, b: 121, c: 89 },
+          { date: "11/26", a: 538, b: 100, c: 105 },
+        ],
+      },
+    },
+  },
+  "ast-002": {
+    aging: { age: 22.4, manufacturerLife: 20, customerLife: 25, scaleMax: 29 },
+    scoreFactors: [
+      { factor: "Financial", pctOfMax: 85, value: 17.0 },
+      { factor: "Importance", pctOfMax: 75, value: 15.0 },
+      { factor: "Age", pctOfMax: 52, value: 10.4 },
+      { factor: "Degradation", pctOfMax: 48, value: 9.6 },
+      { factor: "Obsolescence", pctOfMax: 20, value: 4.0 },
+    ],
+    scoreTotal: 56.0,
+    risk: { importance: 75, condition: 46.0, replacementRank: 2, replacementOf: 10, lastUpdate: "4 days ago" },
+    conditionTrend: conditionSeries(24, 22),
+    conditionTotals: { dielectric: 24.1, mechanical: 6.2, other: 0.0, wear: 22.4 },
+    parameterTrend: paramSeries([4, 5, 5, 6, 6, 7, 8, 8, 9, 9, 10, 11]),
+    parameterRows: [
+      { factor: "Wear", name: "Bearing Vibration", unit: "mm/s", prev: "6.2", current: "7.1", up: true },
+      { factor: "Wear", name: "Number of Repairs (6mo)", unit: "", prev: "2.0", current: "3.0", up: true },
+      { factor: "Mechanical", name: "Close Time P1", unit: "milliseconds", prev: "41.0", current: "44.0", up: true },
+    ],
+    diagnostics: {
+      operations: [
+        { label: "Total Operations", value: 2040, warning: 1600, alarm: 2000, max: 2200 },
+        { label: "Fault Operations", value: 6, warning: 4, alarm: 5, max: 9 },
+      ],
+      contactWear: { series: wearSawtooth(), warning: 80, alert: 95 },
+    },
+  },
+  "ast-003": {
+    aging: { age: 13.2, manufacturerLife: 20, customerLife: 25, scaleMax: 29 },
+    scoreFactors: [
+      { factor: "Financial", pctOfMax: 70, value: 14.0 },
+      { factor: "Importance", pctOfMax: 65, value: 13.0 },
+      { factor: "Age", pctOfMax: 34, value: 6.8 },
+      { factor: "Degradation", pctOfMax: 26, value: 5.2 },
+      { factor: "Obsolescence", pctOfMax: 0, value: 0.0 },
+    ],
+    scoreTotal: 39.0,
+    risk: { importance: 65, condition: 62.0, replacementRank: 5, replacementOf: 10, lastUpdate: "2 days ago" },
+    conditionTrend: conditionSeries(16, 12),
+    conditionTotals: { dielectric: 15.8, mechanical: 0.0, other: 0.0, wear: 12.2 },
+    parameterTrend: paramSeries([88, 86, 84, 85, 87, 88, 86, 85, 87, 88, 89, 88]),
+    parameterRows: [
+      { factor: "Thermal", name: "Top-oil Temperature", unit: "°C", prev: "84.0", current: "88.0", up: true },
+      { factor: "Mechanical", name: "Cooling Fans Degraded", unit: "", prev: "0.0", current: "1.0", up: true },
+    ],
+  },
+  "ast-004": {
+    aging: { age: 12.1, manufacturerLife: 20, customerLife: 25, scaleMax: 29 },
+    scoreFactors: [
+      { factor: "Financial", pctOfMax: 62, value: 12.4 },
+      { factor: "Importance", pctOfMax: 58, value: 11.6 },
+      { factor: "Age", pctOfMax: 31, value: 6.2 },
+      { factor: "Degradation", pctOfMax: 21, value: 4.2 },
+      { factor: "Obsolescence", pctOfMax: 0, value: 0.0 },
+    ],
+    scoreTotal: 34.4,
+    risk: { importance: 58, condition: 66.0, replacementRank: 7, replacementOf: 10, lastUpdate: "6 days ago" },
+    conditionTrend: conditionSeries(14, 10),
+    conditionTotals: { dielectric: 13.9, mechanical: 4.8, other: 0.0, wear: 9.7 },
+    parameterTrend: paramSeries([12, 13, 14, 15, 16, 17, 18, 18, 19, 20, 20, 21]),
+    parameterRows: [
+      { factor: "Wear", name: "Tap-changer Vibration", unit: "% vs baseline", prev: "108.0", current: "120.0", up: true },
+      { factor: "Wear", name: "Operations Count", unit: "", prev: "18,200.0", current: "18,400.0", up: true },
+      { factor: "Mechanical", name: "Contact Resistance", unit: "µΩ", prev: "182.0", current: "191.0", up: true },
+    ],
+    diagnostics: {
+      operations: [
+        { label: "Total Operations", value: 18400, warning: 20000, alarm: 24000, max: 26000 },
+        { label: "Fault Operations", value: 2, warning: 4, alarm: 5, max: 9 },
+      ],
+      contactWear: { series: wearSawtooth(), warning: 80, alert: 95 },
+    },
+  },
+};
+
 export interface RepairRow {
   label: string;
   date: string;

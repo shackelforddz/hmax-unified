@@ -69,7 +69,7 @@ export default function ContextPanel({ customer }: { customer?: string }) {
     <div className="w-[420px] h-full shrink-0 bg-white border-r border-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-8 pt-10 pb-5">
-        <h1 className="text-2xl font-bold text-gray-900 text-center">{name}</h1>
+        <h1 className="text-2xl text-gray-900 text-center">{name}</h1>
       </div>
 
       {/* Tabs */}

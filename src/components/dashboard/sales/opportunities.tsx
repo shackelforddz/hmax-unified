@@ -196,14 +196,14 @@ function OppRow({ opp, onOpenDrawer }: { opp: Opportunity; onOpenDrawer: (opp: O
             <div className="flex flex-wrap gap-2">
               {/* Recommended action — primary CTA */}
               <Button
-                onClick={() => launch({ context: opp.account, prompt: opp.recommendedAction })}
+                onClick={() => launch({ context: opp.account, prompt: opp.recommendedAction, entity: { kind: "opportunity", id: opp.id } })}
                 className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
               >
                 {opp.recommendedAction}
               </Button>
               <Button
                 variant="outline"
-                onClick={() => launch({ context: opp.account, prompt: `Where is the ${opp.account} opportunity and what's missing?` })}
+                onClick={() => launch({ context: opp.account, prompt: `Where is the ${opp.account} opportunity and what's missing?`, entity: { kind: "opportunity", id: opp.id } })}
                 className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
               >
                 Start A Conversation

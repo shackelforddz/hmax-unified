@@ -346,7 +346,7 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
 
   const runAction = (prompt: string) => {
     onClose();
-    launch({ context: detail?.name, prompt });
+    launch({ context: detail?.name, prompt, entity: detail ? { kind: "customer", name: detail.name } : undefined });
   };
 
   // Close on Escape
@@ -379,7 +379,7 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
             <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-100">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{detail.name}</h2>
+                  <h2 className="text-2xl text-gray-900">{detail.name}</h2>
                   <p className="text-sm text-gray-400 mt-0.5">{detail.subtitle}</p>
                 </div>
                 <button

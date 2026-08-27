@@ -96,10 +96,10 @@ function ContractRow({ contract, onOpenDrawer }: { contract: OpsContract; onOpen
                   <p className="text-sm text-gray-900 mb-2 leading-snug">{flag.title}</p>
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => launch({ context: contract.customer, prompt: flag.action })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+                    <Button onClick={() => launch({ context: contract.customer, prompt: flag.action, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
                       {flag.action}
                     </Button>
-                    <Button variant="outline" onClick={() => launch({ context: contract.customer, prompt: flag.title })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
+                    <Button variant="outline" onClick={() => launch({ context: contract.customer, prompt: flag.title, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
                       Start A Conversation
                     </Button>
                     <Button variant="outline" onClick={() => onOpenDrawer(contract.id)} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">

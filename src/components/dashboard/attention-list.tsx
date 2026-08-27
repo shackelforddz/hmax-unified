@@ -110,14 +110,14 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
                   <div className="flex flex-wrap gap-2">
                     {/* Recommended action — primary CTA */}
                     <Button
-                      onClick={() => launch({ context: item.customer, prompt: flag.action })}
+                      onClick={() => launch({ context: item.customer, prompt: flag.action, entity: { kind: "customer", name: item.customer } })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       {flag.action}
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => launch({ context: item.customer, prompt: flag.title })}
+                      onClick={() => launch({ context: item.customer, prompt: flag.title, entity: { kind: "customer", name: item.customer } })}
                       className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
                     >
                       Start A Conversation

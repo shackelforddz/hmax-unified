@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { X, ChevronDown, Check, Circle, Cpu, FileText, ClipboardCheck, UserPlus, ArrowUpRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
-import { OPP_STAGES, type Opportunity, type OpportunityDetail } from "@/lib/sales-data";
+import { OPP_STAGES, OPPORTUNITIES, type Opportunity, type OpportunityDetail } from "@/lib/sales-data";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -174,7 +174,10 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
 
   const runAction = (prompt: string) => {
     onClose();
-    launch({ context: opp?.account, prompt });
+    // Only known opportunities have a context-pane record; proposed ones
+    // (prop-*) fall back to customer detection like before.
+    const known = opp && OPPORTUNITIES.some((o) => o.id === opp.id);
+    launch({ context: opp?.account, prompt, entity: known ? { kind: "opportunity", id: opp!.id } : undefined });
   };
 
   useEffect(() => {
@@ -203,7 +206,7 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
             <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-100">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{opp.account}</h2>
+                  <h2 className="text-2xl text-gray-900">{opp.account}</h2>
                   <p className="text-sm text-gray-400 mt-0.5">{opp.title}</p>
                 </div>
                 <button

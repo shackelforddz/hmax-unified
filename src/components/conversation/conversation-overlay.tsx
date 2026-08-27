@@ -6,9 +6,11 @@ import {
   Library, ArrowUp, UserRoundPlus, X,
 } from "lucide-react";
 import ContextPanel from "./context-panel";
+import EntityContextPanel from "./context-panel-entity";
 import DocPanel from "./doc-panel";
 import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
 import { answerQuery, detectCustomer, suggestNext, visualFor } from "@/lib/knowledge-base";
+import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { Button } from "@/components/ui/button";
 
 const SUGGESTIONS = [
@@ -39,13 +41,15 @@ interface Props {
   context?: string;
   /** When launched from a widget: the user's typed prompt to seed the chat. */
   initialPrompt?: string;
+  /** The record this conversation is about — drives the left context pane. */
+  entity?: ContextEntity;
   /** When reopening from the list: the stored conversation to restore. */
   restore?: StoredConversation | null;
   /** Called as the conversation is created/updated so it can be saved to the list. */
   onPersist?: (record: StoredConversation) => void;
 }
 
-export default function ConversationOverlay({ visible, onClose, context, initialPrompt, restore, onPersist }: Props) {
+export default function ConversationOverlay({ visible, onClose, context, initialPrompt, entity, restore, onPersist }: Props) {
   const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -53,6 +57,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   const [docVisible, setDocVisible] = useState(false);
   const [input, setInput] = useState("");
   const [activeContext, setActiveContext] = useState<string | undefined>(undefined);
+  const [activeEntity, setActiveEntity] = useState<ContextEntity | null>(null);
   const [detectedCustomer, setDetectedCustomer] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -78,6 +83,9 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     const isMob = /mobili[sz]|mobilization plan|mobilisation plan/.test(q);
     const isOpp = /opportunit/.test(q) && /(build|create|new|start|open)/.test(q);
     if (isMob) {
+      // The demo mobilization plan is tied to the Xcel Energy contract
+      // (Sherco HVDC) — surface its detail in the context pane.
+      setActiveEntity((prev) => prev ?? { kind: "contract", id: "ct-sherco" });
       timers.current.push(
         setTimeout(() => push({ role: "ai", kind: "text", text: "Of course — let's confirm a few details and I'll draft the plan." }), 1000)
       );
@@ -132,6 +140,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
       setDocVisible(false);
       setInput("");
       setActiveContext(undefined);
+      setActiveEntity(null);
       setDetectedCustomer(null);
       idRef.current = 0;
       sessionIdRef.current = null;
@@ -143,6 +152,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     if (visible && restore && !started) {
       sessionIdRef.current = restore.id;
       setActiveContext(restore.context);
+      setActiveEntity(restore.entity ?? null);
       setDetectedCustomer(restore.detectedCustomer ?? null);
       if (restore.messages.length > 0) {
         // Restore the existing thread
@@ -160,12 +170,13 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   // When launched from a widget, skip the welcome screen and start immediately
   // with the widget context pinned to the top of the conversation.
   useEffect(() => {
-    if (visible && context && !restore && !started) {
-      setActiveContext(context);
+    if (visible && (context || entity) && !restore && !started) {
+      if (context) setActiveContext(context);
+      if (entity) setActiveEntity(entity);
       send((initialPrompt || "").trim() || `Tell me about ${context}`, context);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, context, initialPrompt]);
+  }, [visible, context, entity, initialPrompt]);
 
   // Persist the conversation to the list as it's created and updated.
   useEffect(() => {
@@ -180,11 +191,12 @@ export default function ConversationOverlay({ visible, onClose, context, initial
       preview,
       date: "Now",
       context: activeContext,
+      entity: activeEntity ?? undefined,
       detectedCustomer,
       messages,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, started, activeContext, detectedCustomer]);
+  }, [messages, started, activeContext, activeEntity, detectedCustomer]);
 
   useEffect(() => clearTimers, []);
 
@@ -232,9 +244,10 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     );
   };
 
-  // Widget-launched chats (activeContext set) hide the context panel until a
-  // customer is identified. Mobilization chats show it as soon as they start.
-  const showPanel = started && (activeContext ? !!detectedCustomer : true);
+  // Entity-launched chats (asset/contract/opportunity/customer) show the
+  // context panel immediately. Widget-launched chats (activeContext only) hide
+  // it until a customer is identified. Mobilization chats show it on start.
+  const showPanel = started && (activeEntity ? true : activeContext ? !!detectedCustomer : true);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -281,7 +294,11 @@ export default function ConversationOverlay({ visible, onClose, context, initial
             showPanel ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <ContextPanel customer={detectedCustomer ?? "Xcel Energy"} />
+          {activeEntity ? (
+            <EntityContextPanel entity={activeEntity} />
+          ) : (
+            <ContextPanel customer={detectedCustomer ?? "Xcel Energy"} />
+          )}
         </div>
       </div>
 

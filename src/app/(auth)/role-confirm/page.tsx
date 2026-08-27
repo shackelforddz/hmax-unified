@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedRole } from "@/store/slices/authSlice";
 import {
   RECOMMENDED_ROLE,
-  ALTERNATIVE_ROLES,
+  ALL_ROLES,
   MOCK_USER,
   type Role,
 } from "@/lib/roles";
@@ -35,7 +35,13 @@ function RoleIcon({ name, size = 22 }: { name: string; size?: number }) {
 export default function RoleConfirmPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [selected, setSelected] = useState<Role>(RECOMMENDED_ROLE);
+  const selectedRoleLabel = useAppSelector((s) => s.auth.selectedRole);
+
+  // The role carried in from the login URL becomes the "recommended" persona
+  // and is pre-selected; the remaining roles are shown as alternatives.
+  const recommended = ALL_ROLES.find((r) => r.label === selectedRoleLabel) ?? RECOMMENDED_ROLE;
+  const alternatives = ALL_ROLES.filter((r) => r.id !== recommended.id);
+  const [selected, setSelected] = useState<Role>(recommended);
 
   const handleContinue = () => {
     dispatch(setSelectedRole(selected.label));
@@ -62,22 +68,22 @@ export default function RoleConfirmPage() {
 
           {/* Recommended role card */}
           <button
-            onClick={() => setSelected(RECOMMENDED_ROLE)}
+            onClick={() => setSelected(recommended)}
             className={`w-full text-left bg-white rounded-2xl p-6 flex items-start gap-5 mb-6 transition-all ${
-              isSelected(RECOMMENDED_ROLE)
+              isSelected(recommended)
                 ? "ring-2 ring-black shadow-sm"
                 : "ring-1 ring-gray-200 hover:ring-gray-300"
             }`}
           >
             <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 mt-0.5">
-              <RoleIcon name={RECOMMENDED_ROLE.icon} size={24} />
+              <RoleIcon name={recommended.icon} size={24} />
             </div>
             <div>
               <h2 className="font-patrick-hand text-xl mb-2">
-                {RECOMMENDED_ROLE.label}
+                {recommended.label}
               </h2>
               <p className="text-sm text-gray-500 leading-relaxed">
-                {RECOMMENDED_ROLE.description}
+                {recommended.description}
               </p>
             </div>
           </button>
@@ -88,7 +94,7 @@ export default function RoleConfirmPage() {
           </p>
 
           <div className="grid grid-cols-3 gap-3">
-            {ALTERNATIVE_ROLES.map((role) => (
+            {alternatives.map((role) => (
               <button
                 key={role.id}
                 onClick={() => setSelected(role)}

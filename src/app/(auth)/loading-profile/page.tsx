@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { MOCK_USER } from "@/lib/roles";
 
 export default function LoadingProfilePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function LoadingProfilePage() {
               />
             </div>
             <p className="text-xs text-gray-400 text-center">
-              Configuring Project Manager view modules...
+              Configuring {selectedRole} view modules...
             </p>
           </div>
         </div>

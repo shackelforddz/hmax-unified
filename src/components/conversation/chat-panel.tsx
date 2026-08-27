@@ -5,6 +5,7 @@ import { Sparkles, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plu
 import { Button } from "@/components/ui/button";
 import { type Suggestions } from "@/lib/knowledge-base";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
+import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { ChartBody } from "@/components/dashboard/sales/custom-widget-view";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
@@ -250,12 +251,12 @@ interface StaffMember {
 }
 
 const STAFF_DIRECTORY: Record<string, StaffMember> = {
-  sara: { id: "sara", name: "Sara B.", role: "Field technician", skills: "HV competent", avail: "Available from 18 Aug", img: "https://i.pravatar.cc/100?img=5" },
-  dev: { id: "dev", name: "Dev K.", role: "Commissioning engineer", skills: "HVDC commissioning · IEC 62271", avail: "Available from 25 Aug", img: "https://i.pravatar.cc/100?img=12" },
-  liam: { id: "liam", name: "Liam O.", role: "Field technician", skills: "HV competent · Lifting supervisor", avail: "Committed until 24 Aug", conflict: true, img: "https://i.pravatar.cc/100?img=13" },
-  jordan: { id: "jordan", name: "Jordan P.", role: "Lead engineer", skills: "HV authorised · DGA certified", avail: "Available · no conflicts", img: "https://i.pravatar.cc/100?img=14" },
-  tom: { id: "tom", name: "Tom H.", role: "Reliability engineer", skills: "PD testing · Power factor", avail: "Available from 19 Aug", img: "https://i.pravatar.cc/100?img=15" },
-  kara: { id: "kara", name: "Kara M.", role: "HSE officer", skills: "Offshore BOSIET · Confined space", avail: "Available — no conflicts", img: "https://i.pravatar.cc/100?img=9" },
+  sara: { id: "sara", name: "Sara B.", role: "Field technician", skills: "HV competent", avail: "Available from 18 Aug", img: "/avatars/5.jpg" },
+  dev: { id: "dev", name: "Dev K.", role: "Commissioning engineer", skills: "HVDC commissioning · IEC 62271", avail: "Available from 25 Aug", img: "/avatars/12.jpg" },
+  liam: { id: "liam", name: "Liam O.", role: "Field technician", skills: "HV competent · Lifting supervisor", avail: "Committed until 24 Aug", conflict: true, img: "/avatars/13.jpg" },
+  jordan: { id: "jordan", name: "Jordan P.", role: "Lead engineer", skills: "HV authorised · DGA certified", avail: "Available · no conflicts", img: "/avatars/14.jpg" },
+  tom: { id: "tom", name: "Tom H.", role: "Reliability engineer", skills: "PD testing · Power factor", avail: "Available from 19 Aug", img: "/avatars/15.jpg" },
+  kara: { id: "kara", name: "Kara M.", role: "HSE officer", skills: "Offshore BOSIET · Confined space", avail: "Available — no conflicts", img: "/avatars/9.jpg" },
 };
 
 function StaffCard({
@@ -946,6 +947,8 @@ export interface StoredConversation {
   date: string;
   context?: string;
   detectedCustomer?: string | null;
+  /** The record this conversation is about (drives the left context pane). */
+  entity?: ContextEntity;
   messages: ChatMsg[];
   /** For seed conversations with no thread yet: the prompt to run on open. */
   seedPrompt?: string;
@@ -1013,7 +1016,7 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://i.pravatar.cc/100?img=68"
+              src="/avatars/68.jpg"
               alt="Jan V."
               className="w-8 h-8 rounded-full object-cover bg-gray-200 shrink-0 mt-0.5 grayscale"
             />

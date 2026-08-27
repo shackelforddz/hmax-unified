@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
-import { ASSET_DETAILS, type AssetDetail, type AssetReading } from "@/lib/sales-data";
+import { ASSET_DETAILS, ASSET_CONDITION, type AssetDetail, type AssetReading, type AssetCondition } from "@/lib/sales-data";
+import { Aging, ScoreCalculation, RiskMatrix, ConditionTrend, ParameterTrend, Diagnostics } from "./asset-condition";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -72,7 +73,7 @@ function ActionsMenu({ onAction }: { onAction: (label: string) => void }) {
   );
 }
 
-function DrawerBody({ d, onAction }: { d: AssetDetail; onAction: (prompt: string) => void }) {
+function DrawerBody({ d, cond, onAction }: { d: AssetDetail; cond: AssetCondition | null; onAction: (prompt: string) => void }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Context summary */}
@@ -93,6 +94,16 @@ function DrawerBody({ d, onAction }: { d: AssetDetail; onAction: (prompt: string
         )}
       </Card>
 
+      {/* ── Condition monitoring (APM) ── */}
+      {cond && (
+        <>
+          <Card><Aging d={cond.aging} /></Card>
+          <Card><RiskMatrix risk={cond.risk} /></Card>
+          <Card><ConditionTrend data={cond.conditionTrend} totals={cond.conditionTotals} /></Card>
+          <Card><ScoreCalculation factors={cond.scoreFactors} total={cond.scoreTotal} /></Card>
+        </>
+      )}
+
       {/* Condition & readings */}
       <Card>
         <SectionTitle>Condition &amp; readings</SectionTitle>
@@ -108,6 +119,16 @@ function DrawerBody({ d, onAction }: { d: AssetDetail; onAction: (prompt: string
           ))}
         </div>
       </Card>
+
+      {/* Parameter trend */}
+      {cond && (
+        <Card><ParameterTrend data={cond.parameterTrend} rows={cond.parameterRows} /></Card>
+      )}
+
+      {/* Diagnostics */}
+      {cond?.diagnostics && (
+        <Card><Diagnostics d={cond.diagnostics} /></Card>
+      )}
 
       {/* Maintenance history */}
       <Card>
@@ -171,12 +192,13 @@ interface Props {
 
 export default function AssetDrawer({ assetId, onClose }: Props) {
   const detail = assetId ? ASSET_DETAILS[assetId] : null;
+  const cond = assetId ? ASSET_CONDITION[assetId] ?? null : null;
   const open = !!detail;
   const launch = useConversationLauncher();
 
   const runAction = (prompt: string) => {
     onClose();
-    launch({ context: detail?.code, prompt });
+    launch({ context: detail?.code, prompt, entity: assetId ? { kind: "asset", id: assetId } : undefined });
   };
 
   useEffect(() => {
@@ -213,7 +235,7 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
                     <img src="/transformer.png" alt={detail.code} className="w-full h-full object-contain grayscale" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{detail.code}</h2>
+                    <h2 className="text-2xl text-gray-900">{detail.code}</h2>
                     <p className="text-sm text-gray-400 mt-0.5">{detail.type} · {detail.location}</p>
                   </div>
                 </div>
@@ -252,7 +274,7 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-5 bg-white">
-              <DrawerBody d={detail} onAction={runAction} />
+              <DrawerBody d={detail} cond={cond} onAction={runAction} />
             </div>
 
             {/* Footer */}

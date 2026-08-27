@@ -30,9 +30,9 @@ const CASE_FIELDS = [
 ];
 
 const STAFF = [
-  { name: "Sara S.", role: "Field Engineer", img: "https://i.pravatar.cc/100?img=5" },
-  { name: "Jim D.", role: "Senior Field Engineer", img: "https://i.pravatar.cc/100?img=33" },
-  { name: "Liam G.", role: "Field Engineer", img: "https://i.pravatar.cc/100?img=13" },
+  { name: "Sara S.", role: "Field Engineer", img: "/avatars/5.jpg" },
+  { name: "Jim D.", role: "Senior Field Engineer", img: "/avatars/33.jpg" },
+  { name: "Liam G.", role: "Field Engineer", img: "/avatars/13.jpg" },
 ];
 
 const PARTS = [

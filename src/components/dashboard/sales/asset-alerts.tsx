@@ -103,14 +103,14 @@ function AssetRow({ asset, onOpenDrawer }: { asset: AssetAlert; onOpenDrawer: (i
               <div className="flex flex-wrap gap-2">
                 {/* Recommended action — primary CTA */}
                 <Button
-                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.action })}
+                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.action, entity: { kind: "asset", id: asset.id } })}
                   className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                 >
                   {asset.alert.action}
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.title })}
+                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.title, entity: { kind: "asset", id: asset.id } })}
                   className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
                 >
                   Start A Conversation

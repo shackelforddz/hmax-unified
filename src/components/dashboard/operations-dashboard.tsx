@@ -9,13 +9,31 @@ import CustomWidget from "@/components/dashboard/sales/custom-widget";
 import CustomWidgetView from "@/components/dashboard/sales/custom-widget-view";
 import CustomWidgetBuilder from "@/components/dashboard/sales/custom-widget-builder";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
+import DashboardTabs from "@/components/dashboard/dashboard-tabs";
+import ContractsTable from "@/components/dashboard/tables/contracts-table";
+import WorkOrdersTable from "@/components/dashboard/tables/work-orders-table";
+
+const TABS = ["Overview", "Contracts", "Work Orders"];
 
 export default function OperationsDashboard() {
   const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
   const [building, setBuilding] = useState(false);
+  const [tab, setTab] = useState("Overview");
+
+  if (tab !== "Overview") {
+    return (
+      <div className="flex flex-col gap-4">
+        <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+        {tab === "Contracts" && <ContractsTable />}
+        {tab === "Work Orders" && <WorkOrdersTable title="Work Orders" />}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
+      <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+
       <PortfolioHealth />
 
       <ContractsAttention />

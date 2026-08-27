@@ -13,13 +13,33 @@ import CustomWidget from "@/components/dashboard/sales/custom-widget";
 import CustomWidgetView from "@/components/dashboard/sales/custom-widget-view";
 import CustomWidgetBuilder from "@/components/dashboard/sales/custom-widget-builder";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
+import DashboardTabs from "@/components/dashboard/dashboard-tabs";
+import OpportunitiesTable from "@/components/dashboard/tables/opportunities-table";
+import ContractsTable from "@/components/dashboard/tables/contracts-table";
+import AssetsTable from "@/components/dashboard/tables/assets-table";
+
+const TABS = ["Overview", "Opportunities", "Contracts", "Assets"];
 
 export default function SalesDashboard() {
   const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
   const [building, setBuilding] = useState(false);
+  const [tab, setTab] = useState("Overview");
+
+  if (tab !== "Overview") {
+    return (
+      <div className="flex flex-col gap-4">
+        <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+        {tab === "Opportunities" && <OpportunitiesTable />}
+        {tab === "Contracts" && <ContractsTable />}
+        {tab === "Assets" && <AssetsTable />}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
+      <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+
       {/* Top row: fleet map + stacked KPI cards */}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">

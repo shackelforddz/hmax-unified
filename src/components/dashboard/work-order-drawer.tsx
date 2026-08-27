@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { X, ChevronDown, CheckCircle2, Circle, CalendarClock, ClipboardList, RefreshCw, UserPlus, ExternalLink } from "lucide-react";
+import { X, ChevronDown, CheckCircle2, Circle, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
-import { OPS_CONTRACTS, OPS_CONTRACT_DETAILS, type OpsContract, type OpsContractDetail, type RiskProfile } from "@/lib/operations-data";
+import { WORK_ORDERS, WORK_ORDER_DETAILS, type WorkOrder, type WorkOrderDetail, type WoStatus, type WoPriority } from "@/lib/work-orders-data";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -13,37 +13,39 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="text-base text-gray-900 mb-4">{children}</h3>;
 }
 
-const RISK_CLS: Record<string, string> = {
-  high: "bg-gray-900 text-white",
-  med: "bg-gray-200 text-gray-700",
-  low: "border border-gray-300 text-gray-500",
-};
-const RISK_LABEL: Record<string, string> = { high: "High", med: "Med", low: "Low" };
+const STATUS_LABEL: Record<WoStatus, string> = { open: "Open", scheduled: "Scheduled", "in-progress": "In progress", blocked: "Blocked", complete: "Complete" };
 
-function RiskProfileView({ risk }: { risk: RiskProfile }) {
-  const rows: [string, keyof RiskProfile][] = [
-    ["Schedule", "schedule"],
-    ["Cost", "cost"],
-    ["Quality", "quality"],
-    ["Safety", "safety"],
-  ];
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {rows.map(([label, key]) => (
-        <div key={key} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2">
-          <span className="text-sm text-gray-600">{label}</span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full ${RISK_CLS[risk[key]]}`}>{RISK_LABEL[risk[key]]}</span>
-        </div>
-      ))}
-    </div>
-  );
+export function StatusBadge({ status }: { status: WoStatus }) {
+  const cls =
+    status === "blocked" ? "bg-gray-900 text-white"
+    : status === "in-progress" ? "bg-gray-200 text-gray-700"
+    : status === "complete" ? "border border-gray-300 text-gray-400"
+    : "border border-gray-300 text-gray-600";
+  return <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${cls}`}>{STATUS_LABEL[status]}</span>;
 }
 
+const PRIORITY_LABEL: Record<WoPriority, string> = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
+export function PriorityBadge({ priority }: { priority: WoPriority }) {
+  const cls =
+    priority === "critical" ? "bg-gray-900 text-white"
+    : priority === "high" ? "bg-gray-700 text-white"
+    : priority === "medium" ? "bg-gray-200 text-gray-700"
+    : "border border-gray-300 text-gray-400";
+  return <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${cls}`}>{PRIORITY_LABEL[priority]}</span>;
+}
+
+const PART_CLS: Record<string, string> = {
+  "in-stock": "border border-gray-300 text-gray-500",
+  ordered: "bg-gray-200 text-gray-700",
+  backordered: "bg-gray-900 text-white",
+};
+const PART_LABEL: Record<string, string> = { "in-stock": "In stock", ordered: "Ordered", backordered: "Backordered" };
+
 const ACTIONS = [
-  { label: "Adjust schedule", icon: CalendarClock },
-  { label: "Raise change order", icon: ClipboardList },
-  { label: "Rebalance crew", icon: RefreshCw },
-  { label: "Assign owner", icon: UserPlus },
+  { label: "Reschedule", icon: CalendarClock },
+  { label: "Update status", icon: ClipboardList },
+  { label: "Order parts", icon: Package },
+  { label: "Reassign", icon: UserPlus },
   { label: "Open in SAP", icon: ExternalLink },
 ];
 
@@ -77,25 +79,21 @@ function ActionsMenu({ onAction }: { onAction: (label: string) => void }) {
   );
 }
 
-const LEVEL_CLS = { Critical: "bg-gray-900 text-white", High: "bg-gray-700 text-white", Medium: "bg-gray-200 text-gray-700" };
-
-function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; onAction: (p: string) => void }) {
+function DrawerBody({ w, d, onAction }: { w: WorkOrder; d: WorkOrderDetail; onAction: (p: string) => void }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Progress */}
       <Card>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-base text-gray-900">Progress</h3>
-          <span className="text-xs text-gray-400">{c.progress}% complete · baseline {c.baseline}%</span>
+          <span className="text-xs text-gray-400">{w.progress}% complete · due {w.due}</span>
         </div>
-        <div className="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-gray-900 rounded-full" style={{ width: `${c.progress}%` }} />
-          <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: `${c.baseline}%` }} />
+        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-gray-900 rounded-full" style={{ width: `${w.progress}%` }} />
         </div>
-        <p className="text-xs text-gray-400 mt-2">{c.baseline - c.progress > 0 ? `${c.baseline - c.progress}pts behind baseline` : "On or ahead of baseline"}</p>
       </Card>
 
-      {/* Context summary + recommended actions */}
+      {/* Summary + actions */}
       <Card>
         <SectionTitle>Context summary</SectionTitle>
         <p className="text-sm text-gray-500 leading-relaxed">{d.summary}</p>
@@ -111,59 +109,47 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
         )}
       </Card>
 
-      {/* Risk profile */}
+      {/* Checklist */}
       <Card>
-        <SectionTitle>Risk profile</SectionTitle>
-        <RiskProfileView risk={c.risk} />
-      </Card>
-
-      {/* Milestones */}
-      <Card>
-        <SectionTitle>Milestones</SectionTitle>
-        <div className="flex flex-col gap-2">
-          {d.milestones.map((m) => (
-            <div key={m.label} className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 min-w-0">
-                {m.done ? <CheckCircle2 size={15} className="text-gray-900 shrink-0" /> : <Circle size={15} className="text-gray-300 shrink-0" />}
-                <span className="text-sm text-gray-700">{m.label}</span>
-              </div>
-              <div className="flex gap-3 shrink-0 text-xs text-gray-400 whitespace-nowrap">
-                <span>planned {m.planned}</span>
-                {m.actual && <span className="text-gray-600">actual {m.actual}</span>}
-              </div>
+        <SectionTitle>Task checklist</SectionTitle>
+        <div className="flex flex-col">
+          {d.checklist.map((c) => (
+            <div key={c.label} className="flex items-center gap-2.5 py-2 border-b border-gray-100 last:border-0">
+              {c.done ? <CheckCircle2 size={15} className="text-gray-900 shrink-0" /> : <Circle size={15} className="text-gray-300 shrink-0" />}
+              <span className={`text-sm ${c.done ? "text-gray-700" : "text-gray-500"}`}>{c.label}</span>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Open risks */}
-      <Card>
-        <SectionTitle>Open risks</SectionTitle>
-        <div className="flex flex-col gap-4">
-          {d.risks.map((r, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-800 mb-1">{r.title}</p>
-                <p className="text-xs text-gray-500 leading-relaxed">{r.detail}</p>
+      {/* Parts */}
+      {d.parts.length > 0 && (
+        <Card>
+          <SectionTitle>Parts</SectionTitle>
+          <div className="flex flex-col">
+            {d.parts.map((p) => (
+              <div key={p.label} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-700">{p.label} <span className="text-gray-400">×{p.qty}</span></span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${PART_CLS[p.status]}`}>{PART_LABEL[p.status]}</span>
               </div>
-              <span className={`text-[11px] px-3 py-0.5 rounded-full whitespace-nowrap ${LEVEL_CLS[r.level]}`}>{r.level}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      )}
 
-      {/* Team */}
+      {/* Timeline */}
       <Card>
-        <SectionTitle>Delivery team</SectionTitle>
-        <div className="flex flex-col gap-2">
-          {d.team.map((t) => (
-            <div key={t.role} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
-                {t.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+        <SectionTitle>Timeline</SectionTitle>
+        <div className="flex flex-col">
+          {d.timeline.map((t, i) => (
+            <div key={i} className="flex gap-3 pb-4 last:pb-0">
+              <div className="flex flex-col items-center shrink-0 pt-1.5">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                {i < d.timeline.length - 1 && <span className="w-px flex-1 bg-gray-200 mt-1" />}
               </div>
-              <div>
-                <p className="text-sm text-gray-800">{t.name}</p>
-                <p className="text-xs text-gray-400">{t.role}</p>
+              <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
+                <p className="text-sm text-gray-800">{t.label}</p>
+                <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">{t.date}</span>
               </div>
             </div>
           ))}
@@ -175,9 +161,9 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
         <SectionTitle>Related</SectionTitle>
         <div className="flex flex-col gap-3">
           {[
+            { label: "Asset", value: d.related.asset },
             { label: "Customer", value: d.related.customer },
-            { label: "Contract value", value: d.related.value },
-            { label: "Region", value: d.related.region },
+            { label: "Contract", value: d.related.contract },
           ].map((r) => (
             <div key={r.label}>
               <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
@@ -191,19 +177,19 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
 }
 
 interface Props {
-  contractId: string | null;
+  workOrderId: string | null;
   onClose: () => void;
 }
 
-export default function ContractDrawer({ contractId, onClose }: Props) {
-  const c = contractId ? OPS_CONTRACTS.find((x) => x.id === contractId) ?? null : null;
-  const d = contractId ? OPS_CONTRACT_DETAILS[contractId] ?? null : null;
-  const open = !!(c && d);
+export default function WorkOrderDrawer({ workOrderId, onClose }: Props) {
+  const w = workOrderId ? WORK_ORDERS.find((x) => x.id === workOrderId) ?? null : null;
+  const d = workOrderId ? WORK_ORDER_DETAILS[workOrderId] ?? null : null;
+  const open = !!w;
   const launch = useConversationLauncher();
 
   const runAction = (prompt: string) => {
     onClose();
-    launch({ context: c?.customer, prompt, entity: contractId ? { kind: "contract", id: contractId } : undefined });
+    launch({ context: w?.code, prompt });
   };
 
   useEffect(() => {
@@ -217,13 +203,13 @@ export default function ContractDrawer({ contractId, onClose }: Props) {
     <>
       <div onClick={onClose} className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} />
       <div className={`fixed top-0 right-0 bottom-0 z-50 w-[520px] max-w-[92vw] bg-white shadow-2xl flex flex-col transition-transform duration-500 ease-in-out font-patrick-hand ${open ? "translate-x-0" : "translate-x-full"}`}>
-        {c && d && (
+        {w && (
           <>
             <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-100">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl text-gray-900">{c.name}</h2>
-                  <p className="text-sm text-gray-400 mt-0.5">{c.customer} · {c.value}</p>
+                  <h2 className="text-2xl text-gray-900">{w.code}</h2>
+                  <p className="text-sm text-gray-400 mt-0.5">{w.title}</p>
                 </div>
                 <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer">
                   <X size={18} />
@@ -231,10 +217,12 @@ export default function ContractDrawer({ contractId, onClose }: Props) {
               </div>
               <div className="flex flex-wrap gap-x-8 gap-y-3 mt-4">
                 {[
-                  { label: "Status", value: c.status === "critical" ? "Critical" : "At risk" },
-                  { label: "Owner", value: c.owner },
-                  { label: "Progress", value: `${c.progress}%` },
-                  { label: "Value", value: c.value },
+                  { label: "Status", value: STATUS_LABEL[w.status] },
+                  { label: "Priority", value: PRIORITY_LABEL[w.priority] },
+                  { label: "Type", value: w.type },
+                  { label: "Assignee", value: w.assignee },
+                  { label: "Asset", value: w.asset },
+                  { label: "Due", value: w.due },
                 ].map((s) => (
                   <div key={s.label}>
                     <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
@@ -245,14 +233,18 @@ export default function ContractDrawer({ contractId, onClose }: Props) {
             </div>
 
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-5 bg-white">
-              <DrawerBody c={c} d={d} onAction={runAction} />
+              {d ? (
+                <DrawerBody w={w} d={d} onAction={runAction} />
+              ) : (
+                <p className="text-sm text-gray-400">No further detail recorded for this work order yet.</p>
+              )}
             </div>
 
             <div className="shrink-0 flex gap-3 px-6 py-4 border-t border-gray-100">
-              <Button variant="outline" onClick={() => runAction(`Tell me about the ${c.name} contract`)} className="flex-1 rounded-full h-auto py-2.5 text-sm text-gray-700 cursor-pointer">
+              <Button variant="outline" onClick={() => runAction(`Tell me about work order ${w.code}`)} className="flex-1 rounded-full h-auto py-2.5 text-sm text-gray-700 cursor-pointer">
                 Create A Conversation
               </Button>
-              <ActionsMenu onAction={(label) => runAction(`${label} for ${c.name}`)} />
+              <ActionsMenu onAction={(label) => runAction(`${label} for work order ${w.code}`)} />
             </div>
           </>
         )}

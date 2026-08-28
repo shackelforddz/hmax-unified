@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
   return (
     <ConversationLauncherContext.Provider value={openConversation}>
-    <div className="h-screen bg-[#F3F4F6] font-patrick-hand relative overflow-hidden">
+    <div className="h-screen bg-[#F5F5F5] font-patrick-hand relative overflow-hidden">
 
       {/* Right conversations panel — anchored below nav, never scrolls under it */}
       <div className="absolute top-[80px] right-4 bottom-4 w-[400px]">
@@ -87,7 +87,7 @@ export default function DashboardPage() {
         }} />
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(243,244,246,0.97) 0%, rgba(243,244,246,0.55) 55%, rgba(243,244,246,0) 100%)",
+          background: "linear-gradient(to bottom, rgba(245,245,245,0.97) 0%, rgba(245,245,245,0.55) 55%, rgba(245,245,245,0) 100%)",
         }} />
       </div>
 

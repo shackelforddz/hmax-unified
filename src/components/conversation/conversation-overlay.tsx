@@ -262,7 +262,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
         visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       style={{
-        background: started ? "rgba(243,244,246,0.7)" : "rgba(243,244,246,0.8)",
+        background: started ? "rgba(245,245,245,0.7)" : "rgba(245,245,245,0.8)",
         backdropFilter: started ? "blur(16px)" : "blur(16px)",
         WebkitBackdropFilter: started ? "blur(16px)" : "blur(16px)",
         transition: "background 500ms ease, backdrop-filter 500ms ease, opacity 300ms ease",

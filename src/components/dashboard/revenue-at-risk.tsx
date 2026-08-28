@@ -37,12 +37,12 @@ export default function RevenueAtRisk() {
             type="category"
             dataKey="label"
             width={130}
-            tick={{ fontSize: 12, fill: "#4B5563" }}
+            tick={{ fontSize: 12, fill: "#525252" }}
             tickLine={false}
             axisLine={false}
           />
-          <Bar dataKey="amount" fill="#111827" radius={[4, 4, 4, 4]} barSize={12}>
-            <LabelList dataKey="display" position="right" fontSize={12} fill="#111827" />
+          <Bar dataKey="amount" fill="#171717" radius={[4, 4, 4, 4]} barSize={12}>
+            <LabelList dataKey="display" position="right" fontSize={12} fill="#171717" />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

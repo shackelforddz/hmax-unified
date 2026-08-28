@@ -509,6 +509,7 @@ export interface SlaBadge {
   verified: boolean;
 }
 export interface SlaRow {
+  contractId: string;
   account: string;
   value: string;
   dueIn: string;
@@ -516,14 +517,176 @@ export interface SlaRow {
   risk: SlaBadge;
 }
 export const SLA_PIPELINE: SlaRow[] = [
-  { account: "ComEd", value: "$4.8M", dueIn: "22d", serviceHealth: { label: "Issues open", verified: false }, risk: { label: "High", verified: false } },
-  { account: "NV Energy", value: "$2.1M", dueIn: "31d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
-  { account: "AEP Ohio", value: "$6.2M", dueIn: "38d", serviceHealth: { label: "Asset declining", verified: false }, risk: { label: "High", verified: false } },
-  { account: "Pacific Gas", value: "$3.9M", dueIn: "44d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
-  { account: "Duke Energy", value: "$5.4M", dueIn: "58d", serviceHealth: { label: "Watch", verified: false }, risk: { label: "Medium", verified: false } },
-  { account: "ComEd", value: "$4.8M", dueIn: "22d", serviceHealth: { label: "Issues open", verified: false }, risk: { label: "High", verified: false } },
-  { account: "NV Energy", value: "$2.1M", dueIn: "31d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
+  { contractId: "sla-comed", account: "ComEd", value: "$4.8M", dueIn: "22d", serviceHealth: { label: "Issues open", verified: false }, risk: { label: "High", verified: false } },
+  { contractId: "sla-nv", account: "NV Energy", value: "$2.1M", dueIn: "31d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
+  { contractId: "sla-aep", account: "AEP Ohio", value: "$6.2M", dueIn: "38d", serviceHealth: { label: "Asset declining", verified: false }, risk: { label: "High", verified: false } },
+  { contractId: "sla-pacific", account: "Pacific Gas", value: "$3.9M", dueIn: "44d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
+  { contractId: "sla-duke", account: "Duke Energy", value: "$5.4M", dueIn: "58d", serviceHealth: { label: "Watch", verified: false }, risk: { label: "Medium", verified: false } },
+  { contractId: "sla-comed", account: "ComEd", value: "$4.8M", dueIn: "22d", serviceHealth: { label: "Issues open", verified: false }, risk: { label: "High", verified: false } },
+  { contractId: "sla-nv", account: "NV Energy", value: "$2.1M", dueIn: "31d", serviceHealth: { label: "Verified", verified: true }, risk: { label: "Verified", verified: true } },
 ];
+
+/* ── SLA contract detail (per account) ───────────────────────────── */
+export interface SlaContractDetail {
+  account: string;
+  agreement: string;
+  value: string;
+  term: string;
+  renewsIn: string;
+  slaTarget: string;
+  slaActual: string;
+  owner: string;
+  region: string;
+  summary: string;
+  serviceHealth: SlaBadge;
+  risk: SlaBadge;
+  metrics: { label: string; value: string }[];
+  obligations: { label: string; met: boolean }[];
+  related: { customer: string; assets: string; contract: string };
+}
+
+export const SLA_CONTRACTS: Record<string, SlaContractDetail> = {
+  "sla-comed": {
+    account: "ComEd",
+    agreement: "ComEd — 5-year HVDC Service Agreement",
+    value: "$4.8M",
+    term: "5 years · yr 4 of 5",
+    renewsIn: "22 days",
+    slaTarget: "98.0%",
+    slaActual: "96.4%",
+    owner: "Marcus Lee",
+    region: "Midwest · US",
+    summary:
+      "ComEd's HVDC service agreement is up for renewal in 22 days with two open asset issues (AST-001, AST-002) pulling service performance 1.6pp under the SLA target. Resolving the thermal and bearing findings before the renewal review is the priority to protect the $4.8M renewal.",
+    serviceHealth: { label: "Issues open", verified: false },
+    risk: { label: "High", verified: false },
+    metrics: [
+      { label: "SLA performance", value: "96.4% vs 98.0% target" },
+      { label: "Response time", value: "4.2h avg (target 4h)" },
+      { label: "Open service issues", value: "2" },
+      { label: "Penalty exposure", value: "$120k" },
+    ],
+    obligations: [
+      { label: "99% uptime commitment", met: false },
+      { label: "Quarterly condition reporting", met: true },
+      { label: "24/7 emergency response", met: true },
+      { label: "Annual DGA sampling", met: true },
+    ],
+    related: { customer: "ComEd", assets: "AST-001, AST-002", contract: "ComEd — 5-year Service Agreement" },
+  },
+  "sla-nv": {
+    account: "NV Energy",
+    agreement: "NV Energy — Service Agreement",
+    value: "$2.1M",
+    term: "3 years · yr 2 of 3",
+    renewsIn: "31 days",
+    slaTarget: "98.0%",
+    slaActual: "99.1%",
+    owner: "Marcus Lee",
+    region: "West · US",
+    summary:
+      "NV Energy is a healthy account tracking above its SLA target with all obligations verified. The renewal in 31 days is low-risk; the play is to confirm terms early and explore a scope uplift for the aging Zone B fleet.",
+    serviceHealth: { label: "Verified", verified: true },
+    risk: { label: "Verified", verified: true },
+    metrics: [
+      { label: "SLA performance", value: "99.1% vs 98.0% target" },
+      { label: "Response time", value: "3.1h avg (target 4h)" },
+      { label: "Open service issues", value: "0" },
+      { label: "Penalty exposure", value: "$0" },
+    ],
+    obligations: [
+      { label: "98% uptime commitment", met: true },
+      { label: "Quarterly condition reporting", met: true },
+      { label: "24/7 emergency response", met: true },
+      { label: "Annual DGA sampling", met: true },
+    ],
+    related: { customer: "NV Energy", assets: "AST-003", contract: "NV Energy — Service Agreement" },
+  },
+  "sla-aep": {
+    account: "AEP Ohio",
+    agreement: "AEP Ohio — Converter Service Agreement",
+    value: "$6.2M",
+    term: "5 years · yr 3 of 5",
+    renewsIn: "38 days",
+    slaTarget: "98.0%",
+    slaActual: "97.2%",
+    owner: "Priya Nair",
+    region: "Midwest · US",
+    summary:
+      "AEP Ohio is the largest SLA in the pipeline at $6.2M, but a declining tap-changer on AST-004 is trending toward an SLA breach. A proactive intervention now de-risks the renewal and creates an upsell for a condition-monitoring add-on.",
+    serviceHealth: { label: "Asset declining", verified: false },
+    risk: { label: "High", verified: false },
+    metrics: [
+      { label: "SLA performance", value: "97.2% vs 98.0% target" },
+      { label: "Response time", value: "3.8h avg (target 4h)" },
+      { label: "Open service issues", value: "1" },
+      { label: "Penalty exposure", value: "$180k" },
+    ],
+    obligations: [
+      { label: "98% uptime commitment", met: false },
+      { label: "Quarterly condition reporting", met: true },
+      { label: "24/7 emergency response", met: true },
+      { label: "Tap-changer maintenance program", met: false },
+    ],
+    related: { customer: "AEP Ohio", assets: "AST-004", contract: "AEP Ohio — Service Agreement" },
+  },
+  "sla-pacific": {
+    account: "Pacific Gas",
+    agreement: "Pacific Gas — Protection & Relay SLA",
+    value: "$3.9M",
+    term: "4 years · yr 1 of 4",
+    renewsIn: "44 days",
+    slaTarget: "98.0%",
+    slaActual: "98.6%",
+    owner: "Lena Fischer",
+    region: "West · US",
+    summary:
+      "Pacific Gas is performing to plan with all obligations verified. With the renewal 44 days out, the focus is a smooth confirmation and positioning the relay-upgrade expansion opportunity already in the pipeline.",
+    serviceHealth: { label: "Verified", verified: true },
+    risk: { label: "Verified", verified: true },
+    metrics: [
+      { label: "SLA performance", value: "98.6% vs 98.0% target" },
+      { label: "Response time", value: "3.4h avg (target 4h)" },
+      { label: "Open service issues", value: "0" },
+      { label: "Penalty exposure", value: "$0" },
+    ],
+    obligations: [
+      { label: "98% uptime commitment", met: true },
+      { label: "Quarterly condition reporting", met: true },
+      { label: "24/7 emergency response", met: true },
+      { label: "Relay calibration program", met: true },
+    ],
+    related: { customer: "Pacific Gas", assets: "AST-021", contract: "Protection relay upgrade" },
+  },
+  "sla-duke": {
+    account: "Duke Energy",
+    agreement: "Duke Energy — Fleet Reliability SLA",
+    value: "$5.4M",
+    term: "5 years · yr 2 of 5",
+    renewsIn: "58 days",
+    slaTarget: "98.0%",
+    slaActual: "97.9%",
+    owner: "Priya Nair",
+    region: "Southeast · US",
+    summary:
+      "Duke Energy sits just under its SLA target and is on the watch list. The renewal is 58 days out with room to recover; a fleet-wide reliability review would both close the SLA gap and support the reliability-program opportunity in discovery.",
+    serviceHealth: { label: "Watch", verified: false },
+    risk: { label: "Medium", verified: false },
+    metrics: [
+      { label: "SLA performance", value: "97.9% vs 98.0% target" },
+      { label: "Response time", value: "4.0h avg (target 4h)" },
+      { label: "Open service issues", value: "1" },
+      { label: "Penalty exposure", value: "$60k" },
+    ],
+    obligations: [
+      { label: "98% uptime commitment", met: false },
+      { label: "Quarterly condition reporting", met: true },
+      { label: "24/7 emergency response", met: true },
+      { label: "Annual thermal scan program", met: true },
+    ],
+    related: { customer: "Duke Energy", assets: "AST-033", contract: "Duke Energy — Service Agreement" },
+  },
+};
 
 export const SLA_RENEWALS: { value: string; points: { t: number; v: number }[] } = {
   value: "12",

@@ -33,8 +33,8 @@ export default function FleetHealth() {
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={F.points} margin={{ top: 8, right: 4, bottom: 4, left: 4 }}>
           <YAxis domain={[55, 92]} hide />
-          <Line type="monotone" dataKey="avg" stroke="#111827" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="std" stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+          <Line type="monotone" dataKey="avg" stroke="#171717" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="std" stroke="#A3A3A3" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
         </LineChart>
       </ResponsiveContainer>
 
@@ -44,7 +44,7 @@ export default function FleetHealth() {
           <span className="w-3 h-0.5 bg-gray-900 inline-block" /> Fleet Avg
         </span>
         <span className="flex items-center gap-1.5 text-xs text-gray-500">
-          <span className="w-3 h-0.5 bg-gray-400 inline-block" style={{ backgroundImage: "repeating-linear-gradient(90deg,#9CA3AF 0 3px,transparent 3px 6px)" }} /> Fleet Standard
+          <span className="w-3 h-0.5 bg-gray-400 inline-block" style={{ backgroundImage: "repeating-linear-gradient(90deg,#A3A3A3 0 3px,transparent 3px 6px)" }} /> Fleet Standard
         </span>
       </div>
     </div>

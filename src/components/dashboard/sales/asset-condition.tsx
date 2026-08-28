@@ -25,12 +25,12 @@ import type {
 } from "@/lib/sales-data";
 
 /* Greyscale palette */
-const INK = "#111827";
-const G600 = "#374151";
-const G500 = "#6B7280";
-const G400 = "#9CA3AF";
-const G300 = "#D1D5DB";
-const G200 = "#E5E7EB";
+const INK = "#171717";
+const G600 = "#404040";
+const G500 = "#737373";
+const G400 = "#A3A3A3";
+const G300 = "#D4D4D4";
+const G200 = "#E5E5E5";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="text-base text-gray-900 mb-4">{children}</h3>;

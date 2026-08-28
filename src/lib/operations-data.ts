@@ -6,9 +6,17 @@ export const PORTFOLIO_HEALTH = {
   onTrack: 8,
   atRisk: 4,
   critical: 2,
-  contractValue: "£18.4m",
-  slaPerformance: "91%",
   resourceCoverage: "87%",
+  // Headline KPIs
+  executedMargin: "18.6%",
+  asSoldMargin: "19.4%",
+  marginDelta: "-0.8pp",
+  revenue: "£18.4m",
+  revenueForecast: "£18.9m",
+  revenueDelta: "-£0.5m",
+  outstandingPayments: "£2.3m",
+  outstandingNote: "4 invoices overdue",
+  resourceNote: "3 roles to fill",
 };
 
 /* Contracts that need attention */

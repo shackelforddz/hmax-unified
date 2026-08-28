@@ -159,14 +159,17 @@ export default function AttentionList() {
   const [categoryFilter, setCategoryFilter] = useState<AttentionCategory | "all">("all");
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
-  const filtered = ATTENTION_ITEMS.filter((item) => {
+  // Only customers needing attention — healthy accounts are excluded.
+  const attentionItems = ATTENTION_ITEMS.filter((item) => item.status !== "healthy");
+
+  const filtered = attentionItems.filter((item) => {
     const matchStatus = statusFilter === "all" || item.status === statusFilter;
     const matchCategory = categoryFilter === "all" || item.category === categoryFilter;
     return matchStatus && matchCategory;
   });
 
   const countFor = (s: AttentionStatus | "all", c: AttentionCategory | "all") =>
-    ATTENTION_ITEMS.filter(
+    attentionItems.filter(
       (i) => (s === "all" || i.status === s) && (c === "all" || i.category === c)
     ).length;
 
@@ -177,7 +180,7 @@ export default function AttentionList() {
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">Customers assigned to you</h3>
+            <h3 className="text-base text-gray-900">Customers that need your attention</h3>
             <p className="text-sm text-gray-400 mt-0.5">{filtered.length} need your attention</p>
           </div>
           <WidgetChat title="Assigned to you" />

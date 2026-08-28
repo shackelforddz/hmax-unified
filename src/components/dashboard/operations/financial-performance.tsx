@@ -39,19 +39,19 @@ export default function FinancialPerformance() {
           <AreaChart data={F.trend} margin={{ top: 10, right: 14, bottom: 0, left: 14 }}>
             <defs>
               <linearGradient id="finArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#111827" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="#111827" stopOpacity={0} />
+                <stop offset="0%" stopColor="#171717" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#171717" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="label" interval={0} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="label" interval={0} tick={{ fontSize: 10, fill: "#A3A3A3" }} tickLine={false} axisLine={false} />
             <YAxis domain={[18, 20]} hide />
             <ReferenceLine
               y={F.planMargin}
-              stroke="#D1D5DB"
+              stroke="#D4D4D4"
               strokeDasharray="3 3"
-              label={{ value: `Plan ${F.planMargin}%`, position: "insideTopRight", fontSize: 9, fill: "#9CA3AF" }}
+              label={{ value: `Plan ${F.planMargin}%`, position: "insideTopRight", fontSize: 9, fill: "#A3A3A3" }}
             />
-            <Area type="monotone" dataKey="value" stroke="#111827" strokeWidth={2} fill="url(#finArea)" dot={{ r: 2, fill: "#fff", stroke: "#111827", strokeWidth: 1.5 }} />
+            <Area type="monotone" dataKey="value" stroke="#171717" strokeWidth={2} fill="url(#finArea)" dot={{ r: 2, fill: "#fff", stroke: "#171717", strokeWidth: 1.5 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

@@ -6,9 +6,9 @@ import { customerSummary } from "@/lib/knowledge-base";
 const TABS = ["Summary", "Documents", "History"];
 
 const SEGMENTS = [
-  { pct: 0.44, color: "#E5E7EB" }, // Healthy
-  { pct: 0.31, color: "#9CA3AF" }, // Average
-  { pct: 0.25, color: "#111827" }, // Poor
+  { pct: 0.44, color: "#E5E5E5" }, // Healthy
+  { pct: 0.31, color: "#A3A3A3" }, // Average
+  { pct: 0.25, color: "#171717" }, // Poor
 ];
 
 function DonutChart() {
@@ -39,10 +39,10 @@ function DonutChart() {
         offset += dashLen;
         return el;
       })}
-      <text x={cx} y={cy - 8} textAnchor="middle" fontSize="26" fontFamily="inherit" fill="#111827" fontWeight="600">
+      <text x={cx} y={cy - 8} textAnchor="middle" fontSize="26" fontFamily="inherit" fill="#171717" fontWeight="600">
         1125
       </text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fontFamily="inherit" fill="#9CA3AF">
+      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fontFamily="inherit" fill="#A3A3A3">
         Assets
       </text>
     </svg>

@@ -8,7 +8,7 @@ import {
 import WidgetChat from "@/components/dashboard/widget-chat";
 import { type CustomWidgetConfig, formatValue } from "@/lib/custom-widget";
 
-const GRAYS = ["#111827", "#6B7280", "#9CA3AF", "#D1D5DB", "#E5E7EB"];
+const GRAYS = ["#171717", "#737373", "#A3A3A3", "#D4D4D4", "#E5E5E5"];
 
 export function ChartBody({ config }: { config: CustomWidgetConfig }) {
   const { type, series, unit } = config;
@@ -28,7 +28,7 @@ export function ChartBody({ config }: { config: CustomWidgetConfig }) {
         <ResponsiveContainer width="100%" height={90}>
           <LineChart data={series} margin={{ top: 6, right: 4, bottom: 0, left: 4 }}>
             <YAxis hide domain={["dataMin", "dataMax"]} />
-            <Line type="monotone" dataKey="value" stroke="#111827" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="value" stroke="#171717" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -66,9 +66,9 @@ export function ChartBody({ config }: { config: CustomWidgetConfig }) {
       <ResponsiveContainer width="100%" height={Math.max(120, series.length * 34)}>
         <BarChart layout="vertical" data={series} margin={{ top: 4, right: 40, bottom: 0, left: 8 }} barCategoryGap={10}>
           <XAxis type="number" domain={[0, max]} hide />
-          <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 12, fill: "#4B5563" }} tickLine={false} axisLine={false} />
-          <Bar dataKey="value" fill="#111827" radius={[4, 4, 4, 4]} barSize={12}>
-            <LabelList dataKey="value" position="right" fontSize={12} fill="#111827" formatter={(v) => formatValue(Number(v ?? 0), unit)} />
+          <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 12, fill: "#525252" }} tickLine={false} axisLine={false} />
+          <Bar dataKey="value" fill="#171717" radius={[4, 4, 4, 4]} barSize={12}>
+            <LabelList dataKey="value" position="right" fontSize={12} fill="#171717" formatter={(v) => formatValue(Number(v ?? 0), unit)} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
@@ -81,13 +81,13 @@ export function ChartBody({ config }: { config: CustomWidgetConfig }) {
       <AreaChart data={series} margin={{ top: 12, right: 14, bottom: 0, left: 14 }}>
         <defs>
           <linearGradient id={`cwArea-${config.id}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#111827" stopOpacity={0.15} />
-            <stop offset="100%" stopColor="#111827" stopOpacity={0} />
+            <stop offset="0%" stopColor="#171717" stopOpacity={0.15} />
+            <stop offset="100%" stopColor="#171717" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <XAxis dataKey="label" interval={0} tick={{ fontSize: 10, fill: "#9CA3AF" }} tickLine={false} axisLine={false} />
+        <XAxis dataKey="label" interval={0} tick={{ fontSize: 10, fill: "#A3A3A3" }} tickLine={false} axisLine={false} />
         <YAxis hide domain={["dataMin", "dataMax"]} />
-        <Area type="monotone" dataKey="value" stroke="#111827" strokeWidth={2} fill={`url(#cwArea-${config.id})`} dot={{ r: 2, fill: "#fff", stroke: "#111827", strokeWidth: 1.5 }} />
+        <Area type="monotone" dataKey="value" stroke="#171717" strokeWidth={2} fill={`url(#cwArea-${config.id})`} dot={{ r: 2, fill: "#fff", stroke: "#171717", strokeWidth: 1.5 }} />
       </AreaChart>
     </ResponsiveContainer>
   );

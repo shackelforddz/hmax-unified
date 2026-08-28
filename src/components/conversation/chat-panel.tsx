@@ -528,16 +528,16 @@ function StepParts() {
 type EventType = "inspection" | "parts" | "field" | "report";
 
 const EVENT_TYPES: { type: EventType; label: string; color: string }[] = [
-  { type: "inspection", label: "Inspection", color: "#111827" },
-  { type: "parts", label: "Parts delivery", color: "#6B7280" },
-  { type: "field", label: "Field work", color: "#9CA3AF" },
-  { type: "report", label: "First report", color: "#D1D5DB" },
+  { type: "inspection", label: "Inspection", color: "#171717" },
+  { type: "parts", label: "Parts delivery", color: "#737373" },
+  { type: "field", label: "Field work", color: "#A3A3A3" },
+  { type: "report", label: "First report", color: "#D4D4D4" },
 ];
 const COLOR_OF: Record<EventType, string> = {
-  inspection: "#111827",
-  parts: "#6B7280",
-  field: "#9CA3AF",
-  report: "#D1D5DB",
+  inspection: "#171717",
+  parts: "#737373",
+  field: "#A3A3A3",
+  report: "#D4D4D4",
 };
 
 interface CalEvent {

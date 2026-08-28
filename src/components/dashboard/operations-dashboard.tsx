@@ -12,6 +12,7 @@ import { type CustomWidgetConfig } from "@/lib/custom-widget";
 import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import ContractsTable from "@/components/dashboard/tables/contracts-table";
 import WorkOrdersTable from "@/components/dashboard/tables/work-orders-table";
+import PeopleWidget from "@/components/dashboard/people-widget";
 
 const TABS = ["Overview", "Contracts", "Work Orders"];
 
@@ -42,6 +43,8 @@ export default function OperationsDashboard() {
         <FinancialPerformance />
         <ResourceCapacity />
       </div>
+
+      <PeopleWidget />
 
       <div className="grid grid-cols-2 gap-4">
         {widgets.map((w) => (

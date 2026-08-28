@@ -18,7 +18,7 @@ export default function SlaRenewals() {
       <ResponsiveContainer width="100%" height={130}>
         <LineChart data={S.points} margin={{ top: 8, right: 6, bottom: 4, left: 6 }}>
           <YAxis domain={[20, 70]} hide />
-          <Line type="monotone" dataKey="v" stroke="#111827" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="v" stroke="#171717" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

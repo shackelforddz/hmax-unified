@@ -11,8 +11,8 @@ function VendorTick({ x, y, payload }: { x?: number; y?: number; payload?: { val
   const bar = V.bars.find((b) => b.name === payload?.value);
   return (
     <text x={x} y={y} textAnchor="end" fontFamily="inherit">
-      <tspan x={x} dy="-2" fontSize="12" fill="#374151">{payload?.value}</tspan>
-      <tspan x={x} dy="14" fontSize="10" fill="#9CA3AF">
+      <tspan x={x} dy="-2" fontSize="12" fill="#404040">{payload?.value}</tspan>
+      <tspan x={x} dy="14" fontSize="10" fill="#A3A3A3">
         {bar ? `${bar.projects} project${bar.projects > 1 ? "s" : ""}` : ""}
       </tspan>
     </text>
@@ -48,8 +48,8 @@ export default function VendorConcentration() {
             tickLine={false}
             axisLine={false}
           />
-          <Bar dataKey="amount" fill="#111827" radius={[4, 4, 4, 4]} barSize={12}>
-            <LabelList dataKey="display" position="right" fontSize={12} fill="#111827" />
+          <Bar dataKey="amount" fill="#171717" radius={[4, 4, 4, 4]} barSize={12}>
+            <LabelList dataKey="display" position="right" fontSize={12} fill="#171717" />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

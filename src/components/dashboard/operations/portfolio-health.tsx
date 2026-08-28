@@ -1,3 +1,4 @@
+import { ArrowDown } from "lucide-react";
 import WidgetChat from "@/components/dashboard/widget-chat";
 import { PORTFOLIO_HEALTH as P } from "@/lib/operations-data";
 
@@ -5,6 +6,13 @@ const SEGMENTS = [
   { label: "On track", value: P.onTrack, color: "bg-gray-300" },
   { label: "At risk", value: P.atRisk, color: "bg-gray-500" },
   { label: "Critical", value: P.critical, color: "bg-gray-900" },
+];
+
+const KPIS = [
+  { label: "Executed vs as-sold margin", value: P.executedMargin, delta: P.marginDelta, note: `vs ${P.asSoldMargin} as-sold` },
+  { label: "Revenue vs forecast", value: P.revenue, delta: P.revenueDelta, note: `vs ${P.revenueForecast} forecast` },
+  { label: "Outstanding payments", value: P.outstandingPayments, delta: null, note: P.outstandingNote },
+  { label: "Resource coverage", value: P.resourceCoverage, delta: null, note: P.resourceNote },
 ];
 
 export default function PortfolioHealth() {
@@ -17,15 +25,15 @@ export default function PortfolioHealth() {
 
       {/* Top KPIs */}
       <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "Active contracts", value: String(P.activeContracts) },
-          { label: "Contract value", value: P.contractValue },
-          { label: "SLA performance", value: P.slaPerformance },
-          { label: "Resource coverage", value: P.resourceCoverage },
-        ].map((k) => (
+        {KPIS.map((k) => (
           <div key={k.label}>
             <p className="text-sm text-gray-400 leading-snug">{k.label}</p>
             <p className="text-3xl text-gray-900 leading-tight mt-1">{k.value}</p>
+            <p className="flex items-center gap-1 text-xs text-gray-500 mt-1.5">
+              {k.delta && <ArrowDown size={11} strokeWidth={2} className="shrink-0" />}
+              {k.delta && <span className="text-gray-700">{k.delta}</span>}
+              <span className="text-gray-400 truncate">{k.note}</span>
+            </p>
           </div>
         ))}
       </div>

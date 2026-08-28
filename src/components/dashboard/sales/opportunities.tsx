@@ -241,7 +241,7 @@ const STAGE_OPTIONS: { label: string; value: OppStage | "all" }[] = [
 export default function Opportunities() {
   const [priority, setPriority] = useState<OppStatus | "all">("all");
   const [stage, setStage] = useState<OppStage | "all">("all");
-  const [pipeline, setPipeline] = useState<Opportunity[]>(OPPORTUNITIES);
+  const [pipeline, setPipeline] = useState<Opportunity[]>(OPPORTUNITIES.slice(0, 3));
   const [proposed, setProposed] = useState<ProposedOpportunity[]>(PROPOSED_OPPORTUNITIES);
   const [drawer, setDrawer] = useState<{ opp: Opportunity; detail: OpportunityDetail } | null>(null);
   const launch = useConversationLauncher();
@@ -271,7 +271,7 @@ export default function Opportunities() {
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">Opportunities</h3>
+            <h3 className="text-base text-gray-900">Opportunities that need your attention</h3>
             <p className="text-sm text-gray-400 mt-0.5">{filtered.length} in your pipeline</p>
           </div>
           <WidgetChat title="Opportunities" />

@@ -24,8 +24,8 @@ function StatusBadge({ status }: { status: AssetStatus }) {
   return <span className="border border-gray-300 text-gray-500 text-xs px-3 py-1 rounded-full whitespace-nowrap">At Risk</span>;
 }
 
-function AssetRow({ asset, onOpenDrawer }: { asset: AssetAlert; onOpenDrawer: (id: string) => void }) {
-  const [expanded, setExpanded] = useState(asset.id === "ast-001");
+function AssetRow({ asset, defaultExpanded, onOpenDrawer }: { asset: AssetAlert; defaultExpanded: boolean; onOpenDrawer: (id: string) => void }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const launch = useConversationLauncher();
   const canExpand = !!asset.alert;
 
@@ -144,19 +144,34 @@ const CATEGORY_OPTIONS: { label: string; value: AssetCategory | "all" }[] = [
   { label: "Missing info", value: "missing-info" },
 ];
 
-export default function AssetAlerts() {
+interface AssetAlertsProps {
+  alerts?: AssetAlert[];
+  categoryOptions?: { label: string; value: AssetCategory | "all" }[];
+  title?: string;
+  /** Trailing noun in the subtitle, e.g. "need your attention". */
+  unit?: string;
+}
+
+export default function AssetAlerts({
+  alerts = ASSET_ALERTS,
+  categoryOptions = CATEGORY_OPTIONS,
+  title = "Asset Alerts",
+  unit = "need your attention",
+}: AssetAlertsProps = {}) {
   const [priority, setPriority] = useState<AssetStatus | "all">("all");
   const [category, setCategory] = useState<AssetCategory | "all">("all");
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
-  const filtered = ASSET_ALERTS.filter((a) => {
+  const filtered = alerts.filter((a) => {
     const matchPriority = priority === "all" || a.status === priority;
     const matchCategory = category === "all" || a.category === category;
     return matchPriority && matchCategory;
   });
 
   const countFor = (s: AssetStatus | "all", c: AssetCategory | "all") =>
-    ASSET_ALERTS.filter((a) => (s === "all" || a.status === s) && (c === "all" || a.category === c)).length;
+    alerts.filter((a) => (s === "all" || a.status === s) && (c === "all" || a.category === c)).length;
+
+  const firstExpandableId = filtered.find((a) => a.alert)?.id;
 
   return (
     <div className="bg-white rounded-xl overflow-hidden">
@@ -165,10 +180,10 @@ export default function AssetAlerts() {
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">Asset Alerts</h3>
-            <p className="text-sm text-gray-400 mt-0.5">{filtered.length} need your attention</p>
+            <h3 className="text-base text-gray-900">{title}</h3>
+            <p className="text-sm text-gray-400 mt-0.5">{filtered.length} {unit}</p>
           </div>
-          <WidgetChat title="Asset Alerts" />
+          <WidgetChat title={title} />
         </div>
 
         {/* Filters */}
@@ -187,7 +202,7 @@ export default function AssetAlerts() {
           ))}
           <span className="text-gray-200 text-xs mx-1">|</span>
           <span className="text-xs text-gray-400">Category</span>
-          {CATEGORY_OPTIONS.map((opt) => (
+          {categoryOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setCategory(opt.value)}
@@ -204,7 +219,7 @@ export default function AssetAlerts() {
       {/* Cards */}
       <div className="p-4 flex flex-col gap-3">
         {filtered.length > 0 ? (
-          filtered.map((a) => <AssetRow key={a.id} asset={a} onOpenDrawer={setDrawerId} />)
+          filtered.map((a) => <AssetRow key={a.id} asset={a} defaultExpanded={a.id === firstExpandableId} onOpenDrawer={setDrawerId} />)
         ) : (
           <p className="text-sm text-gray-400 text-center py-6">No assets match the selected filters.</p>
         )}

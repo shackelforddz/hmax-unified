@@ -35,6 +35,13 @@ export const ALTERNATIVE_ROLES: Role[] = [
       "System health monitoring, incident tracking, SLA compliance, and predictive maintenance alerts.",
     icon: "Cog",
   },
+  {
+    id: "diagnostics",
+    label: "Diagnostics",
+    description:
+      "Field-report interpretation, fault-signature detection, and coordinating field engineers for asset inspections.",
+    icon: "Stethoscope",
+  },
 ];
 
 export const ALL_ROLES: Role[] = [RECOMMENDED_ROLE, ...ALTERNATIVE_ROLES];
@@ -49,6 +56,7 @@ export const ROLE_SLUGS: Record<string, string> = {
   ops: "Operations",
   "reliability-engineer": "Reliability Engineer",
   reliability: "Reliability Engineer",
+  diagnostics: "Diagnostics",
 };
 
 export function roleFromSlug(slug: string): Role | undefined {
@@ -58,7 +66,7 @@ export function roleFromSlug(slug: string): Role | undefined {
 
 // Roles with a dedicated dashboard view — the ones worth demoing.
 export const DEMO_ROLES: Role[] = ALL_ROLES.filter((r) =>
-  ["project-manager", "sales", "operations"].includes(r.id)
+  ["project-manager", "sales", "operations", "reliability-engineer", "diagnostics"].includes(r.id)
 );
 
 export const MOCK_USER = {

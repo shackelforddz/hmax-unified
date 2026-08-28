@@ -114,15 +114,15 @@ function PersonRow({ person, defaultExpanded, onOpenTask }: { person: Person; de
 
 type Filter = "all" | "at-risk";
 
-export default function PeopleWidget() {
+export default function PeopleWidget({ people = PEOPLE, title = "People" }: { people?: Person[]; title?: string }) {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
 
   const isAtRisk = (p: Person) => riskReasons(p, tasksFor(p)).length > 0;
-  const atRiskCount = PEOPLE.filter(isAtRisk).length;
-  const avgAllocation = Math.round(PEOPLE.reduce((s, p) => s + p.allocation, 0) / PEOPLE.length);
+  const atRiskCount = people.filter(isAtRisk).length;
+  const avgAllocation = Math.round(people.reduce((s, p) => s + p.allocation, 0) / people.length);
 
-  const visible = filter === "at-risk" ? PEOPLE.filter(isAtRisk) : PEOPLE;
+  const visible = filter === "at-risk" ? people.filter(isAtRisk) : people;
   // Surface at-risk people first, then by allocation (busiest first).
   const sorted = [...visible].sort((a, b) => {
     const ra = isAtRisk(a) ? 1 : 0;
@@ -133,7 +133,7 @@ export default function PeopleWidget() {
   const firstAtRisk = sorted.find(isAtRisk)?.id;
 
   const FILTERS: { label: string; value: Filter; count: number }[] = [
-    { label: "All", value: "all", count: PEOPLE.length },
+    { label: "All", value: "all", count: people.length },
     { label: "At risk", value: "at-risk", count: atRiskCount },
   ];
 
@@ -143,13 +143,13 @@ export default function PeopleWidget() {
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">People</h3>
+            <h3 className="text-base text-gray-900">{title}</h3>
             <p className="text-sm text-gray-400 mt-0.5">
-              {PEOPLE.length} on your team · {avgAllocation}% avg allocation
+              {people.length} on your team · {avgAllocation}% avg allocation
               {atRiskCount > 0 && <span> · {atRiskCount} at risk</span>}
             </p>
           </div>
-          <WidgetChat title="People" />
+          <WidgetChat title={title} />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs text-gray-400">Priority</span>

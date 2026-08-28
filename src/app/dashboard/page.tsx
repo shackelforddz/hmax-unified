@@ -6,25 +6,22 @@ import ConversationsPanel from "@/components/dashboard/conversations-panel";
 import PmDashboard from "@/components/dashboard/pm-dashboard";
 import SalesDashboard from "@/components/dashboard/sales-dashboard";
 import OperationsDashboard from "@/components/dashboard/operations-dashboard";
+import ReliabilityDashboard from "@/components/dashboard/reliability-dashboard";
+import DiagnosticsDashboard from "@/components/dashboard/diagnostics-dashboard";
 import ConversationOverlay from "@/components/conversation/conversation-overlay";
 import { type StoredConversation } from "@/components/conversation/chat-panel";
 import { ConversationLauncherContext, type LaunchArgs } from "@/components/dashboard/conversation-launcher";
-import { CONVERSATIONS } from "@/lib/dashboard-data";
 import { useAppSelector } from "@/store/hooks";
-
-// Seed the panel with the demo conversations (no thread yet — they run on open).
-const SEED_CONVERSATIONS: StoredConversation[] = CONVERSATIONS.map((c) => ({
-  ...c,
-  messages: [],
-  seedPrompt: c.title,
-}));
 
 export default function DashboardPage() {
   const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; entity?: LaunchArgs["entity"]; restore?: StoredConversation | null }>({ visible: false });
-  const [conversations, setConversations] = useState<StoredConversation[]>(SEED_CONVERSATIONS);
+  // First-time login — the conversation history starts empty.
+  const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const isSales = selectedRole === "Sales";
   const isOps = selectedRole === "Operations";
+  const isReliability = selectedRole === "Reliability Engineer";
+  const isDiagnostics = selectedRole === "Diagnostics";
 
   const openConversation = useCallback((args?: LaunchArgs) => {
     setConv({ visible: true, context: args?.context, prompt: args?.prompt, entity: args?.entity, restore: null });
@@ -61,7 +58,7 @@ export default function DashboardPage() {
       {/* right = 16px page pad + 400px panel + 16px gap = 432px */}
       <div className="no-scrollbar absolute top-0 left-0 bottom-0 overflow-y-auto" style={{ right: 432 }}>
         <div className="pl-4 pb-4 pt-[80px] flex flex-col gap-4">
-          {isSales ? <SalesDashboard /> : isOps ? <OperationsDashboard /> : <PmDashboard />}
+          {isSales ? <SalesDashboard /> : isOps ? <OperationsDashboard /> : isReliability ? <ReliabilityDashboard /> : isDiagnostics ? <DiagnosticsDashboard /> : <PmDashboard />}
         </div>
       </div>
 

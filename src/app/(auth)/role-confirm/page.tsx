@@ -7,6 +7,7 @@ import {
   Banknote,
   RefreshCcw,
   Cog,
+  Stethoscope,
 } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Banknote,
   RefreshCcw,
   Cog,
+  Stethoscope,
 };
 
 function RoleIcon({ name, size = 22 }: { name: string; size?: number }) {

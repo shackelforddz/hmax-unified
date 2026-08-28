@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { MessageCircle, Bell, Search, Briefcase, Banknote, Cog, LogOut, ChevronDown, Check } from "lucide-react";
+import { MessageCircle, Bell, Search, Briefcase, Banknote, Cog, Activity, Stethoscope, LogOut, ChevronDown, Check } from "lucide-react";
 import { MOCK_USER } from "@/lib/roles";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedRole } from "@/store/slices/authSlice";
@@ -12,6 +12,8 @@ const PERSONAS = [
   { label: "Project Manager", icon: Briefcase },
   { label: "Sales", icon: Banknote },
   { label: "Operations", icon: Cog },
+  { label: "Reliability Engineer", icon: Activity },
+  { label: "Diagnostics", icon: Stethoscope },
 ] as const;
 
 export default function TopNav() {

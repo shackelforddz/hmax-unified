@@ -26,7 +26,10 @@ export const FLEET_HEALTH: { past: number; today: number; change: number; points
 };
 
 export type AssetStatus = "critical" | "at-risk";
-export type AssetCategory = "asset-health" | "risk-building" | "offer-readiness" | "missing-info";
+export type AssetCategory =
+  | "asset-health" | "risk-building" | "offer-readiness" | "missing-info"
+  // Diagnostics — asset report review categories
+  | "dga" | "electrical" | "physical";
 export interface AssetAlert {
   id: string;
   code: string;

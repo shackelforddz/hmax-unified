@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink } from "lucide-react";
+import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink, FileText, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { ASSET_DETAILS, ASSET_CONDITION, type AssetDetail, type AssetReading, type AssetCondition } from "@/lib/sales-data";
+import { WORK_ORDERS } from "@/lib/work-orders-data";
+import { REPORTS_AWAITING } from "@/lib/field-reports-data";
+import { ASSET_SERVICE_HISTORY } from "@/lib/asset-history-data";
+import { ASSET_NAMEPLATE, type Nameplate } from "@/lib/asset-nameplate-data";
 import { Aging, ScoreCalculation, RiskMatrix, ConditionTrend, ParameterTrend, Diagnostics } from "./asset-condition";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -73,7 +77,7 @@ function ActionsMenu({ onAction }: { onAction: (label: string) => void }) {
   );
 }
 
-function DrawerBody({ d, cond, onAction }: { d: AssetDetail; cond: AssetCondition | null; onAction: (prompt: string) => void }) {
+function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; cond: AssetCondition | null; nameplate?: Nameplate; onAction: (prompt: string) => void }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Context summary */}
@@ -93,6 +97,32 @@ function DrawerBody({ d, cond, onAction }: { d: AssetDetail; cond: AssetConditio
           </div>
         )}
       </Card>
+
+      {/* Nameplate — factory specifications */}
+      {nameplate && (
+        <Card>
+          <SectionTitle>Nameplate</SectionTitle>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            {[
+              { label: "Manufacturer", value: nameplate.manufacturer },
+              { label: "Manufactured", value: nameplate.manufactureYear },
+              { label: "Serial no.", value: nameplate.serial },
+              { label: "Rated power", value: nameplate.ratedPower },
+              { label: "Voltage (HV / LV)", value: nameplate.voltageRatings },
+              { label: "Frequency", value: nameplate.frequency },
+              { label: "Cooling class", value: nameplate.coolingClass },
+              { label: "Temp rise", value: nameplate.tempRise },
+              { label: "Impedance", value: nameplate.impedance },
+              { label: "Insulation", value: nameplate.insulationClass },
+            ].map((r) => (
+              <div key={r.label}>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+                <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* ── Condition monitoring (APM) ── */}
       {cond && (
@@ -185,6 +215,103 @@ function DrawerBody({ d, cond, onAction }: { d: AssetDetail; cond: AssetConditio
   );
 }
 
+/* ── Documents tab ───────────────────────────────────────────────── */
+function DocRow({ icon: Icon, title, meta }: { icon: React.ElementType; title: string; meta: string }) {
+  return (
+    <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <div className="w-8 h-8 rounded-md bg-white border border-gray-100 flex items-center justify-center shrink-0">
+        <Icon size={15} strokeWidth={1.5} className="text-gray-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-gray-800 truncate">{title}</p>
+        <p className="text-xs text-gray-400 truncate">{meta}</p>
+      </div>
+    </div>
+  );
+}
+
+function DocGroup({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-base text-gray-900">{title}</h3>
+        <span className="text-xs text-gray-400">{count}</span>
+      </div>
+      {count > 0 ? <div className="flex flex-col">{children}</div> : <p className="text-sm text-gray-400">Nothing on file.</p>}
+    </Card>
+  );
+}
+
+function DocumentsTab({ d, id }: { d: AssetDetail; id: string }) {
+  const reports = REPORTS_AWAITING.filter((r) => r.assetId === id);
+  const workOrders = WORK_ORDERS.filter((w) => w.asset === d.code);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <DocGroup title="Reports" count={reports.length}>
+        {reports.map((r) => (
+          <DocRow key={r.id} icon={FileText} title={`${r.code} · ${r.type}`} meta={`${r.engineer} · submitted ${r.submitted}`} />
+        ))}
+      </DocGroup>
+
+      <DocGroup title="Work orders" count={workOrders.length}>
+        {workOrders.map((w) => (
+          <DocRow key={w.id} icon={ClipboardList} title={`${w.code} · ${w.title}`} meta={`${w.type} · ${w.status.replace("-", " ")} · due ${w.due}`} />
+        ))}
+      </DocGroup>
+
+      <DocGroup title="Contracts" count={1}>
+        <DocRow icon={ScrollText} title={d.related.contract} meta={d.related.customer} />
+      </DocGroup>
+    </div>
+  );
+}
+
+/* ── Service history tab ─────────────────────────────────────────── */
+const EVENT_CLS: Record<string, string> = {
+  Repair: "bg-gray-900 text-white",
+  Test: "bg-gray-200 text-gray-700",
+  Inspection: "border border-gray-300 text-gray-500",
+  Service: "border border-gray-300 text-gray-500",
+};
+
+function ServiceHistoryTab({ id }: { id: string }) {
+  const events = ASSET_SERVICE_HISTORY[id] ?? [];
+  return (
+    <Card>
+      <SectionTitle>Service history</SectionTitle>
+      {events.length > 0 ? (
+        <div className="flex flex-col">
+          {events.map((e, i) => (
+            <div key={i} className="flex gap-3 pb-5 last:pb-0">
+              <div className="flex flex-col items-center shrink-0 pt-1.5">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                {i < events.length - 1 && <span className="w-px flex-1 bg-gray-200 mt-1" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-gray-800 leading-snug">{e.action}</p>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${EVENT_CLS[e.type]}`}>{e.type}</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">{e.by} · {e.role} · {e.date}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-400">No service history recorded.</p>
+      )}
+    </Card>
+  );
+}
+
+const DRAWER_TABS = [
+  { label: "Summary", value: "summary" },
+  { label: "Documents", value: "documents" },
+  { label: "Service history", value: "history" },
+] as const;
+type DrawerTab = (typeof DRAWER_TABS)[number]["value"];
+
 interface Props {
   assetId: string | null;
   onClose: () => void;
@@ -195,6 +322,12 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
   const cond = assetId ? ASSET_CONDITION[assetId] ?? null : null;
   const open = !!detail;
   const launch = useConversationLauncher();
+  const [tab, setTab] = useState<DrawerTab>("summary");
+
+  // Reset to the summary tab whenever a different asset is opened.
+  useEffect(() => {
+    if (assetId) setTab("summary");
+  }, [assetId]);
 
   const runAction = (prompt: string) => {
     onClose();
@@ -272,9 +405,26 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
               </div>
             </div>
 
+            {/* Tabs */}
+            <div className="shrink-0 flex px-6 border-b border-gray-100">
+              {DRAWER_TABS.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setTab(t.value)}
+                  className={`py-3 mr-6 text-sm border-b-2 -mb-px transition-colors cursor-pointer ${
+                    tab === t.value ? "border-gray-900 text-gray-900" : "border-transparent text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
             {/* Body */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-5 bg-white">
-              <DrawerBody d={detail} cond={cond} onAction={runAction} />
+              {tab === "summary" && <DrawerBody d={detail} cond={cond} nameplate={assetId ? ASSET_NAMEPLATE[assetId] : undefined} onAction={runAction} />}
+              {tab === "documents" && assetId && <DocumentsTab d={detail} id={assetId} />}
+              {tab === "history" && assetId && <ServiceHistoryTab id={assetId} />}
             </div>
 
             {/* Footer */}

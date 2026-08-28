@@ -9,17 +9,20 @@ export interface Person {
   avatar: string;
   /** Work order ids this person is assigned to (see work-orders-data). */
   taskIds: string[];
+  /** On-site field engineer (does inspections). */
+  field?: boolean;
 }
 
 export const PEOPLE: Person[] = [
   {
     id: "p-daniel",
     name: "Daniel Brooks",
-    role: "Senior Project Engineer",
+    role: "Senior Field Engineer",
     location: "Chicago, IL",
     allocation: 92,
     avatar: "/avatars/12.jpg",
     taskIds: ["wo-2041", "wo-2019"],
+    field: true,
   },
   {
     id: "p-sarah",
@@ -38,6 +41,7 @@ export const PEOPLE: Person[] = [
     allocation: 74,
     avatar: "/avatars/9.jpg",
     taskIds: ["wo-2035", "wo-2024"],
+    field: true,
   },
   {
     id: "p-marcus",
@@ -47,6 +51,7 @@ export const PEOPLE: Person[] = [
     allocation: 61,
     avatar: "/avatars/14.jpg",
     taskIds: ["wo-2031", "wo-2012"],
+    field: true,
   },
   {
     id: "p-priya",
@@ -56,5 +61,9 @@ export const PEOPLE: Person[] = [
     allocation: 68,
     avatar: "/avatars/15.jpg",
     taskIds: ["wo-2019"],
+    field: true,
   },
 ];
+
+// On-site field engineers — used by the Diagnostics view.
+export const FIELD_ENGINEERS: Person[] = PEOPLE.filter((p) => p.field);

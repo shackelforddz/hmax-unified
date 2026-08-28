@@ -37,7 +37,7 @@ export default function OpportunityStats() {
       {/* Pipeline value — wide tile with a trend sparkline */}
       <div className="col-span-2 bg-white rounded-xl p-5 flex flex-col">
         <div className="flex items-start justify-between mb-1">
-          <p className="text-sm text-gray-400">Pipeline value</p>
+          <p className="text-base text-gray-900">Pipeline value</p>
           <WidgetChat title="Pipeline value" />
         </div>
         <div className="flex items-end justify-between gap-4 flex-1">
@@ -67,7 +67,7 @@ export default function OpportunityStats() {
       {/* Weighted forecast */}
       <div className="bg-white rounded-xl p-5 flex flex-col">
         <div className="flex items-start justify-between mb-1">
-          <p className="text-sm text-gray-400">Weighted forecast</p>
+          <p className="text-base text-gray-900">Weighted forecast</p>
           <WidgetChat title="Weighted forecast" />
         </div>
         <div className="flex-1 flex flex-col justify-end">
@@ -82,7 +82,7 @@ export default function OpportunityStats() {
       {/* Contracts at offer stage or beyond */}
       <div className="bg-white rounded-xl p-5 flex flex-col">
         <div className="flex items-start justify-between mb-1">
-          <p className="text-sm text-gray-400">At offer stage or beyond</p>
+          <p className="text-base text-gray-900">At offer stage or beyond</p>
           <WidgetChat title="Contracts at offer stage" />
         </div>
         <div className="flex-1 flex flex-col justify-end">

@@ -1,0 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import KpiCard from "@/components/dashboard/kpi-card";
+import FleetMap from "@/components/dashboard/sales/fleet-map";
+import FleetHealth from "@/components/dashboard/sales/fleet-health";
+import AssetAlerts from "@/components/dashboard/sales/asset-alerts";
+import ReportTurnaround from "@/components/dashboard/diagnostics/report-turnaround";
+import PeopleWidget from "@/components/dashboard/people-widget";
+import { FIELD_ENGINEERS } from "@/lib/people-data";
+import CustomWidget from "@/components/dashboard/sales/custom-widget";
+import CustomWidgetView from "@/components/dashboard/sales/custom-widget-view";
+import CustomWidgetBuilder from "@/components/dashboard/sales/custom-widget-builder";
+import { type CustomWidgetConfig } from "@/lib/custom-widget";
+import DashboardTabs from "@/components/dashboard/dashboard-tabs";
+import AssetsTable from "@/components/dashboard/tables/assets-table";
+import { REPORTS_AWAITING, DIAGNOSTICS_STATS, ASSET_REPORT_ALERTS, REPORT_CATEGORY_OPTIONS } from "@/lib/field-reports-data";
+
+const TABS = ["Overview", "Assets"];
+
+const faultSignatureAssets = new Set(
+  REPORTS_AWAITING.filter((r) => r.faultSignature).map((r) => r.assetId)
+).size;
+
+const KPIS = [
+  { id: "reports-awaiting", label: "Reports awaiting interpretation", value: String(REPORTS_AWAITING.length), trend: "2 vs last week", sparkline: "contracts-at-risk" as const },
+  { id: "outstanding-reports", label: "Outstanding reports", value: String(DIAGNOSTICS_STATS.outstandingReports), trend: "3 vs last week", sparkline: "active-contracts" as const },
+  { id: "fault-signature", label: "Assets with a fault signature", value: String(faultSignatureAssets), trend: "1 vs last month", sparkline: "portfolio-margin" as const },
+];
+const kpi = (id: string) => KPIS.find((k) => k.id === id)!;
+
+export default function DiagnosticsDashboard() {
+  const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
+  const [building, setBuilding] = useState(false);
+  const [tab, setTab] = useState("Overview");
+
+  if (tab !== "Overview") {
+    return (
+      <div className="flex flex-col gap-4">
+        <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+        {tab === "Assets" && <AssetsTable />}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+
+      {/* Bento box — report content on top, then asset health, then people */}
+      <div className="grid grid-cols-6 gap-4 items-stretch [&>*]:min-w-0 [&>.tile>*]:h-full">
+        {/* ── Report content ── */}
+        <div className="tile col-span-2"><KpiCard {...kpi("reports-awaiting")} /></div>
+        <div className="tile col-span-2"><KpiCard {...kpi("outstanding-reports")} /></div>
+        <div className="tile col-span-2"><KpiCard {...kpi("fault-signature")} /></div>
+
+        <div className="tile col-span-6"><ReportTurnaround /></div>
+
+        <div className="col-span-6">
+          <AssetAlerts
+            alerts={ASSET_REPORT_ALERTS}
+            categoryOptions={REPORT_CATEGORY_OPTIONS}
+            title="Asset reports to review"
+            unit="reports to review"
+          />
+        </div>
+
+        {/* ── Asset health ── */}
+        <div className="tile col-span-4"><FleetMap /></div>
+        <div className="col-span-2 flex flex-col gap-4">
+          <FleetHealth />
+          <KpiCard id="critical-assets" label="Critical assets" value="2" trend="2 vs last month" sparkline="contracts-at-risk" />
+          <KpiCard id="at-risk" label="At risk (score <60)" value="3" trend="2 vs last month" sparkline="on-time-delivery" />
+        </div>
+
+        {/* ── Field engineers ── */}
+        <div className="col-span-6">
+          <PeopleWidget people={FIELD_ENGINEERS} title="Field engineers" />
+        </div>
+
+        {/* Custom widgets */}
+        {widgets.map((w) => (
+          <div key={w.id} className="tile col-span-2">
+            <CustomWidgetView config={w} />
+          </div>
+        ))}
+        <div className="tile col-span-2">
+          <CustomWidget onClick={() => setBuilding(true)} />
+        </div>
+      </div>
+
+      {building && (
+        <CustomWidgetBuilder
+          onAdd={(config) => {
+            setWidgets((ws) => [...ws, config]);
+            setBuilding(false);
+          }}
+          onClose={() => setBuilding(false)}
+        />
+      )}
+    </div>
+  );
+}

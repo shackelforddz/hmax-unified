@@ -8,7 +8,7 @@ export default function KpiCard({ label, value, trend, sparkline }: KpiData) {
     <div className="bg-white rounded-xl p-4 flex flex-col gap-3">
       {/* Label row */}
       <div className="flex items-start justify-between">
-        <span className="text-sm text-gray-500 leading-snug">{label}</span>
+        <span className="text-base text-gray-900 leading-snug">{label}</span>
         <WidgetChat title={label} />
       </div>
 

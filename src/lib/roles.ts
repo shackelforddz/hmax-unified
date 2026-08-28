@@ -69,6 +69,102 @@ export const DEMO_ROLES: Role[] = ALL_ROLES.filter((r) =>
   ["project-manager", "sales", "operations", "reliability-engineer", "diagnostics"].includes(r.id)
 );
 
+/* ── Role-confirm intro content ──────────────────────────────────── */
+export const PRODUCT_INTRO =
+  "HMAX Unified brings your assets, contracts and teams into one place — with a conversational assistant that helps you deep dive and get your work done.";
+
+export interface HowToStep {
+  icon: string;   // lucide icon name
+  title: string;
+  detail: string;
+}
+
+// A short "how to use the product" primer shown on the final login step.
+export const HOW_TO_USE: HowToStep[] = [
+  {
+    icon: "LayoutDashboard",
+    title: "Start from your dashboard",
+    detail:
+      "Your workspace opens on the widgets tuned to your role — the KPIs, alerts and lists that matter to you first.",
+  },
+  {
+    icon: "MessageSquareText",
+    title: "Deep dive with the assistant",
+    detail:
+      "Ask the assistant to dig into a contract, asset or alert. It pulls the data together, explains what's going on and answers your follow-ups.",
+  },
+  {
+    icon: "Sparkles",
+    title: "Get your tasks done",
+    detail:
+      "Hand off the work — reschedule delivery, draft a review, chase an invoice. The assistant carries the full context and drives it to a next step.",
+  },
+  {
+    icon: "PanelRightOpen",
+    title: "Drill into the detail when you need it",
+    detail:
+      "Open any asset, contract, customer or opportunity for the full record — summary, documents and history — right alongside the conversation.",
+  },
+];
+
+export interface RoleIntro {
+  detection: string;    // how the role was identified
+  highlights: string[]; // what data the workspace surfaces
+}
+
+export const ROLE_INTRO: Record<string, RoleIntro> = {
+  "Project Manager": {
+    detection:
+      "Matched from your Hitachi Identity profile in the PMO Division, your project-delivery access groups, and recent activity across contract and milestone tools.",
+    highlights: [
+      "Customers and contracts needing your attention",
+      "Delivery trend, revenue-at-risk and upcoming milestones",
+      "Vendor concentration and program-level risk",
+      "Your team's allocation and assigned work orders",
+    ],
+  },
+  Sales: {
+    detection:
+      "Matched from your commercial access groups, account ownership in the pipeline tools, and recent CRM activity.",
+    highlights: [
+      "Opportunity pipeline, weighted forecast and stage breakdown",
+      "SLA renewals and service-agreement health",
+      "Fleet map and asset alerts by account",
+      "Repeat-repair assets and account summaries",
+    ],
+  },
+  Operations: {
+    detection:
+      "Matched from your service-delivery access groups and recent activity across scheduling and work-order systems.",
+    highlights: [
+      "Portfolio health — margin, revenue and outstanding payments",
+      "Contracts needing attention with change-order, HSE and quality alerts",
+      "Financial performance and resource capacity",
+      "Your team's allocation and work orders",
+    ],
+  },
+  "Reliability Engineer": {
+    detection:
+      "Matched from your engineering access groups, asset-management activity, and reliability tooling.",
+    highlights: [
+      "Fleet health and asset alerts by review type",
+      "Contracts to review — scope feasibility handed over from sales",
+      "Handover-vs-site constraints and engineering bulletins",
+      "Nameplate, design drawings and service history per asset",
+    ],
+  },
+  Diagnostics: {
+    detection:
+      "Matched from your diagnostics access groups and recent field-report interpretation activity.",
+    highlights: [
+      "Reports awaiting interpretation and field-report turnaround",
+      "Asset reports to review — DGA, electrical and physical",
+      "Assets showing a fault signature",
+      "Your field engineers and their assignments",
+    ],
+  },
+};
+
 export const MOCK_USER = {
   name: "James",
   fullName: "James Jenkins",

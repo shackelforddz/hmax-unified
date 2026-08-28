@@ -14,57 +14,65 @@ import { KPI_DATA } from "@/lib/dashboard-data";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
 import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import WorkOrdersTable from "@/components/dashboard/tables/work-orders-table";
+import ContractsTable from "@/components/dashboard/tables/contracts-table";
+import ContractStatus from "@/components/dashboard/operations/contract-status";
 import PeopleWidget from "@/components/dashboard/people-widget";
 
-const TABS = ["Overview", "Work Orders"];
+const TABS = ["Overview", "Contracts", "Work Orders"];
 
 export default function PmDashboard() {
   const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
   const [building, setBuilding] = useState(false);
   const [tab, setTab] = useState("Overview");
 
+  if (tab !== "Overview") {
+    return (
+      <div className="flex flex-col gap-4">
+        <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
+        {tab === "Contracts" && <ContractsTable />}
+        {tab === "Work Orders" && <WorkOrdersTable />}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
 
-      {tab === "Work Orders" ? (
-        <WorkOrdersTable />
-      ) : (
-        <>
-          <div className="grid grid-cols-4 gap-4">
-            {KPI_DATA.map((kpi) => (
-              <KpiCard key={kpi.id} {...kpi} />
-            ))}
-          </div>
+      <div className="grid grid-cols-4 gap-4">
+        {KPI_DATA.map((kpi) => (
+          <KpiCard key={kpi.id} {...kpi} />
+        ))}
+      </div>
 
-          <AttentionList />
+      <ContractStatus />
 
-          <PeopleWidget />
+      <AttentionList />
 
-          {/* PM data visuals */}
-          <div className="grid grid-cols-2 gap-4">
-            <DeliveryTrend />
-            <RevenueAtRisk />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <UpcomingMilestones />
-            <VendorConcentration />
-            {widgets.map((w) => (
-              <CustomWidgetView key={w.id} config={w} />
-            ))}
-            <CustomWidget onClick={() => setBuilding(true)} />
-          </div>
+      <PeopleWidget />
 
-          {building && (
-            <CustomWidgetBuilder
-              onAdd={(config) => {
-                setWidgets((ws) => [...ws, config]);
-                setBuilding(false);
-              }}
-              onClose={() => setBuilding(false)}
-            />
-          )}
-        </>
+      {/* PM data visuals */}
+      <div className="grid grid-cols-2 gap-4">
+        <DeliveryTrend />
+        <RevenueAtRisk />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <UpcomingMilestones />
+        <VendorConcentration />
+        {widgets.map((w) => (
+          <CustomWidgetView key={w.id} config={w} />
+        ))}
+        <CustomWidget onClick={() => setBuilding(true)} />
+      </div>
+
+      {building && (
+        <CustomWidgetBuilder
+          onAdd={(config) => {
+            setWidgets((ws) => [...ws, config]);
+            setBuilding(false);
+          }}
+          onClose={() => setBuilding(false)}
+        />
       )}
     </div>
   );

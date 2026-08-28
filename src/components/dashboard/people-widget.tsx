@@ -89,6 +89,31 @@ function PersonRow({ person, defaultExpanded, onOpenTask }: { person: Person; de
         <>
           <hr className="border-gray-200" />
           <div className="px-5 py-3">
+            {/* Competencies */}
+            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">Competencies</p>
+            <div className="flex flex-wrap gap-1.5 mb-3.5">
+              {person.competencies.map((c) => (
+                <span key={c} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{c}</span>
+              ))}
+            </div>
+
+            {/* Certifications */}
+            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">Certifications</p>
+            <div className="flex flex-wrap gap-1.5 mb-3.5">
+              {person.certifications.map((cert) => {
+                const soon = cert.expires <= "2026-11"; // expiring within ~90 days
+                return (
+                  <span
+                    key={cert.name}
+                    className={`text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${soon ? "bg-gray-900 text-white" : "border border-gray-200 text-gray-600"}`}
+                  >
+                    {cert.name}
+                    <span className={soon ? "text-gray-300" : "text-gray-400"}>· exp {cert.expires}</span>
+                  </span>
+                );
+              })}
+            </div>
+
             <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Assigned tasks</p>
             {tasks.map((t) => (
               <div
@@ -138,7 +163,7 @@ export default function PeopleWidget({ people = PEOPLE, title = "People" }: { pe
   ];
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <WorkOrderDrawer workOrderId={drawerId} onClose={() => setDrawerId(null)} />
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">

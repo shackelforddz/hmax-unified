@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { OPS_CONTRACTS, type OpsContract, type OpsStatus, type RiskProfile } from "@/lib/operations-data";
+import { OPS_CONTRACTS, type OpsContract, type OpsStatus, type RiskProfile, type ContractAlert, type AlertCategory } from "@/lib/operations-data";
 import WidgetChat from "@/components/dashboard/widget-chat";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
@@ -13,6 +13,25 @@ function StatusBadge({ status }: { status: OpsStatus }) {
     return <span className="bg-black text-white text-xs px-3 py-1 rounded-full whitespace-nowrap">Critical</span>;
   }
   return <span className="border border-gray-400 text-gray-700 text-xs px-3 py-1 rounded-full whitespace-nowrap">At Risk</span>;
+}
+
+/* ── Alert categories ────────────────────────────────────────────── */
+const CAT_LABEL: Record<AlertCategory, string> = {
+  delivery: "Delivery",
+  "change-order": "Change order",
+  hse: "HSE",
+  quality: "Quality",
+};
+const CAT_CLS: Record<AlertCategory, string> = {
+  delivery: "border border-gray-300 text-gray-500",
+  "change-order": "bg-gray-200 text-gray-700",
+  quality: "bg-gray-500 text-white",
+  hse: "bg-gray-900 text-white",
+};
+const CAT_ORDER: AlertCategory[] = ["delivery", "change-order", "hse", "quality"];
+
+function CategoryBadge({ category }: { category: AlertCategory }) {
+  return <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${CAT_CLS[category]}`}>{CAT_LABEL[category]}</span>;
 }
 
 const RISK_CLS: Record<string, string> = {
@@ -41,10 +60,15 @@ function RiskChips({ risk }: { risk: RiskProfile }) {
   );
 }
 
-function ContractRow({ contract, onOpenDrawer }: { contract: OpsContract; onOpenDrawer: (id: string) => void }) {
+function ContractRow({ contract, category, onOpenDrawer }: { contract: OpsContract; category: AlertCategory | "all"; onOpenDrawer: (id: string) => void }) {
   const [expanded, setExpanded] = useState(contract.id === "ct-sherco");
   const launch = useConversationLauncher();
   const behind = contract.baseline - contract.progress;
+
+  // Category counts for the collapsed summary.
+  const counts = CAT_ORDER.map((c) => [c, contract.alerts.filter((a) => a.category === c).length] as const).filter(([, n]) => n > 0);
+  // Alerts shown when expanded (respect the active category filter).
+  const shown = category === "all" ? contract.alerts : contract.alerts.filter((a) => a.category === category);
 
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden">
@@ -72,6 +96,7 @@ function ContractRow({ contract, onOpenDrawer }: { contract: OpsContract; onOpen
 
         {/* Progress bar (baseline vs actual) */}
         <div className="flex items-center gap-3 mb-2.5">
+          <span className="text-xs text-gray-400 shrink-0 w-20">Progress</span>
           <div className="relative flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-gray-900 rounded-full" style={{ width: `${contract.progress}%` }} />
             <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: `${contract.baseline}%` }} />
@@ -82,24 +107,41 @@ function ContractRow({ contract, onOpenDrawer }: { contract: OpsContract; onOpen
         </div>
 
         {/* Risk profile */}
-        <RiskChips risk={contract.risk} />
+        <div className="flex items-center gap-3 mb-2.5">
+          <span className="text-xs text-gray-400 shrink-0 w-20">Risk profile</span>
+          <RiskChips risk={contract.risk} />
+        </div>
+
+        {/* Alerts summary by category */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-400 shrink-0 w-20">Alerts</span>
+          <span className="text-xs text-gray-500">{contract.alerts.length} to review</span>
+          {counts.map(([cat, n]) => (
+            <span key={cat} className="inline-flex items-center gap-1 text-xs text-gray-500">
+              <span className="text-gray-300">·</span>{CAT_LABEL[cat]} {n}
+            </span>
+          ))}
+        </div>
       </button>
 
-      {expanded && contract.flags.length > 0 && (
+      {expanded && shown.length > 0 && (
         <>
           <hr className="border-gray-200" />
           <div className="px-6 py-5 flex flex-col gap-6">
-            {contract.flags.map((flag, i) => (
+            {shown.map((alert: ContractAlert, i) => (
               <div key={i} className="flex gap-4">
                 <div className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-sm text-gray-500 shrink-0 font-mono leading-none">!</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 mb-2 leading-snug">{flag.title}</p>
-                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <p className="text-sm text-gray-900 leading-snug">{alert.title}</p>
+                    <CategoryBadge category={alert.category} />
+                  </div>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{alert.detail}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => launch({ context: contract.customer, prompt: flag.action, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
-                      {flag.action}
+                    <Button onClick={() => launch({ context: contract.customer, prompt: alert.action, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+                      {alert.action}
                     </Button>
-                    <Button variant="outline" onClick={() => launch({ context: contract.customer, prompt: flag.title, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
+                    <Button variant="outline" onClick={() => launch({ context: contract.customer, prompt: alert.title, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
                       Start A Conversation
                     </Button>
                     <Button variant="outline" onClick={() => onOpenDrawer(contract.id)} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
@@ -122,6 +164,14 @@ const PRIORITY_OPTIONS: { label: string; value: OpsStatus | "all" }[] = [
   { label: "At Risk", value: "at-risk" },
 ];
 
+const CATEGORY_OPTIONS: { label: string; value: AlertCategory | "all" }[] = [
+  { label: "All", value: "all" },
+  { label: "Delivery", value: "delivery" },
+  { label: "Change orders", value: "change-order" },
+  { label: "HSE", value: "hse" },
+  { label: "Quality", value: "quality" },
+];
+
 type SortBy = "priority" | "progress" | "risk";
 const SORT_OPTIONS: { label: string; value: SortBy }[] = [
   { label: "Priority", value: "priority" },
@@ -138,20 +188,27 @@ function riskScore(c: OpsContract): number {
 
 export default function ContractsAttention() {
   const [priority, setPriority] = useState<OpsStatus | "all">("all");
+  const [category, setCategory] = useState<AlertCategory | "all">("all");
   const [sortBy, setSortBy] = useState<SortBy>("priority");
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
-  const filtered = OPS_CONTRACTS.filter((c) => priority === "all" || c.status === priority);
-  const countFor = (p: OpsStatus | "all") => OPS_CONTRACTS.filter((c) => p === "all" || c.status === p).length;
+  const filtered = OPS_CONTRACTS.filter(
+    (c) =>
+      (priority === "all" || c.status === priority) &&
+      (category === "all" || c.alerts.some((a) => a.category === category))
+  );
+  const countPriority = (p: OpsStatus | "all") =>
+    OPS_CONTRACTS.filter((c) => (p === "all" || c.status === p) && (category === "all" || c.alerts.some((a) => a.category === category))).length;
+  const countCategory = (cat: AlertCategory | "all") =>
+    OPS_CONTRACTS.filter((c) => (priority === "all" || c.status === priority) && (cat === "all" || c.alerts.some((a) => a.category === cat))).length;
 
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === "progress") return a.progress - b.progress; // least complete first
-    if (sortBy === "risk") return riskScore(b) - riskScore(a); // highest risk first
-    return riskScore(b) - riskScore(a); // priority: critical first, then risk
+    return riskScore(b) - riskScore(a); // priority / risk: highest first
   });
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <ContractDrawer contractId={drawerId} onClose={() => setDrawerId(null)} />
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">
@@ -171,7 +228,22 @@ export default function ContractsAttention() {
                 priority === opt.value ? "bg-black text-white" : "border border-gray-200 text-gray-500 hover:border-gray-300"
               }`}
             >
-              {opt.label} {countFor(opt.value)}
+              {opt.label} {countPriority(opt.value)}
+            </button>
+          ))}
+
+          <span className="text-gray-200 text-xs mx-1">|</span>
+
+          <span className="text-xs text-gray-400">Category</span>
+          {CATEGORY_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setCategory(opt.value)}
+              className={`text-xs px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                category === opt.value ? "bg-black text-white" : "border border-gray-200 text-gray-500 hover:border-gray-300"
+              }`}
+            >
+              {opt.label} {countCategory(opt.value)}
             </button>
           ))}
 
@@ -194,7 +266,7 @@ export default function ContractsAttention() {
 
       <div className="p-4 flex flex-col gap-3">
         {sorted.length > 0 ? (
-          sorted.map((c) => <ContractRow key={c.id} contract={c} onOpenDrawer={setDrawerId} />)
+          sorted.map((c) => <ContractRow key={c.id} contract={c} category={category} onOpenDrawer={setDrawerId} />)
         ) : (
           <p className="text-sm text-gray-400 text-center py-6">No contracts match the selected filter.</p>
         )}

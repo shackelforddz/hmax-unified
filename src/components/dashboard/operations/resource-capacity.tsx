@@ -4,7 +4,7 @@ import { TEAMS, CAPACITY_RISKS } from "@/lib/operations-data";
 
 export default function ResourceCapacity() {
   return (
-    <div className="bg-white rounded-xl p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       <div className="flex items-start justify-between mb-4">
         <h3 className="text-base text-gray-900">Resource &amp; Capacity</h3>
         <WidgetChat title="Resource & Capacity" />

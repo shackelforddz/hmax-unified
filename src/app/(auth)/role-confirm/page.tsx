@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Briefcase,
@@ -8,6 +7,11 @@ import {
   RefreshCcw,
   Cog,
   Stethoscope,
+  Check,
+  LayoutDashboard,
+  MessageSquareText,
+  PanelRightOpen,
+  Sparkles,
 } from "lucide-react";
 import AuthHeader from "@/components/auth/auth-header";
 import { Button } from "@/components/ui/button";
@@ -17,7 +21,9 @@ import {
   RECOMMENDED_ROLE,
   ALL_ROLES,
   MOCK_USER,
-  type Role,
+  PRODUCT_INTRO,
+  ROLE_INTRO,
+  HOW_TO_USE,
 } from "@/lib/roles";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -26,6 +32,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
   RefreshCcw,
   Cog,
   Stethoscope,
+  LayoutDashboard,
+  MessageSquareText,
+  PanelRightOpen,
+  Sparkles,
 };
 
 function RoleIcon({ name, size = 22 }: { name: string; size?: number }) {
@@ -39,18 +49,14 @@ export default function RoleConfirmPage() {
   const dispatch = useAppDispatch();
   const selectedRoleLabel = useAppSelector((s) => s.auth.selectedRole);
 
-  // The role carried in from the login URL becomes the "recommended" persona
-  // and is pre-selected; the remaining roles are shown as alternatives.
+  // The role carried in from the login URL becomes the recommended role.
   const recommended = ALL_ROLES.find((r) => r.label === selectedRoleLabel) ?? RECOMMENDED_ROLE;
-  const alternatives = ALL_ROLES.filter((r) => r.id !== recommended.id);
-  const [selected, setSelected] = useState<Role>(recommended);
+  const intro = ROLE_INTRO[recommended.label];
 
   const handleContinue = () => {
-    dispatch(setSelectedRole(selected.label));
+    dispatch(setSelectedRole(recommended.label));
     router.push("/dashboard");
   };
-
-  const isSelected = (role: Role) => selected.id === role.id;
 
   return (
     <div className="min-h-screen bg-[#EBEBEB] flex flex-col font-patrick-hand">
@@ -60,63 +66,61 @@ export default function RoleConfirmPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-[740px]">
-          {/* Heading */}
-          <p className="text-xs text-gray-400 text-center mb-1 tracking-wide">
-            Role Detected: {MOCK_USER.detectedDivision}
-          </p>
-          <h1 className="font-patrick-hand text-[2rem] text-center mb-8">
-            Your Recommended Persona
+          {/* Welcome heading */}
+          <h1 className="font-patrick-hand text-[2rem] text-center mb-3">
+            Welcome to HMAX Unified, {MOCK_USER.name}
           </h1>
-
-          {/* Recommended role card */}
-          <button
-            onClick={() => setSelected(recommended)}
-            className={`w-full text-left bg-white rounded-2xl p-6 flex items-start gap-5 mb-6 transition-all ${
-              isSelected(recommended)
-                ? "ring-2 ring-black shadow-sm"
-                : "ring-1 ring-gray-200 hover:ring-gray-300"
-            }`}
-          >
-            <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 mt-0.5">
-              <RoleIcon name={recommended.icon} size={24} />
-            </div>
-            <div>
-              <h2 className="font-patrick-hand text-xl mb-2">
-                {recommended.label}
-              </h2>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {recommended.description}
-              </p>
-            </div>
-          </button>
-
-          {/* Alternative roles */}
-          <p className="text-xs text-gray-400 text-center mb-4">
-            Or, select an alternative workspace persona below
+          <p className="text-sm text-gray-500 text-center leading-relaxed max-w-[520px] mx-auto mb-8">
+            {PRODUCT_INTRO}
           </p>
 
-          <div className="grid grid-cols-3 gap-3">
-            {alternatives.map((role) => (
-              <button
-                key={role.id}
-                onClick={() => setSelected(role)}
-                className={`text-left bg-white rounded-xl p-4 transition-all ${
-                  isSelected(role)
-                    ? "ring-2 ring-black shadow-sm"
-                    : "ring-1 ring-gray-200 hover:ring-gray-300"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2 text-gray-600">
-                  <RoleIcon name={role.icon} size={16} />
-                  <span className="font-patrick-hand text-base">
-                    {role.label}
-                  </span>
+          {/* Role identified + what they'll see */}
+          <div className="bg-white rounded-2xl ring-1 ring-gray-200 p-6 mb-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">Role identified</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+                    <RoleIcon name={recommended.icon} size={20} />
+                  </div>
+                  <h2 className="font-patrick-hand text-xl">{recommended.label}</h2>
                 </div>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  {role.description}
-                </p>
-              </button>
-            ))}
+              </div>
+              {intro && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-3">What you&apos;ll see</p>
+                  <ul className="flex flex-col gap-2">
+                    {intro.highlights.map((h) => (
+                      <li key={h} className="flex items-start gap-2 text-sm text-gray-600 leading-snug">
+                        <Check size={14} className="text-gray-400 shrink-0 mt-0.5" />
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Getting started — a quick primer on using the product */}
+          <div className="bg-white rounded-2xl ring-1 ring-gray-200 p-6 mb-6">
+            <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-4">Getting started — four things to try first</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+              {HOW_TO_USE.map((step, i) => (
+                <div key={step.title} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 mt-0.5 relative">
+                    <RoleIcon name={step.icon} size={18} />
+                    <span className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center leading-none">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 mb-1">{step.title}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed">{step.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Bottom actions */}
@@ -132,7 +136,7 @@ export default function RoleConfirmPage() {
               onClick={handleContinue}
               className="rounded-full h-auto px-6 py-2.5 text-sm cursor-pointer"
             >
-              Continue with {selected.label}
+              Enter your workspace
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink, FileText, ScrollText } from "lucide-react";
+import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink, FileText, ScrollText, PencilRuler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { ASSET_DETAILS, ASSET_CONDITION, type AssetDetail, type AssetReading, type AssetCondition } from "@/lib/sales-data";
@@ -9,6 +9,7 @@ import { WORK_ORDERS } from "@/lib/work-orders-data";
 import { REPORTS_AWAITING } from "@/lib/field-reports-data";
 import { ASSET_SERVICE_HISTORY } from "@/lib/asset-history-data";
 import { ASSET_NAMEPLATE, type Nameplate } from "@/lib/asset-nameplate-data";
+import { ASSET_DRAWINGS } from "@/lib/asset-drawings-data";
 import { Aging, ScoreCalculation, RiskMatrix, ConditionTrend, ParameterTrend, Diagnostics } from "./asset-condition";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -245,9 +246,16 @@ function DocGroup({ title, count, children }: { title: string; count: number; ch
 function DocumentsTab({ d, id }: { d: AssetDetail; id: string }) {
   const reports = REPORTS_AWAITING.filter((r) => r.assetId === id);
   const workOrders = WORK_ORDERS.filter((w) => w.asset === d.code);
+  const drawings = ASSET_DRAWINGS[id] ?? [];
 
   return (
     <div className="flex flex-col gap-4">
+      <DocGroup title="Drawings & FAT" count={drawings.length}>
+        {drawings.map((dw) => (
+          <DocRow key={dw.ref} icon={PencilRuler} title={`${dw.name} · ${dw.type}`} meta={`${dw.ref} · ${dw.date}`} />
+        ))}
+      </DocGroup>
+
       <DocGroup title="Reports" count={reports.length}>
         {reports.map((r) => (
           <DocRow key={r.id} icon={FileText} title={`${r.code} · ${r.type}`} meta={`${r.engineer} · submitted ${r.submitted}`} />

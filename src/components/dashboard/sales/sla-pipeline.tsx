@@ -21,7 +21,7 @@ export default function SlaPipeline() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
   return (
-    <div className="bg-white rounded-xl p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       <SlaContractDrawer contractId={drawerId} onClose={() => setDrawerId(null)} />
       {/* Header */}
       <div className="flex items-start justify-between mb-4">

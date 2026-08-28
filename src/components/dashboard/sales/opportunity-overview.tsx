@@ -21,7 +21,7 @@ export default function OpportunityOverview() {
   const segments = byStage.filter((b) => b.value > 0);
 
   return (
-    <div className="bg-white rounded-xl p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-base text-gray-900">Opportunity Overview</h3>

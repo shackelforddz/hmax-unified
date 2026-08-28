@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Key, ShoppingCart, Heart, BarChart2, FileText,
   Library, ArrowUp, UserRoundPlus, X,
+  TrendingUp, RefreshCw, ClipboardList, Wrench, Stethoscope, Search, Activity,
 } from "lucide-react";
 import ContextPanel from "./context-panel";
 import EntityContextPanel from "./context-panel-entity";
@@ -11,28 +12,117 @@ import DocPanel from "./doc-panel";
 import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
 import { answerQuery, detectCustomer, suggestNext, visualFor } from "@/lib/knowledge-base";
 import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
+import { useAppSelector } from "@/store/hooks";
 import { Button } from "@/components/ui/button";
 
-const SUGGESTIONS = [
-  { icon: Calendar, label: "Create a new mobilization plan" },
-  { icon: Key, label: "Mobilize Xcel Next" },
-  { icon: ShoppingCart, label: "Order a part?" },
-  { icon: Heart, label: "Evaluate asset risk/health" },
-  { icon: BarChart2, label: "Create an impact report" },
-  { icon: FileText, label: "Create an invoice" },
-];
+interface WelcomeSet {
+  suggestions: { icon: React.ElementType; label: string }[];
+  starters: string[];
+  defaultPrompt: string;
+}
 
-const DEFAULT_PROMPT = "Create a mobilization plan for Xcel Energy";
+// New-conversation content, tailored to the active persona.
+const WELCOME_BY_ROLE: Record<string, WelcomeSet> = {
+  "Project Manager": {
+    suggestions: [
+      { icon: Calendar, label: "Create a new mobilization plan" },
+      { icon: Key, label: "Mobilize Xcel Next" },
+      { icon: ShoppingCart, label: "Order a part?" },
+      { icon: Heart, label: "Evaluate asset risk/health" },
+      { icon: BarChart2, label: "Create an impact report" },
+      { icon: FileText, label: "Create an invoice" },
+    ],
+    starters: [
+      "What needs my attention today?",
+      "Show the portfolio overview",
+      "Which contracts are at risk?",
+      "Why is on-time delivery falling?",
+      "What's driving revenue at risk?",
+      "Show vendor concentration",
+    ],
+    defaultPrompt: "Create a mobilization plan for Xcel Energy",
+  },
+  Sales: {
+    suggestions: [
+      { icon: TrendingUp, label: "Build a new opportunity" },
+      { icon: RefreshCw, label: "Prepare an SLA renewal" },
+      { icon: FileText, label: "Draft a service offer" },
+      { icon: Heart, label: "Evaluate asset risk/health" },
+      { icon: BarChart2, label: "Create an impact report" },
+      { icon: Search, label: "Summarize an account" },
+    ],
+    starters: [
+      "What's my pipeline value?",
+      "Which opportunities need attention?",
+      "Which SLAs renew soon?",
+      "What's the weighted forecast?",
+      "Which assets are critical?",
+      "Show fleet health",
+    ],
+    defaultPrompt: "Summarize my opportunity pipeline",
+  },
+  Operations: {
+    suggestions: [
+      { icon: ClipboardList, label: "Raise a change order" },
+      { icon: RefreshCw, label: "Rebalance the crew" },
+      { icon: Calendar, label: "Adjust a contract schedule" },
+      { icon: Wrench, label: "Create a work order" },
+      { icon: BarChart2, label: "Create an impact report" },
+      { icon: FileText, label: "Create an invoice" },
+    ],
+    starters: [
+      "What needs my attention today?",
+      "Which contracts are critical?",
+      "What change orders are unsigned?",
+      "How is margin vs plan?",
+      "Where are we short on resources?",
+      "Which HSE complaints are open?",
+    ],
+    defaultPrompt: "Show contracts needing attention",
+  },
+  "Reliability Engineer": {
+    suggestions: [
+      { icon: Search, label: "Review a service scope" },
+      { icon: FileText, label: "Check design drawings" },
+      { icon: Activity, label: "Assess asset feasibility" },
+      { icon: Wrench, label: "Draft a maintenance procedure" },
+      { icon: ClipboardList, label: "Log a site constraint" },
+      { icon: BarChart2, label: "Create an impact report" },
+    ],
+    starters: [
+      "What needs my review today?",
+      "Which scopes are not feasible?",
+      "Which assets need design review?",
+      "What new standards apply?",
+      "Where do handover and site conflict?",
+      "Show fleet health",
+    ],
+    defaultPrompt: "Review the Xcel Energy service scope",
+  },
+  Diagnostics: {
+    suggestions: [
+      { icon: Stethoscope, label: "Interpret a field report" },
+      { icon: Activity, label: "Review a DGA trend" },
+      { icon: Search, label: "Assess a fault signature" },
+      { icon: UserRoundPlus, label: "Dispatch a field engineer" },
+      { icon: Wrench, label: "Draft a diagnostic procedure" },
+      { icon: BarChart2, label: "Create an impact report" },
+    ],
+    starters: [
+      "Which reports await interpretation?",
+      "Which assets have a fault signature?",
+      "How long do field reports take?",
+      "Which DGA trends are concerning?",
+      "Who is available to inspect?",
+      "Show fleet health",
+    ],
+    defaultPrompt: "Interpret the AST-001 thermal report",
+  },
+};
 
-// Quick-start prompts shown above the input on the welcome screen.
-const WELCOME_STARTERS = [
-  "What needs my attention today?",
-  "Show the portfolio overview",
-  "Which contracts are at risk?",
-  "Why is on-time delivery falling?",
-  "What's driving revenue at risk?",
-  "Show vendor concentration",
-];
+function welcomeFor(role: string): WelcomeSet {
+  return WELCOME_BY_ROLE[role] ?? WELCOME_BY_ROLE["Project Manager"];
+}
 
 interface Props {
   visible: boolean;
@@ -50,6 +140,8 @@ interface Props {
 }
 
 export default function ConversationOverlay({ visible, onClose, context, initialPrompt, entity, restore, onPersist }: Props) {
+  const selectedRole = useAppSelector((s) => s.auth.selectedRole);
+  const welcome = welcomeFor(selectedRole);
   const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -216,7 +308,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
 
   const handleSend = () => {
     const t = input.trim();
-    if (!t && !started) send(DEFAULT_PROMPT);
+    if (!t && !started) send(welcome.defaultPrompt);
     else if (t) send(t);
   };
 
@@ -337,7 +429,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                   Create A New Conversation
                 </h1>
                 <div className="grid grid-cols-3 gap-3">
-                  {SUGGESTIONS.map(({ icon: Icon, label }) => (
+                  {welcome.suggestions.map(({ icon: Icon, label }) => (
                     <button
                       key={label}
                       onClick={() => send(label)}
@@ -371,7 +463,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
           {!started && (
             <div className="max-w-[640px] mx-auto w-full px-4 mb-2">
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                {WELCOME_STARTERS.map((p) => (
+                {welcome.starters.map((p) => (
                   <button
                     key={p}
                     onClick={() => send(p)}
@@ -390,7 +482,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder={started ? "Message..." : DEFAULT_PROMPT}
+                placeholder={started ? "Message..." : welcome.defaultPrompt}
                 className="flex-1 text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent"
                 autoFocus
               />

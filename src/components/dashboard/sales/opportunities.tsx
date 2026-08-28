@@ -265,7 +265,7 @@ export default function Opportunities() {
     pipeline.filter((o) => (p === "all" || o.status === p) && (s === "all" || o.stage === s)).length;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <OpportunityDrawer opp={drawer?.opp ?? null} detail={drawer?.detail ?? null} onClose={() => setDrawer(null)} />
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">

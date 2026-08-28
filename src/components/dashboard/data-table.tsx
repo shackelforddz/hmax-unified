@@ -21,7 +21,7 @@ interface Props<T> {
 
 export default function DataTable<T>({ title, subtitle, columns, rows, getKey, onRowClick }: Props<T>) {
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-5 pt-5 pb-4 border-b border-gray-100 flex items-start justify-between">
         <div>
           <h3 className="text-base text-gray-900">{title}</h3>

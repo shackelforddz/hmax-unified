@@ -6,7 +6,7 @@ import WidgetChat from "@/components/dashboard/widget-chat";
 
 export default function FleetHealth() {
   return (
-    <div className="bg-white rounded-xl p-4 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <h3 className="text-base text-gray-900">Fleet health</h3>
@@ -29,14 +29,16 @@ export default function FleetHealth() {
         </div>
       </div>
 
-      {/* Chart */}
-      <ResponsiveContainer width="100%" height={120}>
-        <LineChart data={F.points} margin={{ top: 8, right: 4, bottom: 4, left: 4 }}>
-          <YAxis domain={[55, 92]} hide />
-          <Line type="monotone" dataKey="avg" stroke="#171717" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="std" stroke="#A3A3A3" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
+      {/* Chart — grows to fill the container height */}
+      <div className="flex-1 min-h-[120px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={F.points} margin={{ top: 8, right: 4, bottom: 4, left: 4 }}>
+            <YAxis domain={[55, 92]} hide />
+            <Line type="monotone" dataKey="avg" stroke="#171717" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="std" stroke="#A3A3A3" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Legend */}
       <div className="flex gap-4 mt-2">

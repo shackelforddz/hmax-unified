@@ -101,7 +101,7 @@ interface Props {
 
 export default function CustomWidgetView({ config, static: isStatic }: Props) {
   return (
-    <div className="bg-white rounded-xl p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       <div className="flex items-start justify-between mb-4 gap-3">
         <h3 className="text-base text-gray-900 leading-snug">{config.title}</h3>
         {isStatic ? (

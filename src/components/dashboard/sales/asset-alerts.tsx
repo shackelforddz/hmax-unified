@@ -174,7 +174,7 @@ export default function AssetAlerts({
   const firstExpandableId = filtered.find((a) => a.alert)?.id;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <AssetDrawer assetId={drawerId} onClose={() => setDrawerId(null)} />
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">

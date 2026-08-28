@@ -28,7 +28,9 @@ export interface RiskProfile {
   quality: RiskLevel;
   safety: RiskLevel;
 }
-export interface OpsContractFlag {
+export type AlertCategory = "delivery" | "change-order" | "hse" | "quality";
+export interface ContractAlert {
+  category: AlertCategory;
   title: string;
   detail: string;
   action: string;
@@ -43,7 +45,7 @@ export interface OpsContract {
   progress: number; // % complete
   baseline: number; // planned % at this point
   risk: RiskProfile;
-  flags: OpsContractFlag[];
+  alerts: ContractAlert[];
 }
 
 export const OPS_CONTRACTS: OpsContract[] = [
@@ -57,18 +59,12 @@ export const OPS_CONTRACTS: OpsContract[] = [
     progress: 55,
     baseline: 73,
     risk: { schedule: "high", cost: "med", quality: "low", safety: "med" },
-    flags: [
-      {
-        title: "18 days behind baseline — outage window at risk",
-        detail:
-          "Field mobilization slipped and the work is now tracking 18 days behind. Missing the 14 September outage window pushes delivery into February and defers a £1.2m milestone invoice.",
-        action: "Adjust Schedule",
-      },
-      {
-        title: "Delta Coils is the critical path on winding sets",
-        detail: "A single vendor gates the remaining scope; a further slip cascades across six projects.",
-        action: "Reassign Vendor",
-      },
+    alerts: [
+      { category: "delivery", title: "18 days behind baseline — outage window at risk", detail: "Field mobilization slipped and the work is now tracking 18 days behind. Missing the 14 September outage window pushes delivery into February and defers a £1.2m milestone invoice.", action: "Adjust Schedule" },
+      { category: "delivery", title: "Delta Coils is the critical path on winding sets", detail: "A single vendor gates the remaining scope; a further slip cascades across six projects.", action: "Reassign Vendor" },
+      { category: "change-order", title: "Change order CO-204 · Additional winding sets — £320k", detail: "Scope adds two winding sets beyond the original contract. Review the technical impact and price before it's booked to release progress invoicing.", action: "Review change order" },
+      { category: "quality", title: "NCR-071 · Weld porosity on winding set 2", detail: "QA radiography flagged porosity above the acceptance criteria on the second winding set. Disposition the non-conformance before assembly continues.", action: "Review NCR" },
+      { category: "hse", title: "HSE complaint · Dropped-load near-miss during lift", detail: "A dropped-load near-miss was reported during the winding lift. HSE has opened a RIDDOR review — confirm the lifting-plan corrective actions.", action: "Review HSE report" },
     ],
   },
   {
@@ -81,17 +77,11 @@ export const OPS_CONTRACTS: OpsContract[] = [
     progress: 62,
     baseline: 78,
     risk: { schedule: "high", cost: "high", quality: "med", safety: "low" },
-    flags: [
-      {
-        title: "Change order CO-118 unsigned — £680k held",
-        detail: "Progress invoicing is blocked and reported margin sits 14pts under baseline until the change order is booked.",
-        action: "Raise Change Order",
-      },
-      {
-        title: "Crew over-allocated across the platform cluster",
-        detail: "Field Service is at 96% utilisation with no slack for the additional protection-relay scope.",
-        action: "Rebalance Crew",
-      },
+    alerts: [
+      { category: "delivery", title: "Crew over-allocated across the platform cluster", detail: "Field Service is at 96% utilisation with no slack for the additional protection-relay scope.", action: "Rebalance Crew" },
+      { category: "change-order", title: "Change order CO-118 · Protection-relay scope extension — £680k", detail: "Progress invoicing is blocked and reported margin sits 14pts under baseline until this change order is booked. Review and raise it for signature.", action: "Review change order" },
+      { category: "change-order", title: "Change order CO-131 · Weather standby days — £120k", detail: "Additional weather standby days claimed by the vessel operator. Verify the logs and approve before booking.", action: "Review change order" },
+      { category: "hse", title: "HSE complaint · Working-at-height PPE non-use", detail: "A subcontractor was reported working at height without fall arrest. An HSE complaint is open — verify the toolbox-talk and re-induction records.", action: "Review HSE report" },
     ],
   },
   {
@@ -104,12 +94,10 @@ export const OPS_CONTRACTS: OpsContract[] = [
     progress: 80,
     baseline: 82,
     risk: { schedule: "low", cost: "low", quality: "med", safety: "high" },
-    flags: [
-      {
-        title: "Two HSE certificates expire before the next visit",
-        detail: "Offshore crew certifications lapse ahead of the planned window; remobilisation is blocked until they renew.",
-        action: "Schedule Cert Renewal",
-      },
+    alerts: [
+      { category: "delivery", title: "Two HSE certificates expire before the next visit", detail: "Offshore crew certifications lapse ahead of the planned window; remobilisation is blocked until they renew.", action: "Schedule Cert Renewal" },
+      { category: "hse", title: "HSE complaint · Slip hazard on access gangway", detail: "Crew logged a slip hazard on the wet access gangway. Confirm the anti-slip remediation is closed out before the next mobilisation.", action: "Review HSE report" },
+      { category: "quality", title: "NCR-058 · Bushing torque values out of spec", detail: "A torque check on the transformer bushings fell outside specification. Disposition the non-conformance and re-torque to procedure.", action: "Review NCR" },
     ],
   },
   {
@@ -122,12 +110,9 @@ export const OPS_CONTRACTS: OpsContract[] = [
     progress: 40,
     baseline: 45,
     risk: { schedule: "med", cost: "low", quality: "low", safety: "med" },
-    flags: [
-      {
-        title: "Site access unresolved — verbal only",
-        detail: "Only a verbal change order is in place; a written access agreement is required before the crew can mobilise.",
-        action: "Request Written Access",
-      },
+    alerts: [
+      { category: "delivery", title: "Site access unresolved — verbal only", detail: "Only a verbal arrangement is in place; a written access agreement is required before the crew can mobilise.", action: "Request Written Access" },
+      { category: "change-order", title: "Change order CO-241 · Written site-access agreement — £15k", detail: "Only a verbal access arrangement is in place. Review and issue the written change order before the crew can mobilise.", action: "Review change order" },
     ],
   },
 ];

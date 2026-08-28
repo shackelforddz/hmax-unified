@@ -6,7 +6,7 @@ import WidgetChat from "@/components/dashboard/widget-chat";
 
 export default function SlaRenewals() {
   return (
-    <div className="bg-white rounded-xl p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-base text-gray-900">Upcoming SLA Renewals</h3>

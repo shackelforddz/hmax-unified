@@ -174,16 +174,16 @@ export default function AttentionList() {
     ).length;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <AttentionDrawer itemId={drawerId} onClose={() => setDrawerId(null)} />
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base text-gray-900">Customers that need your attention</h3>
+            <h3 className="text-base text-gray-900">Contracts that need your attention</h3>
             <p className="text-sm text-gray-400 mt-0.5">{filtered.length} need your attention</p>
           </div>
-          <WidgetChat title="Assigned to you" />
+          <WidgetChat title="Contracts that need your attention" />
         </div>
 
         {/* Filter pills */}

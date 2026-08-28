@@ -29,7 +29,9 @@ export type AssetStatus = "critical" | "at-risk";
 export type AssetCategory =
   | "asset-health" | "risk-building" | "offer-readiness" | "missing-info"
   // Diagnostics — asset report review categories
-  | "dga" | "electrical" | "physical";
+  | "dga" | "electrical" | "physical"
+  // Reliability — engineering review categories
+  | "scope-feasibility" | "design" | "site" | "standards";
 export interface AssetAlert {
   id: string;
   code: string;
@@ -736,9 +738,12 @@ export const MAP_LABELS: { name: string; x: number; y: number; size?: "sm" | "md
   { name: "Pontesesto", x: 44, y: 80, size: "sm" },
 ];
 
-export const MAP_MARKERS: { x: number; y: number; ping?: boolean }[] = [
-  { x: 52, y: 24, ping: true },
-  { x: 33, y: 66 },
+// x/y are percent coords for the static fallback map; lat/lng for Google Maps.
+export const MAP_MARKERS: { id: string; x: number; y: number; lat: number; lng: number; ping?: boolean }[] = [
+  { id: "ast-001", x: 52, y: 24, lat: 45.508, lng: 9.162, ping: true },
+  { id: "ast-002", x: 33, y: 66, lat: 45.432, lng: 9.112 },
+  { id: "ast-003", x: 68, y: 46, lat: 45.462, lng: 9.252 },
+  { id: "ast-004", x: 23, y: 39, lat: 45.421, lng: 9.148 },
 ];
 
 /* ── Opportunities ───────────────────────────────────────────────── */

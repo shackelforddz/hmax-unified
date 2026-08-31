@@ -87,7 +87,7 @@ function DrawerBody({ opp, detail, onAction }: { opp: Opportunity; detail: Oppor
         <p className="text-sm text-gray-500 leading-relaxed">{detail.summary}</p>
         {detail.recommendations.length > 0 && (
           <div className="mt-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommendations</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-2">Recommendations</p>
             <div className="flex flex-col gap-2">
               {detail.recommendations.map((r, i) => (
                 <div key={i} className="flex gap-2.5">
@@ -156,7 +156,7 @@ function DrawerBody({ opp, detail, onAction }: { opp: Opportunity; detail: Oppor
             { label: "Region", value: detail.related.region },
           ].map((r) => (
             <div key={r.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
               <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
             </div>
           ))}
@@ -229,7 +229,7 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
                   { label: "Status", value: opp.status === "on-track" ? "On track" : opp.status === "at-risk" ? "At risk" : "Stalled" },
                 ].map((s) => (
                   <div key={s.label}>
-                    <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
                     <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
                   </div>
                 ))}

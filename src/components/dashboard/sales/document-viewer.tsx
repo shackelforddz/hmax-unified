@@ -61,7 +61,7 @@ function DrawingCanvas({ doc }: { doc: ViewDoc }) {
           ...doc.fields.slice(0, 2).map((f) => ({ l: f.label, v: f.value })),
         ].map((c, i) => (
           <div key={i} className={`px-3 py-2 ${i < 3 ? "border-r border-gray-300" : ""}`}>
-            <p className="text-gray-400 uppercase tracking-wider">{c.l}</p>
+            <p className="text-gray-400 tracking-wider">{c.l}</p>
             <p className="text-gray-800 mt-0.5 truncate">{c.v}</p>
           </div>
         ))}
@@ -98,7 +98,7 @@ export default function DocumentViewer({ doc, onClose, onAsk }: Props) {
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="min-w-0">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider">{doc.docType}</p>
+            <p className="text-[11px] text-gray-400 tracking-wider">{doc.docType}</p>
             <h2 className="text-xl text-gray-900 truncate">{doc.title}</h2>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -129,7 +129,7 @@ export default function DocumentViewer({ doc, onClose, onAsk }: Props) {
                 <p className="text-xs text-gray-400 mt-0.5">{doc.docType}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Reference</p>
+                <p className="text-xs text-gray-400 tracking-wider">Reference</p>
                 <p className="text-sm text-gray-800 mt-0.5">{doc.ref}</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function DocumentViewer({ doc, onClose, onAsk }: Props) {
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
               {doc.fields.map((f) => (
                 <div key={f.label}>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">{f.label}</p>
+                  <p className="text-[11px] text-gray-400 tracking-wider">{f.label}</p>
                   <p className="text-sm text-gray-800 mt-0.5">{f.value}</p>
                 </div>
               ))}
@@ -150,7 +150,7 @@ export default function DocumentViewer({ doc, onClose, onAsk }: Props) {
             {/* Narrative sections */}
             {doc.sections.map((s) => (
               <div key={s.heading}>
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">{s.heading}</p>
+                <p className="text-[11px] text-gray-400 tracking-wider mb-1.5">{s.heading}</p>
                 <p className="text-sm text-gray-700 leading-relaxed">{s.text}</p>
               </div>
             ))}

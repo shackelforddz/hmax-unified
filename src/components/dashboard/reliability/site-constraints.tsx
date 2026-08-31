@@ -30,11 +30,11 @@ export default function SiteConstraints() {
               <StatusBadge status={c.status} />
             </div>
             <div className="flex items-baseline gap-2 text-xs">
-              <span className="text-gray-400 w-16 shrink-0 uppercase tracking-wider text-[10px]">Handover</span>
+              <span className="text-gray-400 w-16 shrink-0 tracking-wider text-[10px]">Handover</span>
               <span className="text-gray-600 flex-1 min-w-0">{c.handover}</span>
             </div>
             <div className="flex items-baseline gap-2 text-xs mt-1">
-              <span className="text-gray-400 w-16 shrink-0 uppercase tracking-wider text-[10px]">Site</span>
+              <span className="text-gray-400 w-16 shrink-0 tracking-wider text-[10px]">Site</span>
               <span className={`flex-1 min-w-0 ${c.status === "conflict" ? "text-gray-900" : "text-gray-600"}`}>{c.actual}</span>
             </div>
           </div>

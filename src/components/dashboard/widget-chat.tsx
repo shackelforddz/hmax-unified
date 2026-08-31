@@ -117,7 +117,7 @@ export default function WidgetChat({ title, triggerClassName }: Props) {
 
             {starters.length > 0 && (
               <div className="mt-3">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">Suggested</p>
+                <p className="text-[11px] text-gray-400 tracking-wider mb-1.5">Suggested</p>
                 <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
                   {starters.map((p) => (
                     <button

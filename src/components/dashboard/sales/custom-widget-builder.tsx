@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, LineChart, BarChart3, PieChart, Hash, Sparkles } from "lucide-react";
+import { X, LineChart, BarChart3, PieChart, Hash } from "lucide-react";
 import CustomWidgetView from "./custom-widget-view";
 import { buildWidget, type WidgetType, type CustomWidgetConfig } from "@/lib/custom-widget";
 import { Button } from "@/components/ui/button";
@@ -106,8 +106,7 @@ export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
               </div>
             </div>
 
-            <Button onClick={generate} className="self-start gap-2 rounded-full h-auto px-5 py-2.5 text-sm cursor-pointer">
-              <Sparkles size={14} strokeWidth={1.5} />
+            <Button onClick={generate} className="self-start rounded-full h-auto px-5 py-2.5 text-sm cursor-pointer">
               {preview ? "Regenerate preview" : "Generate preview"}
             </Button>
           </div>

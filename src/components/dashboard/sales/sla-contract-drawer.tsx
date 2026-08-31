@@ -69,15 +69,15 @@ function DrawerBody({ d, onAction }: { d: SlaContractDetail; onAction: (p: strin
       <Card>
         <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
           <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Service health</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-1">Service health</p>
             <Badge badge={d.serviceHealth} />
           </div>
           <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Renewal risk</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-1">Renewal risk</p>
             <Badge badge={d.risk} />
           </div>
           <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider">SLA</p>
+            <p className="text-[11px] text-gray-400 tracking-wider">SLA</p>
             <p className="text-sm text-gray-800 mt-0.5">{d.slaActual} / {d.slaTarget}</p>
           </div>
         </div>
@@ -127,7 +127,7 @@ function DrawerBody({ d, onAction }: { d: SlaContractDetail; onAction: (p: strin
             { label: "Region", value: d.region },
           ].map((r) => (
             <div key={r.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
               <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
             </div>
           ))}
@@ -183,7 +183,7 @@ export default function SlaContractDrawer({ contractId, onClose }: Props) {
                   { label: "Owner", value: d.owner },
                 ].map((s) => (
                   <div key={s.label}>
-                    <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
                     <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
                   </div>
                 ))}

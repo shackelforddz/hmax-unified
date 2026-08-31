@@ -100,7 +100,7 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
         <p className="text-sm text-gray-500 leading-relaxed">{d.summary}</p>
         {d.recommendedActions.length > 0 && (
           <div className="mt-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommended actions</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-2">Recommended actions</p>
             <div className="flex flex-wrap gap-2">
               {d.recommendedActions.map((a) => (
                 <Button key={a} onClick={() => onAction(a)} className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer">{a}</Button>
@@ -179,7 +179,7 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
             { label: "Region", value: d.related.region },
           ].map((r) => (
             <div key={r.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
               <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
             </div>
           ))}
@@ -236,7 +236,7 @@ export default function ContractDrawer({ contractId, onClose }: Props) {
                   { label: "Value", value: c.value },
                 ].map((s) => (
                   <div key={s.label}>
-                    <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
                     <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
                   </div>
                 ))}

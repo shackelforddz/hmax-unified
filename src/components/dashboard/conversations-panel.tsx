@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersVertical, Sparkles, ArrowUpRight, Plus, MessageSquarePlus } from "lucide-react";
+import { SlidersVertical, ArrowUpRight, Plus, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StoredConversation } from "@/components/conversation/chat-panel";
 import { useAppSelector } from "@/store/hooks";
@@ -73,9 +73,8 @@ export default function ConversationsPanel({ conversations, onNewConversation, o
       <div className="shrink-0 border-t border-zinc-800">
         {conversations.length === 0 && (
           <div className="px-4 pt-4">
-            <div className="flex items-center gap-1.5 mb-2.5 px-1">
-              <Sparkles size={13} strokeWidth={1.5} className="text-zinc-400" />
-              <span className="text-[11px] uppercase tracking-wider text-zinc-500">Recommended for you</span>
+            <div className="mb-2.5 px-1">
+              <span className="text-[11px] tracking-wider text-zinc-500">Recommended for you</span>
             </div>
 
             {/* Horizontal scroll card list — deep-dives and quick actions together.

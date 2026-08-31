@@ -298,7 +298,7 @@ export default function Opportunities() {
         {proposed.length > 0 && (
           <>
             <div className="px-1">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed for you · {proposed.length}</p>
+              <p className="text-xs text-gray-500 tracking-wider">Proposed for you · {proposed.length}</p>
             </div>
             {proposed.map((p) => (
               <ProposedCard
@@ -310,7 +310,7 @@ export default function Opportunities() {
               />
             ))}
             <div className="flex items-center gap-3 px-1 py-1">
-              <span className="text-xs text-gray-400 uppercase tracking-wider">Your pipeline</span>
+              <span className="text-xs text-gray-400 tracking-wider">Your pipeline</span>
               <hr className="flex-1 border-gray-100" />
             </div>
           </>

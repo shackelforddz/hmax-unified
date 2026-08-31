@@ -88,7 +88,7 @@ export default function DocPanel({ onClose }: Props) {
 
         {/* Case Details */}
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Case Details</p>
+          <p className="text-xs text-gray-400 tracking-wider mb-3">Case Details</p>
           <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
             {CASE_FIELDS.map(({ label, value }, i) => (
               <div key={label} className={`flex items-start gap-4 px-4 py-2.5 ${i < CASE_FIELDS.length - 1 ? "border-b border-gray-100" : ""}`}>
@@ -101,7 +101,7 @@ export default function DocPanel({ onClose }: Props) {
 
         {/* Staffing */}
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Staffing</p>
+          <p className="text-xs text-gray-400 tracking-wider mb-3">Staffing</p>
           <div className="flex flex-col gap-2">
             {STAFF.map((s) => (
               <div key={s.name} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-100">
@@ -122,7 +122,7 @@ export default function DocPanel({ onClose }: Props) {
 
         {/* Parts */}
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Parts & Materials</p>
+          <p className="text-xs text-gray-400 tracking-wider mb-3">Parts & Materials</p>
           <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
             <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-4 py-2 border-b border-gray-200">
               <span className="text-xs text-gray-400">Part</span>
@@ -143,7 +143,7 @@ export default function DocPanel({ onClose }: Props) {
 
         {/* Schedule */}
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Schedule</p>
+          <p className="text-xs text-gray-400 tracking-wider mb-3">Schedule</p>
           <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
             <p className="text-sm text-gray-700">5 – 16 August 2024</p>
             <p className="text-xs text-gray-400 mt-1">10 working days · Central US</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Sparkles, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, GripVertical, BarChart2 } from "lucide-react";
+import { Asterisk, Info, Check, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, GripVertical, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type Suggestions } from "@/lib/knowledge-base";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
@@ -14,7 +14,7 @@ function TypingBubble() {
   return (
     <div className="flex items-start gap-3 mb-5 animate-message-in">
       <div className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center shrink-0 mt-0.5">
-        <Sparkles size={14} strokeWidth={1.5} className="text-gray-600" />
+        <Asterisk size={14} strokeWidth={1.5} className="text-gray-600" />
       </div>
       <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-1.5">
         <span className="typing-dot w-1.5 h-1.5 rounded-full bg-gray-400" style={{ animationDelay: "0ms" }} />
@@ -86,7 +86,7 @@ function StepCase() {
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP 1 OF 5</p>
+        <p className="text-xs text-gray-400 tracking-widest mb-1">Step 1 of 5</p>
         <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">Case details</h3>
         <p className="text-sm text-gray-500 leading-relaxed">
           Confirm or update the case basics. The system has pre-filled from the linked opportunity OPP-441.
@@ -156,7 +156,7 @@ function StepScope() {
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP 2 OF 5</p>
+        <p className="text-xs text-gray-400 tracking-widest mb-1">Step 2 of 5</p>
         <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">Scope & access</h3>
         <p className="text-sm text-gray-500 leading-relaxed">
           What work is needed and what site constraints apply? The system has suggested scope based on the open field signals on this account.
@@ -365,7 +365,7 @@ function StepStaffing() {
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP 3 OF 5</p>
+        <p className="text-xs text-gray-400 tracking-widest mb-1">Step 3 of 5</p>
         <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">Staffing</h3>
         <p className="text-sm text-gray-500 leading-relaxed">
           The system has checked availability and suggested the best-fit crew for this case type, scope, and site requirements. Confirm, swap, or add.
@@ -442,7 +442,7 @@ function StepParts() {
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP 4 OF 5</p>
+        <p className="text-xs text-gray-400 tracking-widest mb-1">Step 4 of 5</p>
         <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">Parts & materials</h3>
         <p className="text-sm text-gray-500 leading-relaxed">
           The system has checked ERP inventory for parts required based on the asset type and scope. Review stock status, override quantities, or add items.
@@ -470,12 +470,12 @@ function StepParts() {
       <div>
         {/* Head */}
         <div className="grid grid-cols-[1fr_auto_96px_92px_48px_28px] gap-x-3 px-1 pb-2 border-b border-gray-200 items-center">
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Part</span>
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Qty</span>
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Supplier</span>
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">ERP stock</span>
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Lead</span>
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider text-right">OK</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">Part</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">Qty</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">Supplier</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">ERP stock</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">Lead</span>
+          <span className="text-[11px] text-gray-400 tracking-wider text-right">OK</span>
         </div>
         {/* Rows */}
         {parts.map((p, i) => (
@@ -588,7 +588,7 @@ function StepSchedule() {
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP 5 OF 5</p>
+        <p className="text-xs text-gray-400 tracking-widest mb-1">Step 5 of 5</p>
         <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">Schedule</h3>
         <p className="text-sm text-gray-500 leading-relaxed">
           Milestones auto-placed from parts lead times and crew availability. Drag any event to change its date. Conflicts flagged in real time.
@@ -738,7 +738,7 @@ function OppFieldGroup({ children }: { children: React.ReactNode }) {
 function OppHeader({ n, title, sub }: { n: number; title: string; sub: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP {n} OF 4</p>
+      <p className="text-xs text-gray-400 tracking-widest mb-1">Step {n} of 4</p>
       <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">{title}</h3>
       <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
     </div>
@@ -929,7 +929,7 @@ function FlowFieldControl({ f }: { f: FlowField }) {
 function FlowHeader({ n, total, title, sub }: { n: number; total: number; title: string; sub: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP {n} OF {total}</p>
+      <p className="text-xs text-gray-400 tracking-widest mb-1">Step {n} of {total}</p>
       <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">{title}</h3>
       <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
     </div>
@@ -1024,7 +1024,7 @@ function ContextCard({ context }: { context: string }) {
         <BarChart2 size={15} strokeWidth={1.5} className="text-gray-500" />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] text-gray-400 uppercase tracking-wider">Context</p>
+        <p className="text-[11px] text-gray-400 tracking-wider">Context</p>
         <p className="text-sm text-gray-800 truncate">{context}</p>
       </div>
     </div>
@@ -1035,7 +1035,7 @@ function ContextCard({ context }: { context: string }) {
 function AiAvatar() {
   return (
     <div className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center shrink-0 mt-0.5">
-      <Sparkles size={14} strokeWidth={1.5} className="text-gray-600" />
+      <Asterisk size={14} strokeWidth={1.5} className="text-gray-600" />
     </div>
   );
 }
@@ -1100,7 +1100,7 @@ function SuggestionBlock({ suggestions, onSend }: { suggestions: Suggestions; on
       )}
       {actions.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-gray-400 uppercase tracking-wider">Next steps</span>
+          <span className="text-[11px] text-gray-400 tracking-wider">Next steps</span>
           {actions.map((a) => (
             <Button
               key={a.label}

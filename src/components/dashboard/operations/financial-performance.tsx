@@ -58,7 +58,7 @@ export default function FinancialPerformance() {
 
       {/* Variance causes */}
       <div className="mt-4">
-        <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Margin variance · causes</p>
+        <p className="text-[11px] text-gray-400 tracking-wider mb-2">Margin variance · causes</p>
         <div className="flex flex-col gap-1.5">
           {F.causes.map((c) => (
             <div key={c.label} className="flex items-center justify-between">

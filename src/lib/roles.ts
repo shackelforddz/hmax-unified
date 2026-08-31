@@ -94,7 +94,7 @@ export const HOW_TO_USE: HowToStep[] = [
       "Ask the assistant to dig into a contract, asset or alert. It pulls the data together, explains what's going on and answers your follow-ups.",
   },
   {
-    icon: "Sparkles",
+    icon: "CircleCheck",
     title: "Get your tasks done",
     detail:
       "Hand off the work — reschedule delivery, draft a review, chase an invoice. The assistant carries the full context and drives it to a next step.",

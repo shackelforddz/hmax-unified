@@ -90,7 +90,7 @@ export function ScoreCalculation({ factors, total }: { factors: ScoreFactor[]; t
     <div>
       <SectionTitle>Score Calculation</SectionTitle>
       <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0">
-        <div className="grid grid-cols-[80px_1fr] items-center gap-x-3 col-span-2 pb-2 border-b border-gray-200 text-[11px] text-gray-400 uppercase tracking-wider">
+        <div className="grid grid-cols-[80px_1fr] items-center gap-x-3 col-span-2 pb-2 border-b border-gray-200 text-[11px] text-gray-400 tracking-wider">
           <span>Factor</span>
           <span>% of Max Value</span>
         </div>
@@ -140,8 +140,8 @@ export function RiskMatrix({ risk }: { risk: RiskSummary }) {
             style={{ left: `${x}%`, top: `${100 - y}%` }}
             title={`Condition ${x} · Importance ${y}`}
           />
-          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-white/80 uppercase tracking-wider">Condition</span>
-          <span className="absolute top-1/2 left-1 -translate-y-1/2 -rotate-90 origin-left text-[9px] text-white/80 uppercase tracking-wider">Importance</span>
+          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-white/80 tracking-wider">Condition</span>
+          <span className="absolute top-1/2 left-1 -translate-y-1/2 -rotate-90 origin-left text-[9px] text-white/80 tracking-wider">Importance</span>
         </div>
         {/* KPI stack */}
         <div className="flex flex-col gap-2">
@@ -158,7 +158,7 @@ export function RiskMatrix({ risk }: { risk: RiskSummary }) {
 function Kpi({ icon: Icon, label, value, accent, small }: { icon: React.ElementType; label: string; value: string; accent?: boolean; small?: boolean }) {
   return (
     <div className="bg-white border border-gray-100 rounded-lg px-3 py-2">
-      <p className="text-[10px] text-gray-400 uppercase tracking-wider leading-none mb-1.5">{label}</p>
+      <p className="text-[10px] text-gray-400 tracking-wider leading-none mb-1.5">{label}</p>
       <div className="flex items-center gap-1.5">
         <Icon size={14} strokeWidth={1.5} className="text-gray-400 shrink-0" />
         <span className={`${small ? "text-sm" : "text-lg"} leading-none ${accent ? "text-gray-900 font-semibold" : "text-gray-900"}`}>{value}</span>
@@ -221,7 +221,7 @@ export function ParameterTrend({ data, rows }: { data: ParameterPoint[]; rows: P
 
       {/* Table */}
       <div className="mt-4 overflow-hidden rounded-lg border border-gray-100">
-        <div className="grid grid-cols-[70px_1fr_auto] gap-x-2 px-3 py-2 bg-gray-100 text-[10px] text-gray-500 uppercase tracking-wider">
+        <div className="grid grid-cols-[70px_1fr_auto] gap-x-2 px-3 py-2 bg-gray-100 text-[10px] text-gray-500 tracking-wider">
           <span>Factor</span>
           <span>Name</span>
           <span className="text-right">Current</span>

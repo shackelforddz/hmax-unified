@@ -37,7 +37,7 @@ export default function DataTable<T>({ title, subtitle, columns, rows, getKey, o
               {columns.map((c, i) => (
                 <th
                   key={i}
-                  className={`px-5 py-3 text-[11px] text-gray-400 uppercase tracking-wider font-normal whitespace-nowrap ${
+                  className={`px-5 py-3 text-[11px] text-gray-400 tracking-wider font-normal whitespace-nowrap ${
                     c.align === "right" ? "text-right" : "text-left"
                   } ${c.className ?? ""}`}
                 >

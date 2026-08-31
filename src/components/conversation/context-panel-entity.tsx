@@ -28,7 +28,7 @@ function Shell({ title, subtitle, kind, belowHeader, children }: { title: string
   return (
     <div className="w-[420px] h-full shrink-0 bg-white border-r border-gray-100 flex flex-col overflow-hidden">
       <div className="px-7 pt-10 pb-5 border-b border-gray-100">
-        <span className="text-[11px] text-gray-400 uppercase tracking-wider">{kind}</span>
+        <span className="text-[11px] text-gray-400 tracking-wider">{kind}</span>
         <h1 className="text-2xl text-gray-900 leading-tight mt-1">{title}</h1>
         {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
       </div>
@@ -49,7 +49,7 @@ function Stats({ items }: { items: { label: string; value: string }[] }) {
     <div className="flex flex-wrap gap-x-7 gap-y-3">
       {items.map((s) => (
         <div key={s.label}>
-          <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+          <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
           <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
         </div>
       ))}
@@ -111,12 +111,12 @@ function AssetContext({ id, onAction }: { id: string; onAction?: (prompt: string
             { label: "Last service", value: d.stats.lastService },
           ].map((s) => (
             <div key={s.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
               <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
             </div>
           ))}
           <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider">Health</p>
+            <p className="text-[11px] text-gray-400 tracking-wider">Health</p>
             <div className="flex items-center gap-2 mt-1.5">
               <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-gray-900 rounded-full" style={{ width: `${d.stats.healthPct}%` }} />
@@ -273,7 +273,7 @@ function OpportunityContext({ id }: { id: string }) {
           <p className="text-sm text-gray-500 leading-relaxed">{d.summary}</p>
           {d.recommendations.length > 0 && (
             <div className="mt-4">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommendations</p>
+              <p className="text-[11px] text-gray-400 tracking-wider mb-2">Recommendations</p>
               <div className="flex flex-col gap-2">
                 {d.recommendations.map((r, i) => (
                   <div key={i} className="flex gap-2.5">

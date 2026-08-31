@@ -75,7 +75,7 @@ function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: str
 
         {d.recommendedActions && d.recommendedActions.length > 0 && (
           <div className="mt-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommended actions</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-2">Recommended actions</p>
             <div className="flex flex-wrap gap-2">
               {d.recommendedActions.map((a) => (
                 <Button
@@ -116,15 +116,15 @@ function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: str
         {d.invoice && (
           <div className="bg-white border border-gray-100 rounded-xl p-4 mt-4 flex flex-col gap-3">
             <div>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">Invoice readiness</p>
+              <p className="text-[11px] text-gray-400 tracking-wider mb-1.5">Invoice readiness</p>
               <span className="text-xs bg-gray-900 text-white px-2 py-0.5 rounded-full">{d.invoice.readiness}</span>
             </div>
             <div>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Blocker</p>
+              <p className="text-[11px] text-gray-400 tracking-wider mb-1">Blocker</p>
               <p className="text-sm text-gray-700">{d.invoice.blocker}</p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Critical vendor</p>
+              <p className="text-[11px] text-gray-400 tracking-wider mb-1">Critical vendor</p>
               <p className="text-sm text-gray-700">{d.invoice.criticalVendor}</p>
             </div>
           </div>
@@ -141,13 +141,13 @@ function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: str
             { label: "Handover status", value: d.ownership.handoverStatus },
           ].map((o) => (
             <div key={o.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">{o.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider mb-1">{o.label}</p>
               <p className="text-sm text-gray-700 leading-snug">{o.value}</p>
             </div>
           ))}
         </div>
         <div className="bg-white border border-gray-100 rounded-xl p-4">
-          <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-3">Blockers &amp; dependencies</p>
+          <p className="text-[11px] text-gray-400 tracking-wider mb-3">Blockers &amp; dependencies</p>
           <div className="flex flex-col gap-4">
             {d.blockers.map((b, i) => (
               <div key={i}>
@@ -165,8 +165,8 @@ function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: str
         <p className="text-xs text-gray-400 mb-3">Provenance is shown for every record. Nothing is copied into this layer.</p>
         <div>
           <div className="grid grid-cols-[1fr_auto] gap-x-3 pb-2 border-b border-gray-200">
-            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Document</span>
-            <span className="text-[10px] text-gray-400 uppercase tracking-wider text-right">State</span>
+            <span className="text-[10px] text-gray-400 tracking-wider">Document</span>
+            <span className="text-[10px] text-gray-400 tracking-wider text-right">State</span>
           </div>
           {d.documents.map((doc) => (
             <div key={doc.name} className="grid grid-cols-[1fr_auto] gap-x-3 py-2.5 items-center border-b border-gray-100">
@@ -264,7 +264,7 @@ function DrawerBody({ d, onAction }: { d: CustomerDetail; onAction: (prompt: str
 function RelatedGroup({ label, icon, refs }: { label: string; icon: React.ReactNode; refs: { title: string; sub: string }[] }) {
   return (
     <div>
-      <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">{label}</p>
+      <p className="text-[11px] text-gray-400 tracking-wider mb-2">{label}</p>
       <div className="flex flex-col gap-2">
         {refs.map((r) => (
           <div key={r.title} className="flex items-start gap-3">
@@ -399,12 +399,12 @@ export default function AttentionDrawer({ itemId, onClose }: Props) {
                   { label: "Schedule", value: detail.stats.schedule },
                 ].map((s) => (
                   <div key={s.label}>
-                    <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
                     <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
                   </div>
                 ))}
                 <div>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Health</p>
+                  <p className="text-[11px] text-gray-400 tracking-wider">Health</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div className="h-full bg-gray-900 rounded-full" style={{ width: `${detail.stats.healthPct}%` }} />

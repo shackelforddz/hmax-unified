@@ -90,7 +90,7 @@ export function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; c
         <p className="text-sm text-gray-500 leading-relaxed">{d.contextSummary}</p>
         {d.recommendedActions.length > 0 && (
           <div className="mt-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">Recommended actions</p>
+            <p className="text-[11px] text-gray-400 tracking-wider mb-2">Recommended actions</p>
             <div className="flex flex-wrap gap-2">
               {d.recommendedActions.map((a) => (
                 <Button key={a} onClick={() => onAction(a)} className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer">
@@ -120,7 +120,7 @@ export function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; c
               { label: "Insulation", value: nameplate.insulationClass },
             ].map((r) => (
               <div key={r.label}>
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+                <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
                 <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
               </div>
             ))}
@@ -209,7 +209,7 @@ export function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; c
             { label: "Station", value: d.related.station },
           ].map((r) => (
             <div key={r.label}>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">{r.label}</p>
+              <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
               <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
             </div>
           ))}
@@ -492,12 +492,12 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
                   { label: "Last service", value: detail.stats.lastService },
                 ].map((s) => (
                   <div key={s.label}>
-                    <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-[11px] text-gray-400 tracking-wider">{s.label}</p>
                     <p className="text-sm text-gray-800 mt-0.5">{s.value}</p>
                   </div>
                 ))}
                 <div>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Health</p>
+                  <p className="text-[11px] text-gray-400 tracking-wider">Health</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div className="h-full bg-gray-900 rounded-full" style={{ width: `${detail.stats.healthPct}%` }} />

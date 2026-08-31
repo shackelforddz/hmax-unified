@@ -105,7 +105,7 @@ export default function TopNav() {
 
               {/* Persona switcher */}
               <div className="px-4 pt-2.5 pb-1">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider">Persona</p>
+                <p className="text-[11px] text-gray-400 tracking-wider">Persona</p>
               </div>
               {PERSONAS.map(({ label, icon: Icon }) => (
                 <button

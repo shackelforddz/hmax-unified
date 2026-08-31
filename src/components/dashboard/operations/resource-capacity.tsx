@@ -32,7 +32,7 @@ export default function ResourceCapacity() {
 
       {/* Capacity risks */}
       <div className="mt-5">
-        <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-2.5">Capacity risks</p>
+        <p className="text-[11px] text-gray-400 tracking-wider mb-2.5">Capacity risks</p>
         <div className="flex flex-col gap-2.5">
           {CAPACITY_RISKS.map((r) => (
             <div key={r.title} className="flex gap-3">

@@ -142,12 +142,23 @@ type Filter = "all" | "at-risk";
 export default function PeopleWidget({ people = PEOPLE, title = "People" }: { people?: Person[]; title?: string }) {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [comp, setComp] = useState("all");
+  const [cert, setCert] = useState("all");
 
   const isAtRisk = (p: Person) => riskReasons(p, tasksFor(p)).length > 0;
   const atRiskCount = people.filter(isAtRisk).length;
   const avgAllocation = Math.round(people.reduce((s, p) => s + p.allocation, 0) / people.length);
 
-  const visible = filter === "at-risk" ? people.filter(isAtRisk) : people;
+  // Filter options derived from the current team.
+  const competencyOptions = Array.from(new Set(people.flatMap((p) => p.competencies))).sort();
+  const certOptions = Array.from(new Set(people.flatMap((p) => p.certifications.map((c) => c.name)))).sort();
+
+  const visible = people.filter(
+    (p) =>
+      (filter === "all" || isAtRisk(p)) &&
+      (comp === "all" || p.competencies.includes(comp)) &&
+      (cert === "all" || p.certifications.some((c) => c.name === cert))
+  );
   // Surface at-risk people first, then by allocation (busiest first).
   const sorted = [...visible].sort((a, b) => {
     const ra = isAtRisk(a) ? 1 : 0;
@@ -161,6 +172,9 @@ export default function PeopleWidget({ people = PEOPLE, title = "People" }: { pe
     { label: "All", value: "all", count: people.length },
     { label: "At risk", value: "at-risk", count: atRiskCount },
   ];
+
+  const selectCls =
+    "text-xs px-3 py-1 rounded-full border border-gray-200 text-gray-500 bg-white cursor-pointer outline-none hover:border-gray-300 max-w-[180px]";
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -189,6 +203,24 @@ export default function PeopleWidget({ people = PEOPLE, title = "People" }: { pe
               {f.label} {f.count}
             </button>
           ))}
+
+          <span className="text-gray-200 text-xs mx-1">|</span>
+
+          <span className="text-xs text-gray-400">Competency</span>
+          <select value={comp} onChange={(e) => setComp(e.target.value)} className={selectCls}>
+            <option value="all">All</option>
+            {competencyOptions.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
+
+          <span className="text-xs text-gray-400">Certification</span>
+          <select value={cert} onChange={(e) => setCert(e.target.value)} className={selectCls}>
+            <option value="all">All</option>
+            {certOptions.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -198,7 +230,7 @@ export default function PeopleWidget({ people = PEOPLE, title = "People" }: { pe
             <PersonRow key={p.id} person={p} defaultExpanded={p.id === firstAtRisk} onOpenTask={setDrawerId} />
           ))
         ) : (
-          <p className="text-sm text-gray-400 text-center py-6">No one on your team is currently at risk.</p>
+          <p className="text-sm text-gray-400 text-center py-6">No one on your team matches the selected filters.</p>
         )}
       </div>
     </div>

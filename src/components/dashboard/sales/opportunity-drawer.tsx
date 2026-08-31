@@ -5,6 +5,7 @@ import { X, ChevronDown, Check, Circle, Cpu, FileText, ClipboardCheck, UserPlus,
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { OPP_STAGES, OPPORTUNITIES, type Opportunity, type OpportunityDetail } from "@/lib/sales-data";
+import OwnerBadge from "./owner-badge";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -114,7 +115,10 @@ function DrawerBody({ opp, detail, onAction }: { opp: Opportunity; detail: Oppor
                 <Circle size={15} className="text-gray-300 shrink-0" />
               )}
               <span className={`text-sm ${r.done ? "text-gray-700" : "text-gray-500"}`}>{r.label}</span>
-              {!r.done && <span className="ml-auto text-[10px] text-gray-500 border border-gray-200 rounded-full px-2 py-0.5">Missing</span>}
+              <span className="ml-auto flex items-center gap-2 shrink-0">
+                <OwnerBadge owner={r.owner} />
+                {!r.done && <span className="text-[10px] text-gray-500 border border-gray-200 rounded-full px-2 py-0.5">Missing</span>}
+              </span>
             </div>
           ))}
         </div>

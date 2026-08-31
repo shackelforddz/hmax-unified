@@ -51,6 +51,7 @@ export default function DashboardPage() {
           conversations={conversations}
           onNewConversation={() => openConversation()}
           onSelect={openStored}
+          onStartPrompt={(prompt) => openConversation({ prompt })}
         />
       </div>
 

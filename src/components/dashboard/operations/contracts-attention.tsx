@@ -63,7 +63,6 @@ function RiskChips({ risk }: { risk: RiskProfile }) {
 function ContractRow({ contract, category, onOpenDrawer }: { contract: OpsContract; category: AlertCategory | "all"; onOpenDrawer: (id: string) => void }) {
   const [expanded, setExpanded] = useState(contract.id === "ct-sherco");
   const launch = useConversationLauncher();
-  const behind = contract.baseline - contract.progress;
 
   // Category counts for the collapsed summary.
   const counts = CAT_ORDER.map((c) => [c, contract.alerts.filter((a) => a.category === c).length] as const).filter(([, n]) => n > 0);
@@ -94,15 +93,14 @@ function ContractRow({ contract, category, onOpenDrawer }: { contract: OpsContra
           </div>
         </div>
 
-        {/* Progress bar (baseline vs actual) */}
+        {/* Progress bar — % of contract term elapsed */}
         <div className="flex items-center gap-3 mb-2.5">
           <span className="text-xs text-gray-400 shrink-0 w-20">Progress</span>
           <div className="relative flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-gray-900 rounded-full" style={{ width: `${contract.progress}%` }} />
-            <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: `${contract.baseline}%` }} />
           </div>
           <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
-            {contract.progress}%{behind > 0 ? ` · ${behind}pts behind` : ""}
+            {contract.progress}% of term
           </span>
         </div>
 

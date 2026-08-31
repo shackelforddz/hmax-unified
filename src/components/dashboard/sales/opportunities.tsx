@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Circle, TrendingUp, Plus, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Circle, Plus } from "lucide-react";
 import {
   OPPORTUNITIES,
   OPPORTUNITY_DETAILS,
@@ -16,13 +16,14 @@ import WidgetChat from "@/components/dashboard/widget-chat";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import OpportunityDrawer from "./opportunity-drawer";
+import OwnerBadge from "./owner-badge";
 
-const REQ_LABELS = [
-  "Account & shipping details",
-  "Install Base profile",
-  "Scope of Work & tech requirements",
-  "Costing & pricing model",
-  "Legal T&Cs",
+const REQ_LABELS: { label: string; owner: string }[] = [
+  { label: "Account & shipping details", owner: "Sales ops — T. Wu" },
+  { label: "Install Base profile", owner: "Reliability — F. Dubois" },
+  { label: "Scope of Work & tech requirements", owner: "Engineering — J. Park" },
+  { label: "Costing & pricing model", owner: "Commercial — A. Rossi" },
+  { label: "Legal T&Cs", owner: "Legal — R. Bianchi" },
 ];
 
 // Turn a system proposal into a fresh pipeline opportunity.
@@ -35,7 +36,7 @@ function proposalToOpp(p: ProposedOpportunity): Opportunity {
     owner: "Unassigned",
     stage: "Discovery",
     status: "on-track",
-    requirements: REQ_LABELS.map((label) => ({ label, done: false })),
+    requirements: REQ_LABELS.map(({ label, owner }) => ({ label, owner, done: false })),
     recommendedAction: "Qualify budget & scope",
   };
 }
@@ -84,35 +85,21 @@ function ProposedCard({
   onDismiss: () => void;
 }) {
   return (
-    <div className="border border-gray-200 rounded-2xl p-5 bg-gray-50">
-      <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0">
-          <Sparkles size={16} strokeWidth={1.5} className="text-gray-500" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-base text-gray-900">{p.account}</h4>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-900 text-white">Proposed</span>
-          </div>
-          <p className="text-sm text-gray-400">{p.title} · {p.estimatedValue}</p>
-          <p className="text-sm text-gray-600 leading-relaxed mt-2">{p.rationale}</p>
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            {p.signals.map((s) => (
-              <span key={s} className="text-[11px] text-gray-500 bg-white border border-gray-100 rounded-full px-2 py-0.5">{s}</span>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button onClick={onAdd} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
-              Add to pipeline
-            </Button>
-            <Button variant="outline" onClick={onReview} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">
-              Review
-            </Button>
-            <Button variant="ghost" onClick={onDismiss} className="rounded-full h-auto px-4 py-2 text-sm text-gray-500 cursor-pointer">
-              Dismiss
-            </Button>
-          </div>
-        </div>
+    <div className="border border-gray-200 rounded-2xl px-4 py-3 bg-gray-50 flex items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm text-gray-900 truncate">{p.account}</h4>
+        <p className="text-xs text-gray-400 truncate">{p.title} · {p.estimatedValue} · {p.rationale}</p>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Button onClick={onAdd} className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer">
+          Add
+        </Button>
+        <Button variant="outline" onClick={onReview} className="rounded-full h-auto px-4 py-1.5 text-xs text-gray-700 cursor-pointer">
+          Review
+        </Button>
+        <Button variant="ghost" onClick={onDismiss} className="rounded-full h-auto px-3 py-1.5 text-xs text-gray-500 cursor-pointer">
+          Dismiss
+        </Button>
       </div>
     </div>
   );
@@ -151,9 +138,6 @@ function OppRow({ opp, onOpenDrawer }: { opp: Opportunity; onOpenDrawer: (opp: O
         className="w-full text-left px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-4">
-          <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-            <TrendingUp size={16} strokeWidth={1.5} className="text-gray-400" />
-          </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-base text-gray-900 mb-1">{nameSpan}</h4>
             <p className="text-sm text-gray-400 truncate">
@@ -184,6 +168,7 @@ function OppRow({ opp, onOpenDrawer }: { opp: Opportunity; onOpenDrawer: (opp: O
                     <div key={m.label} className="flex items-center gap-2.5">
                       <Circle size={14} className="text-gray-300 shrink-0" />
                       <span className="text-sm text-gray-600">{m.label}</span>
+                      <OwnerBadge owner={m.owner} className="ml-auto" />
                     </div>
                   ))}
                 </div>
@@ -312,8 +297,7 @@ export default function Opportunities() {
         {/* Proposed for you — system-generated opportunities to review */}
         {proposed.length > 0 && (
           <>
-            <div className="flex items-center gap-2 px-1">
-              <Sparkles size={13} strokeWidth={1.5} className="text-gray-400" />
+            <div className="px-1">
               <p className="text-xs text-gray-500 uppercase tracking-wider">Proposed for you · {proposed.length}</p>
             </div>
             {proposed.map((p) => (

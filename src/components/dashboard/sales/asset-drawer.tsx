@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink, FileText, ScrollText, PencilRuler } from "lucide-react";
+import { X, ChevronDown, CalendarClock, ClipboardList, Package, UserPlus, ExternalLink, FileText, ScrollText, PencilRuler, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { ASSET_DETAILS, ASSET_CONDITION, type AssetDetail, type AssetReading, type AssetCondition } from "@/lib/sales-data";
-import { WORK_ORDERS } from "@/lib/work-orders-data";
+import { WORK_ORDERS, WORK_ORDER_DETAILS } from "@/lib/work-orders-data";
 import { REPORTS_AWAITING } from "@/lib/field-reports-data";
 import { ASSET_SERVICE_HISTORY } from "@/lib/asset-history-data";
 import { ASSET_NAMEPLATE, type Nameplate } from "@/lib/asset-nameplate-data";
 import { ASSET_DRAWINGS } from "@/lib/asset-drawings-data";
 import { Aging, ScoreCalculation, RiskMatrix, ConditionTrend, ParameterTrend, Diagnostics } from "./asset-condition";
+import DocumentViewer, { type ViewDoc } from "./document-viewer";
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -78,7 +81,7 @@ function ActionsMenu({ onAction }: { onAction: (label: string) => void }) {
   );
 }
 
-function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; cond: AssetCondition | null; nameplate?: Nameplate; onAction: (prompt: string) => void }) {
+export function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; cond: AssetCondition | null; nameplate?: Nameplate; onAction: (prompt: string) => void }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Context summary */}
@@ -217,17 +220,21 @@ function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; cond: As
 }
 
 /* ── Documents tab ───────────────────────────────────────────────── */
-function DocRow({ icon: Icon, title, meta }: { icon: React.ElementType; title: string; meta: string }) {
+function DocRow({ icon: Icon, title, meta, onOpen }: { icon: React.ElementType; title: string; meta: string; onOpen: () => void }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+    <button
+      onClick={onOpen}
+      className="w-full text-left flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0 hover:bg-white transition-colors cursor-pointer group"
+    >
       <div className="w-8 h-8 rounded-md bg-white border border-gray-100 flex items-center justify-center shrink-0">
         <Icon size={15} strokeWidth={1.5} className="text-gray-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-800 truncate">{title}</p>
+        <p className="text-sm text-gray-800 truncate group-hover:underline underline-offset-2 decoration-gray-300">{title}</p>
         <p className="text-xs text-gray-400 truncate">{meta}</p>
       </div>
-    </div>
+      <Eye size={15} strokeWidth={1.5} className="text-gray-300 group-hover:text-gray-500 shrink-0 transition-colors" />
+    </button>
   );
 }
 
@@ -243,7 +250,7 @@ function DocGroup({ title, count, children }: { title: string; count: number; ch
   );
 }
 
-function DocumentsTab({ d, id }: { d: AssetDetail; id: string }) {
+export function DocumentsTab({ d, id, onOpen }: { d: AssetDetail; id: string; onOpen: (doc: ViewDoc) => void }) {
   const reports = REPORTS_AWAITING.filter((r) => r.assetId === id);
   const workOrders = WORK_ORDERS.filter((w) => w.asset === d.code);
   const drawings = ASSET_DRAWINGS[id] ?? [];
@@ -251,25 +258,109 @@ function DocumentsTab({ d, id }: { d: AssetDetail; id: string }) {
   return (
     <div className="flex flex-col gap-4">
       <DocGroup title="Drawings & FAT" count={drawings.length}>
-        {drawings.map((dw) => (
-          <DocRow key={dw.ref} icon={PencilRuler} title={`${dw.name} · ${dw.type}`} meta={`${dw.ref} · ${dw.date}`} />
-        ))}
+        {drawings.map((dw) => {
+          const isFat = dw.type === "FAT report";
+          const doc: ViewDoc = {
+            kind: "drawing",
+            docType: isFat ? "Factory acceptance test" : dw.type,
+            title: dw.name,
+            ref: dw.ref,
+            preview: isFat ? "text" : "drawing",
+            fields: [
+              { label: "Document type", value: dw.type },
+              { label: "Issue date", value: dw.date },
+              { label: "Discipline", value: "Electrical" },
+              { label: "Status", value: "Issued for construction" },
+            ],
+            sections: isFat
+              ? [{ heading: "Summary", text: "Factory acceptance testing completed to IEC 60076. All routine and type tests passed with no deviations recorded; the unit was released for shipment." }]
+              : [{ heading: "Notes", text: "Single-line representation for reference only. Confirm against the latest revision before any switching, isolation or maintenance activity." }],
+          };
+          return <DocRow key={dw.ref} icon={PencilRuler} title={`${dw.name} · ${dw.type}`} meta={`${dw.ref} · ${dw.date}`} onOpen={() => onOpen(doc)} />;
+        })}
       </DocGroup>
 
       <DocGroup title="Reports" count={reports.length}>
-        {reports.map((r) => (
-          <DocRow key={r.id} icon={FileText} title={`${r.code} · ${r.type}`} meta={`${r.engineer} · submitted ${r.submitted}`} />
-        ))}
+        {reports.map((r) => {
+          const doc: ViewDoc = {
+            kind: "report",
+            docType: "Field report",
+            title: `${r.code} · ${r.type}`,
+            ref: r.code,
+            preview: "text",
+            fields: [
+              { label: "Asset", value: r.asset },
+              { label: "Report type", value: r.type },
+              { label: "Engineer", value: r.engineer },
+              { label: "Submitted", value: r.submitted },
+              { label: "Priority", value: cap(r.priority) },
+              { label: "Fault signature", value: r.faultSignature ? "Detected" : "None" },
+            ],
+            sections: [
+              { heading: "Finding", text: r.finding },
+              {
+                heading: "Recommendation",
+                text: r.faultSignature
+                  ? "Fault signature present — recommend engineering interpretation and that a corrective work order be raised against the asset."
+                  : "Readings within limits — continue trend monitoring; no immediate corrective action required.",
+              },
+            ],
+          };
+          return <DocRow key={r.id} icon={FileText} title={`${r.code} · ${r.type}`} meta={`${r.engineer} · submitted ${r.submitted}`} onOpen={() => onOpen(doc)} />;
+        })}
       </DocGroup>
 
       <DocGroup title="Work orders" count={workOrders.length}>
-        {workOrders.map((w) => (
-          <DocRow key={w.id} icon={ClipboardList} title={`${w.code} · ${w.title}`} meta={`${w.type} · ${w.status.replace("-", " ")} · due ${w.due}`} />
-        ))}
+        {workOrders.map((w) => {
+          const det = WORK_ORDER_DETAILS[w.id];
+          const doc: ViewDoc = {
+            kind: "work-order",
+            docType: "Work order",
+            title: `${w.code} · ${w.title}`,
+            ref: w.code,
+            preview: "text",
+            fields: [
+              { label: "Asset", value: w.asset },
+              { label: "Type", value: w.type },
+              { label: "Priority", value: cap(w.priority) },
+              { label: "Status", value: cap(w.status.replace("-", " ")) },
+              { label: "Assignee", value: w.assignee },
+              { label: "Due", value: w.due },
+              { label: "Progress", value: `${w.progress}%` },
+              { label: "Contract", value: w.contract },
+            ],
+            sections: det ? [{ heading: "Scope", text: det.summary }] : [],
+          };
+          return <DocRow key={w.id} icon={ClipboardList} title={`${w.code} · ${w.title}`} meta={`${w.type} · ${w.status.replace("-", " ")} · due ${w.due}`} onOpen={() => onOpen(doc)} />;
+        })}
       </DocGroup>
 
       <DocGroup title="Contracts" count={1}>
-        <DocRow icon={ScrollText} title={d.related.contract} meta={d.related.customer} />
+        <DocRow
+          icon={ScrollText}
+          title={d.related.contract}
+          meta={d.related.customer}
+          onOpen={() =>
+            onOpen({
+              kind: "contract",
+              docType: "Service contract",
+              title: d.related.contract,
+              ref: d.related.contract,
+              preview: "text",
+              fields: [
+                { label: "Customer", value: d.related.customer },
+                { label: "Station", value: d.related.station },
+                { label: "Covered asset", value: d.code },
+              ],
+              sections: [
+                {
+                  heading: "Scope of service",
+                  text: `Coverage for ${d.code} under the ${d.related.contract}. Includes scheduled maintenance, condition monitoring and priority call-out for ${d.related.customer} at ${d.related.station}.`,
+                },
+              ],
+            })
+          }
+        />
       </DocGroup>
     </div>
   );
@@ -283,7 +374,7 @@ const EVENT_CLS: Record<string, string> = {
   Service: "border border-gray-300 text-gray-500",
 };
 
-function ServiceHistoryTab({ id }: { id: string }) {
+export function ServiceHistoryTab({ id }: { id: string }) {
   const events = ASSET_SERVICE_HISTORY[id] ?? [];
   return (
     <Card>
@@ -313,12 +404,12 @@ function ServiceHistoryTab({ id }: { id: string }) {
   );
 }
 
-const DRAWER_TABS = [
+export const DRAWER_TABS = [
   { label: "Summary", value: "summary" },
   { label: "Documents", value: "documents" },
   { label: "Service history", value: "history" },
 ] as const;
-type DrawerTab = (typeof DRAWER_TABS)[number]["value"];
+export type DrawerTab = (typeof DRAWER_TABS)[number]["value"];
 
 interface Props {
   assetId: string | null;
@@ -331,10 +422,14 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
   const open = !!detail;
   const launch = useConversationLauncher();
   const [tab, setTab] = useState<DrawerTab>("summary");
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
 
   // Reset to the summary tab whenever a different asset is opened.
   useEffect(() => {
-    if (assetId) setTab("summary");
+    if (assetId) {
+      setTab("summary");
+      setViewDoc(null);
+    }
   }, [assetId]);
 
   const runAction = (prompt: string) => {
@@ -431,7 +526,7 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
             {/* Body */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-5 bg-white">
               {tab === "summary" && <DrawerBody d={detail} cond={cond} nameplate={assetId ? ASSET_NAMEPLATE[assetId] : undefined} onAction={runAction} />}
-              {tab === "documents" && assetId && <DocumentsTab d={detail} id={assetId} />}
+              {tab === "documents" && assetId && <DocumentsTab d={detail} id={assetId} onOpen={setViewDoc} />}
               {tab === "history" && assetId && <ServiceHistoryTab id={assetId} />}
             </div>
 
@@ -449,6 +544,21 @@ export default function AssetDrawer({ assetId, onClose }: Props) {
           </>
         )}
       </div>
+
+      {/* Document viewer — opens above the drawer */}
+      <DocumentViewer
+        doc={viewDoc}
+        onClose={() => setViewDoc(null)}
+        onAsk={(doc) => {
+          setViewDoc(null);
+          onClose();
+          launch({
+            context: detail?.code,
+            prompt: `Walk me through ${doc.title} (${doc.ref})`,
+            entity: assetId ? { kind: "asset", id: assetId } : undefined,
+          });
+        }}
+      />
     </>
   );
 }

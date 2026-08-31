@@ -11,6 +11,7 @@ import EntityContextPanel from "./context-panel-entity";
 import DocPanel from "./doc-panel";
 import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
 import { answerQuery, detectCustomer, suggestNext, visualFor } from "@/lib/knowledge-base";
+import { flowFor, flowById } from "@/lib/guided-flows";
 import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { useAppSelector } from "@/store/hooks";
 import { Button } from "@/components/ui/button";
@@ -174,6 +175,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     const q = text.toLowerCase();
     const isMob = /mobili[sz]|mobilization plan|mobilisation plan/.test(q);
     const isOpp = /opportunit/.test(q) && /(build|create|new|start|open)/.test(q);
+    const flow = !isMob && !isOpp ? flowFor(text) : undefined;
     if (isMob) {
       // The demo mobilization plan is tied to the Xcel Energy contract
       // (Sherco HVDC) — surface its detail in the context pane.
@@ -196,6 +198,18 @@ export default function ConversationOverlay({ visible, onClose, context, initial
         setTimeout(() => {
           setTyping(false);
           push({ role: "ai", kind: "opp-wizard" });
+        }, 2100)
+      );
+    } else if (flow) {
+      setWizardStep(1);
+      if (flow.entity) setActiveEntity((prev) => prev ?? flow.entity ?? null);
+      timers.current.push(
+        setTimeout(() => push({ role: "ai", kind: "text", text: flow.intro }), 1000)
+      );
+      timers.current.push(
+        setTimeout(() => {
+          setTyping(false);
+          push({ role: "ai", kind: "flow", flowId: flow.id });
         }, 2100)
       );
     } else {
@@ -262,7 +276,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   // When launched from a widget, skip the welcome screen and start immediately
   // with the widget context pinned to the top of the conversation.
   useEffect(() => {
-    if (visible && (context || entity) && !restore && !started) {
+    if (visible && (context || entity || initialPrompt) && !restore && !started) {
       if (context) setActiveContext(context);
       if (entity) setActiveEntity(entity);
       send((initialPrompt || "").trim() || `Tell me about ${context}`, context);
@@ -336,10 +350,31 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     );
   };
 
-  // Entity-launched chats (asset/contract/opportunity/customer) show the
-  // context panel immediately. Widget-launched chats (activeContext only) hide
-  // it until a customer is identified. Mobilization chats show it on start.
-  const showPanel = started && (activeEntity ? true : activeContext ? !!detectedCustomer : true);
+  // Final step of a generic guided flow — confirm the action.
+  const flowComplete = (flowId: string) => {
+    const flow = flowById(flowId);
+    setTyping(true);
+    clearTimers();
+    timers.current.push(
+      setTimeout(() => {
+        setTyping(false);
+        push({
+          role: "ai",
+          kind: "text",
+          text: flow?.done ?? "✓ Done.",
+          suggestions: flow?.doneSuggestions
+            ? { prompts: flow.doneSuggestions, actions: [] }
+            : undefined,
+        });
+      }, 1000)
+    );
+  };
+
+  // The left context pane only ever shows detail content for a real record —
+  // an asset, contract, opportunity, or customer. It appears when a record is
+  // pinned (activeEntity) or a customer is identified from the conversation;
+  // otherwise there is no pane (no placeholder / default account).
+  const showPanel = started && (!!activeEntity || !!detectedCustomer);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -387,10 +422,10 @@ export default function ConversationOverlay({ visible, onClose, context, initial
           }`}
         >
           {activeEntity ? (
-            <EntityContextPanel entity={activeEntity} />
-          ) : (
-            <ContextPanel customer={detectedCustomer ?? "Xcel Energy"} />
-          )}
+            <EntityContextPanel entity={activeEntity} onAction={(t) => send(t)} />
+          ) : detectedCustomer ? (
+            <ContextPanel customer={detectedCustomer} />
+          ) : null}
         </div>
       </div>
 
@@ -402,9 +437,11 @@ export default function ConversationOverlay({ visible, onClose, context, initial
             started ? "opacity-100 max-h-20" : "opacity-0 max-h-0 overflow-hidden"
           }`}
         >
-          <div className="max-w-[640px] mx-auto w-full px-4 flex items-center justify-between pt-7 pb-5">
-            <h2 className="text-xl text-gray-900">{activeContext ?? "Xcel Energy Mobilization Plan"}</h2>
-            <div className="flex items-center gap-1">
+          <div className="max-w-[640px] mx-auto w-full px-4 flex items-center justify-between gap-3 pt-7 pb-5">
+            <h2 className="text-xl text-gray-900 truncate min-w-0">
+              {activeContext ?? messages.find((m) => m.role === "user")?.text ?? "New conversation"}
+            </h2>
+            <div className="flex items-center gap-1 shrink-0">
               <button className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:bg-black/5 transition-colors cursor-pointer">
                 <UserRoundPlus size={17} strokeWidth={1.5} />
               </button>
@@ -451,6 +488,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                 onWizardStep={setWizardStep}
                 onGenerate={() => setDocVisible(true)}
                 onOppCreate={oppCreate}
+                onFlowComplete={flowComplete}
                 onSend={(t) => send(t)}
               />
             )}

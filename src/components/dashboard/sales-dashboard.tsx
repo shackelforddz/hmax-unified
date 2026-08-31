@@ -5,6 +5,7 @@ import KpiCard from "@/components/dashboard/kpi-card";
 import FleetMap from "@/components/dashboard/sales/fleet-map";
 import FleetHealth from "@/components/dashboard/sales/fleet-health";
 import AssetAlerts from "@/components/dashboard/sales/asset-alerts";
+import AccountsAttention from "@/components/dashboard/sales/accounts-attention";
 import OpportunityStats from "@/components/dashboard/sales/opportunity-stats";
 import OpportunityOverview from "@/components/dashboard/sales/opportunity-overview";
 import Opportunities from "@/components/dashboard/sales/opportunities";
@@ -44,10 +45,16 @@ export default function SalesDashboard() {
 
       {/* Bento box — tiles stretch to equal height within each row */}
       <div className="grid grid-cols-6 gap-4 items-stretch [&>*]:min-w-0 [&>.tile>*]:h-full">
-        {/* ── Opportunities (ops) — top ── */}
+        {/* ── Opportunities (ops) ── */}
         <div className="col-span-6">
           <OpportunityStats />
         </div>
+
+        {/* ── Accounts needing attention — account-level altitude ── */}
+        <div className="col-span-6">
+          <AccountsAttention />
+        </div>
+
         <div className="tile col-span-6">
           <OpportunityOverview />
         </div>

@@ -754,6 +754,7 @@ export const OPP_STAGES: OppStage[] = ["Discovery", "Qualified", "Scoping", "Off
 export interface OppRequirement {
   label: string;
   done: boolean;
+  owner: string; // the function/person responsible for supplying this input
 }
 export interface Opportunity {
   id: string;
@@ -771,11 +772,11 @@ export interface Opportunity {
 const req = (
   account: boolean, installBase: boolean, scope: boolean, costing: boolean, legal: boolean
 ): OppRequirement[] => [
-  { label: "Account & shipping details", done: account },
-  { label: "Install Base profile", done: installBase },
-  { label: "Scope of Work & tech requirements", done: scope },
-  { label: "Costing & pricing model", done: costing },
-  { label: "Legal T&Cs", done: legal },
+  { label: "Account & shipping details", done: account, owner: "Sales ops — T. Wu" },
+  { label: "Install Base profile", done: installBase, owner: "Reliability — F. Dubois" },
+  { label: "Scope of Work & tech requirements", done: scope, owner: "Engineering — J. Park" },
+  { label: "Costing & pricing model", done: costing, owner: "Commercial — A. Rossi" },
+  { label: "Legal T&Cs", done: legal, owner: "Legal — R. Bianchi" },
 ];
 
 export const OPPORTUNITIES: Opportunity[] = [

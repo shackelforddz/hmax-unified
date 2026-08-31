@@ -42,13 +42,25 @@ export interface OpsContract {
   owner: string;
   value: string;
   status: OpsStatus;
-  progress: number; // % complete
-  baseline: number; // planned % at this point
+  start: string; // contract term start (ISO)
+  end: string;   // contract term end (ISO)
+  progress: number; // % of contract term elapsed — derived from start/end
   risk: RiskProfile;
   alerts: ContractAlert[];
 }
 
-export const OPS_CONTRACTS: OpsContract[] = [
+// Progress is measured purely by contract length: how far through the
+// contract term we are today, clamped to 0–100%.
+export function contractLengthProgress(start: string, end: string, now: Date = new Date()): number {
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  const t = now.getTime();
+  if (t <= s) return 0;
+  if (t >= e) return 100;
+  return Math.round(((t - s) / (e - s)) * 100);
+}
+
+const RAW_CONTRACTS: Omit<OpsContract, "progress">[] = [
   {
     id: "ct-sherco",
     name: "Sherco HVDC winding replacement",
@@ -56,8 +68,8 @@ export const OPS_CONTRACTS: OpsContract[] = [
     owner: "Daniel Brooks",
     value: "£4.2m",
     status: "critical",
-    progress: 55,
-    baseline: 73,
+    start: "2026-06-01",
+    end: "2026-12-15",
     risk: { schedule: "high", cost: "med", quality: "low", safety: "med" },
     alerts: [
       { category: "delivery", title: "18 days behind baseline — outage window at risk", detail: "Field mobilization slipped and the work is now tracking 18 days behind. Missing the 14 September outage window pushes delivery into February and defers a £1.2m milestone invoice.", action: "Adjust Schedule" },
@@ -74,8 +86,8 @@ export const OPS_CONTRACTS: OpsContract[] = [
     owner: "Sarah Mitchell",
     value: "£2.4m",
     status: "critical",
-    progress: 62,
-    baseline: 78,
+    start: "2026-04-15",
+    end: "2027-02-01",
     risk: { schedule: "high", cost: "high", quality: "med", safety: "low" },
     alerts: [
       { category: "delivery", title: "Crew over-allocated across the platform cluster", detail: "Field Service is at 96% utilisation with no slack for the additional protection-relay scope.", action: "Rebalance Crew" },
@@ -91,8 +103,8 @@ export const OPS_CONTRACTS: OpsContract[] = [
     owner: "Sarah Mitchell",
     value: "£2.4m",
     status: "at-risk",
-    progress: 80,
-    baseline: 82,
+    start: "2025-11-01",
+    end: "2026-10-15",
     risk: { schedule: "low", cost: "low", quality: "med", safety: "high" },
     alerts: [
       { category: "delivery", title: "Two HSE certificates expire before the next visit", detail: "Offshore crew certifications lapse ahead of the planned window; remobilisation is blocked until they renew.", action: "Schedule Cert Renewal" },
@@ -107,8 +119,8 @@ export const OPS_CONTRACTS: OpsContract[] = [
     owner: "Lena Fischer",
     value: "£440k",
     status: "at-risk",
-    progress: 40,
-    baseline: 45,
+    start: "2026-07-01",
+    end: "2027-03-01",
     risk: { schedule: "med", cost: "low", quality: "low", safety: "med" },
     alerts: [
       { category: "delivery", title: "Site access unresolved — verbal only", detail: "Only a verbal arrangement is in place; a written access agreement is required before the crew can mobilise.", action: "Request Written Access" },
@@ -116,6 +128,11 @@ export const OPS_CONTRACTS: OpsContract[] = [
     ],
   },
 ];
+
+export const OPS_CONTRACTS: OpsContract[] = RAW_CONTRACTS.map((c) => ({
+  ...c,
+  progress: contractLengthProgress(c.start, c.end),
+}));
 
 export interface OpsContractDetail {
   summary: string;

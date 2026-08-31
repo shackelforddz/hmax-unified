@@ -15,7 +15,6 @@ function ProgressCell({ c }: { c: OpsContract }) {
     <div className="flex items-center gap-2 min-w-[120px]">
       <div className="relative flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div className="h-full bg-gray-900 rounded-full" style={{ width: `${c.progress}%` }} />
-        <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: `${c.baseline}%` }} />
       </div>
       <span className="text-xs text-gray-400 shrink-0">{c.progress}%</span>
     </div>

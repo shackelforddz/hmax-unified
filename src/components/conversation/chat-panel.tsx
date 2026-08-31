@@ -7,6 +7,7 @@ import { type Suggestions } from "@/lib/knowledge-base";
 import { type CustomWidgetConfig } from "@/lib/custom-widget";
 import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { ChartBody } from "@/components/dashboard/sales/custom-widget-view";
+import { flowById, type GuidedFlow, type FlowField } from "@/lib/guided-flows";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -892,6 +893,129 @@ function OppWizardCard({
   );
 }
 
+/* ── Generic data-driven guided flow ─────────────────────────────── */
+function FlowFieldControl({ f }: { f: FlowField }) {
+  if (f.type === "chips") {
+    return <OppChips label={f.label} options={f.options ?? []} initial={f.value ?? f.options?.[0] ?? ""} />;
+  }
+  if (f.type === "textarea") {
+    return (
+      <div>
+        <label className="text-xs text-gray-500 mb-1.5 block">
+          {f.label} {f.star && <span className="text-gray-400">*</span>}
+        </label>
+        <textarea
+          defaultValue={f.value}
+          className="w-full h-20 px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none bg-white placeholder-gray-300"
+        />
+      </div>
+    );
+  }
+  // text or date
+  return (
+    <div>
+      <label className="text-xs text-gray-500 mb-1.5 block">
+        {f.label} {f.star && <span className="text-gray-400">*</span>}
+      </label>
+      <input
+        type={f.type === "date" ? "date" : "text"}
+        defaultValue={f.value}
+        className="w-full h-9 px-3 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 bg-white"
+      />
+    </div>
+  );
+}
+
+function FlowHeader({ n, total, title, sub }: { n: number; total: number; title: string; sub: string }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">STEP {n} OF {total}</p>
+      <h3 className="text-2xl text-gray-900 mb-1 font-patrick-hand">{title}</h3>
+      <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
+    </div>
+  );
+}
+
+function FlowWizardCard({
+  flow,
+  step,
+  onContinue,
+  onBack,
+  onComplete,
+}: {
+  flow: GuidedFlow;
+  step: number;
+  onContinue: () => void;
+  onBack: () => void;
+  onComplete: () => void;
+}) {
+  const total = flow.steps.length + 1; // input steps + Review
+  const stepDefs = [
+    ...flow.steps.map((s, i) => ({ num: i + 1, label: s.label })),
+    { num: total, label: "Review" },
+  ];
+  const isFirst = step === 1;
+  const isLast = step === total;
+  const current = flow.steps[step - 1];
+  const reviewRows = flow.steps.flatMap((s) =>
+    s.fields.filter((f) => f.value).map((f) => ({ label: f.label, value: f.value as string }))
+  );
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <StepTabs current={step} steps={stepDefs} />
+
+      <div key={step} className="animate-step-in">
+        {!isLast && current ? (
+          <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
+            <FlowHeader n={step} total={total} title={current.title} sub={current.sub} />
+            {current.banner && <InfoBanner title={current.banner.title} sub={current.banner.sub} />}
+            <div className="grid grid-cols-2 gap-3">
+              {current.fields.map((f) => (
+                <div key={f.label} className={f.type === "chips" || f.type === "textarea" || f.full ? "col-span-2" : ""}>
+                  <FlowFieldControl f={f} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 px-5 pt-4 pb-1">
+            <FlowHeader n={total} total={total} title="Review & confirm" sub={`Confirm the details before you ${flow.cta.toLowerCase()}.`} />
+            <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+              {reviewRows.map((r, i) => (
+                <div key={`${r.label}-${i}`} className={`flex items-start gap-4 px-4 py-3 ${i < reviewRows.length - 1 ? "border-b border-gray-100" : ""}`}>
+                  <span className="text-xs text-gray-400 w-32 shrink-0 pt-0.5">{r.label}</span>
+                  <span className="text-sm text-gray-800 flex-1">{r.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+        {!isFirst ? (
+          <Button variant="outline" onClick={onBack} className="gap-1.5 rounded-full h-auto px-5 py-2 text-sm text-gray-600 cursor-pointer">
+            <ChevronLeft size={14} />
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        {isLast ? (
+          <Button onClick={onComplete} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
+            {flow.cta}
+          </Button>
+        ) : (
+          <Button onClick={onContinue} className="rounded-full h-auto px-6 py-2 text-sm cursor-pointer">
+            Continue
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Context card (widget-launched conversations) ────────────────── */
 function ContextCard({ context }: { context: string }) {
   return (
@@ -933,7 +1057,9 @@ function SourcesLine() {
 export interface ChatMsg {
   id: number;
   role: "user" | "ai";
-  kind?: "text" | "wizard" | "opp-wizard";
+  kind?: "text" | "wizard" | "opp-wizard" | "flow";
+  /** For kind === "flow": which guided flow to render. */
+  flowId?: string;
   text?: string;
   suggestions?: Suggestions;
   visual?: CustomWidgetConfig;
@@ -998,10 +1124,11 @@ interface ThreadProps {
   onWizardStep: (n: number) => void;
   onGenerate: () => void;
   onOppCreate?: () => void;
+  onFlowComplete?: (flowId: string) => void;
   onSend?: (text: string) => void;
 }
 
-export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onOppCreate, onSend }: ThreadProps) {
+export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onOppCreate, onFlowComplete, onSend }: ThreadProps) {
   const lastId = messages[messages.length - 1]?.id;
   return (
     <>
@@ -1055,6 +1182,31 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
               <SourcesLine />
             </div>
           </div>
+        ) : m.kind === "flow" ? (
+          (() => {
+            const flow = flowById(m.flowId);
+            if (!flow) return null;
+            const total = flow.steps.length + 1;
+            return (
+              <div key={m.id} className="mb-8">
+                <div className="flex items-start gap-3 mb-2 animate-message-in">
+                  <AiAvatar />
+                  <div className="flex-1 min-w-0">
+                    <FlowWizardCard
+                      flow={flow}
+                      step={wizardStep}
+                      onContinue={() => onWizardStep(Math.min(total, wizardStep + 1))}
+                      onBack={() => onWizardStep(Math.max(1, wizardStep - 1))}
+                      onComplete={() => onFlowComplete?.(flow.id)}
+                    />
+                  </div>
+                </div>
+                <div className="ml-11">
+                  <SourcesLine />
+                </div>
+              </div>
+            );
+          })()
         ) : (
           <div key={m.id} className="flex items-start gap-3 mb-5 animate-message-in">
             <AiAvatar />

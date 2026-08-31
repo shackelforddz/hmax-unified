@@ -7,6 +7,7 @@ import DeliveryTrend from "@/components/dashboard/delivery-trend";
 import RevenueAtRisk from "@/components/dashboard/revenue-at-risk";
 import UpcomingMilestones from "@/components/dashboard/upcoming-milestones";
 import VendorConcentration from "@/components/dashboard/vendor-concentration";
+import WaitingOn from "@/components/dashboard/waiting-on";
 import CustomWidget from "@/components/dashboard/sales/custom-widget";
 import CustomWidgetView from "@/components/dashboard/sales/custom-widget-view";
 import CustomWidgetBuilder from "@/components/dashboard/sales/custom-widget-builder";
@@ -48,6 +49,8 @@ export default function PmDashboard() {
       <ContractStatus />
 
       <AttentionList />
+
+      <WaitingOn />
 
       <PeopleWidget />
 

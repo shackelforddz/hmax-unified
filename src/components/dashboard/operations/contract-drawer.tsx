@@ -86,13 +86,12 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
       <Card>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-base text-gray-900">Progress</h3>
-          <span className="text-xs text-gray-400">{c.progress}% complete · baseline {c.baseline}%</span>
+          <span className="text-xs text-gray-400">{c.progress}% of term elapsed</span>
         </div>
         <div className="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
           <div className="h-full bg-gray-900 rounded-full" style={{ width: `${c.progress}%` }} />
-          <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: `${c.baseline}%` }} />
         </div>
-        <p className="text-xs text-gray-400 mt-2">{c.baseline - c.progress > 0 ? `${c.baseline - c.progress}pts behind baseline` : "On or ahead of baseline"}</p>
+        <p className="text-xs text-gray-400 mt-2">Contract term {c.start} → {c.end}</p>
       </Card>
 
       {/* Context summary + recommended actions */}

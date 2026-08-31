@@ -1,16 +1,28 @@
 "use client";
 
-import { SlidersVertical, MessageSquarePlus } from "lucide-react";
+import { SlidersVertical, Sparkles, ArrowUpRight, Plus, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StoredConversation } from "@/components/conversation/chat-panel";
+import { useAppSelector } from "@/store/hooks";
+import { recommendedTasksFor, recommendedActionsFor } from "@/lib/conversation-suggestions";
 
 interface Props {
   conversations: StoredConversation[];
   onNewConversation?: () => void;
   onSelect?: (conversation: StoredConversation) => void;
+  onStartPrompt?: (prompt: string) => void;
 }
 
-export default function ConversationsPanel({ conversations, onNewConversation, onSelect }: Props) {
+export default function ConversationsPanel({ conversations, onNewConversation, onSelect, onStartPrompt }: Props) {
+  const selectedRole = useAppSelector((s) => s.auth.selectedRole);
+  // One merged list of things to try — deep-dive questions and quick actions
+  // interleaved so the two kinds alternate rather than grouping together.
+  const asks = recommendedTasksFor(selectedRole).map((t) => ({ ...t, kind: "ask" as const }));
+  const tasks = recommendedActionsFor(selectedRole).map((t) => ({ ...t, kind: "task" as const }));
+  const cards = Array.from({ length: Math.max(asks.length, tasks.length) }).flatMap((_, i) =>
+    [asks[i], tasks[i]].filter(Boolean)
+  );
+
   return (
     <div className="h-full bg-zinc-900 rounded-xl flex flex-col overflow-hidden">
       {/* Header */}
@@ -51,20 +63,53 @@ export default function ConversationsPanel({ conversations, onNewConversation, o
             </div>
             <p className="text-sm text-zinc-300">No conversations yet</p>
             <p className="text-xs text-zinc-500 leading-relaxed mt-1">
-              Start a new conversation, or open one from any widget to see it here.
+              Start a new conversation, open one from any widget, or pick a recommended task below.
             </p>
           </div>
         )}
       </div>
 
-      {/* New Conversation button */}
-      <div className="p-4 shrink-0">
-        <Button
-          onClick={onNewConversation}
-          className="w-full rounded-full h-auto py-3 text-sm bg-white text-black hover:bg-zinc-100 cursor-pointer"
-        >
-          New Conversation
-        </Button>
+      {/* Bottom section — recommendations (when empty) + New Conversation */}
+      <div className="shrink-0 border-t border-zinc-800">
+        {conversations.length === 0 && (
+          <div className="px-4 pt-4">
+            <div className="flex items-center gap-1.5 mb-2.5 px-1">
+              <Sparkles size={13} strokeWidth={1.5} className="text-zinc-400" />
+              <span className="text-[11px] uppercase tracking-wider text-zinc-500">Recommended for you</span>
+            </div>
+
+            {/* Horizontal scroll card list — deep-dives and quick actions together.
+                Left aligns with the header; right bleeds for scroll affordance. */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mr-4 pr-4 pl-1 snap-x">
+              {cards.map((card) => (
+                <button
+                  key={`${card.kind}-${card.label}`}
+                  onClick={() => onStartPrompt?.(card.prompt)}
+                  className="shrink-0 snap-start w-[170px] h-[104px] text-left p-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer flex flex-col justify-between group"
+                >
+                  <span className="w-7 h-7 rounded-md bg-zinc-700 group-hover:bg-zinc-600 flex items-center justify-center shrink-0 transition-colors">
+                    {card.kind === "task" ? (
+                      <Plus size={15} strokeWidth={1.5} className="text-zinc-300" />
+                    ) : (
+                      <ArrowUpRight size={15} strokeWidth={1.5} className="text-zinc-300" />
+                    )}
+                  </span>
+                  <span className="text-sm text-zinc-200 leading-snug line-clamp-2">{card.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* New Conversation button */}
+        <div className="p-4">
+          <Button
+            onClick={onNewConversation}
+            className="w-full rounded-full h-auto py-3 text-sm bg-white text-black hover:bg-zinc-100 cursor-pointer"
+          >
+            New Conversation
+          </Button>
+        </div>
       </div>
     </div>
   );

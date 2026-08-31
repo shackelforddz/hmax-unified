@@ -14,6 +14,7 @@ import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import ContractsTable from "@/components/dashboard/tables/contracts-table";
 import WorkOrdersTable from "@/components/dashboard/tables/work-orders-table";
 import PeopleWidget from "@/components/dashboard/people-widget";
+import { FIELD_ENGINEERS } from "@/lib/people-data";
 import { PORTFOLIO_HEALTH as P } from "@/lib/operations-data";
 
 const TABS = ["Overview", "Contracts", "Work Orders"];
@@ -54,7 +55,7 @@ export default function OperationsDashboard() {
         <ResourceCapacity />
       </div>
 
-      <PeopleWidget />
+      <PeopleWidget people={FIELD_ENGINEERS} title="Field engineers" />
 
       <div className="grid grid-cols-2 gap-4">
         {widgets.map((w) => (

@@ -38,11 +38,12 @@ export const PEOPLE: Person[] = [
   {
     id: "p-sarah",
     name: "Sarah Mitchell",
-    role: "Delivery Lead",
+    role: "Field Delivery Lead",
     location: "Aberdeen, UK",
     allocation: 96,
     avatar: "/avatars/5.jpg",
     taskIds: ["wo-2038", "wo-2027"],
+    field: true,
     competencies: ["Lifting supervisor", "Offshore operations"],
     certifications: [
       { name: "BOSIET", expires: "2026-09" },

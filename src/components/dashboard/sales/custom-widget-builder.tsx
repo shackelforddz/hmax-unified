@@ -5,6 +5,7 @@ import { X, LineChart, BarChart3, PieChart, Hash } from "lucide-react";
 import CustomWidgetView from "./custom-widget-view";
 import { buildWidget, type WidgetType, type CustomWidgetConfig } from "@/lib/custom-widget";
 import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/store/hooks";
 
 const VISUALS: { type: WidgetType; label: string; icon: typeof LineChart }[] = [
   { type: "line", label: "Line", icon: LineChart },
@@ -13,7 +14,18 @@ const VISUALS: { type: WidgetType; label: string; icon: typeof LineChart }[] = [
   { type: "kpi", label: "KPI", icon: Hash },
 ];
 
-const EXAMPLES = ["Portfolio margin trend", "Revenue at risk by trigger", "Fleet health over time", "Asset condition breakdown"];
+// Example prompts tuned to what each role actually tracks.
+const EXAMPLES_BY_ROLE: Record<string, string[]> = {
+  "Project Manager": ["On-time delivery trend", "Revenue at risk by trigger", "Milestones due by week", "Vendor concentration"],
+  Sales: ["Pipeline value trend", "Weighted forecast by stage", "SLA renewals by month", "Opportunities by stage"],
+  Operations: ["Portfolio margin trend", "Contract status breakdown", "Resource utilisation by team", "Change orders by value"],
+  "Reliability Engineer": ["Fleet health over time", "Assets by review type", "Scope feasibility outcomes", "Site constraints by type"],
+  Diagnostics: ["Reports awaiting interpretation", "Fault signatures by asset", "Field-report turnaround", "DGA trends by unit"],
+};
+
+function examplesFor(role: string): string[] {
+  return EXAMPLES_BY_ROLE[role] ?? EXAMPLES_BY_ROLE["Project Manager"];
+}
 
 interface Props {
   onAdd: (config: CustomWidgetConfig) => void;
@@ -21,6 +33,8 @@ interface Props {
 }
 
 export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
+  const selectedRole = useAppSelector((s) => s.auth.selectedRole);
+  const examples = examplesFor(selectedRole);
   const [type, setType] = useState<WidgetType>("line");
   const [prompt, setPrompt] = useState("");
   const [preview, setPreview] = useState<CustomWidgetConfig | null>(null);
@@ -90,11 +104,11 @@ export default function CustomWidgetBuilder({ onAdd, onClose }: Props) {
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g. Portfolio margin trend over the last 6 months"
+                placeholder={`e.g. ${examples[0]} over the last 6 months`}
                 className="w-full h-24 px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none"
               />
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {EXAMPLES.map((ex) => (
+                {examples.map((ex) => (
                   <button
                     key={ex}
                     onClick={() => setPrompt(ex)}

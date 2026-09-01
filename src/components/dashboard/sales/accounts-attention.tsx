@@ -6,6 +6,7 @@ import WidgetChat from "@/components/dashboard/widget-chat";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { ACCOUNT_ATTENTION, type AccountAttention, type AccountStatus } from "@/lib/accounts-data";
+import { buildPlaybook } from "@/lib/alert-playbooks";
 
 function StatusBadge({ status }: { status: AccountStatus }) {
   if (status === "critical") {
@@ -71,7 +72,7 @@ function AccountRow({ item, defaultOpen }: { item: AccountAttention; defaultOpen
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      onClick={() => launch({ context: item.account, prompt: flag.action, entity })}
+                      onClick={() => launch({ context: item.account, prompt: flag.action, entity, playbook: buildPlaybook(flag.action, flag.detail) })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       {flag.action}

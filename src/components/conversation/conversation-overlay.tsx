@@ -12,6 +12,8 @@ import DocPanel from "./doc-panel";
 import { ChatThread, type ChatMsg, type StoredConversation } from "./chat-panel";
 import { answerQuery, detectCustomer, suggestNext, visualFor } from "@/lib/knowledge-base";
 import { flowFor, flowById } from "@/lib/guided-flows";
+import { type Playbook } from "@/lib/alert-playbooks";
+import DocumentViewer, { type ViewDoc } from "@/components/dashboard/sales/document-viewer";
 import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { useAppSelector } from "@/store/hooks";
 import { Button } from "@/components/ui/button";
@@ -134,13 +136,15 @@ interface Props {
   initialPrompt?: string;
   /** The record this conversation is about — drives the left context pane. */
   entity?: ContextEntity;
+  /** An alert playbook to open with: situation + recommendation + next steps. */
+  playbook?: Playbook;
   /** When reopening from the list: the stored conversation to restore. */
   restore?: StoredConversation | null;
   /** Called as the conversation is created/updated so it can be saved to the list. */
   onPersist?: (record: StoredConversation) => void;
 }
 
-export default function ConversationOverlay({ visible, onClose, context, initialPrompt, entity, restore, onPersist }: Props) {
+export default function ConversationOverlay({ visible, onClose, context, initialPrompt, entity, playbook, restore, onPersist }: Props) {
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
   const welcome = welcomeFor(selectedRole);
   const [started, setStarted] = useState(false);
@@ -152,6 +156,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   const [activeContext, setActiveContext] = useState<string | undefined>(undefined);
   const [activeEntity, setActiveEntity] = useState<ContextEntity | null>(null);
   const [detectedCustomer, setDetectedCustomer] = useState<string | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const idRef = useRef(0);
@@ -235,6 +240,36 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     respond(t, ctx ?? activeContext);
   };
 
+  // Open an alert conversation with a grounded playbook: the situation (data),
+  // a recommendation, then next-step buttons — many of which start a wizard.
+  const startPlaybook = (pb: Playbook, action: string, ctx?: string) => {
+    if (!sessionIdRef.current) sessionIdRef.current = `conv-${Date.now()}`;
+    setStarted(true);
+    clearTimers();
+    setTyping(true);
+    push({ role: "user", text: action });
+    timers.current.push(
+      setTimeout(() => push({ role: "ai", kind: "text", text: pb.situation }), 900)
+    );
+    timers.current.push(
+      setTimeout(() => {
+        setTyping(false);
+        push({
+          role: "ai",
+          kind: "text",
+          text: `Recommendation — ${pb.recommendation}`,
+          suggestions: { prompts: [], actions: pb.steps },
+        });
+        if (pb.panel) push({ role: "ai", kind: "panel", panel: pb.panel });
+      }, 1900)
+    );
+    // Keep the widget context / customer in sync for the left pane.
+    if (ctx) {
+      const who = detectCustomer(ctx);
+      if (who) setDetectedCustomer((prev) => prev ?? who);
+    }
+  };
+
   // Reset the whole overlay whenever it is dismissed
   useEffect(() => {
     if (!visible) {
@@ -248,6 +283,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
       setActiveContext(undefined);
       setActiveEntity(null);
       setDetectedCustomer(null);
+      setViewDoc(null);
       idRef.current = 0;
       sessionIdRef.current = null;
     }
@@ -276,13 +312,17 @@ export default function ConversationOverlay({ visible, onClose, context, initial
   // When launched from a widget, skip the welcome screen and start immediately
   // with the widget context pinned to the top of the conversation.
   useEffect(() => {
-    if (visible && (context || entity || initialPrompt) && !restore && !started) {
+    if (visible && (context || entity || initialPrompt || playbook) && !restore && !started) {
       if (context) setActiveContext(context);
       if (entity) setActiveEntity(entity);
-      send((initialPrompt || "").trim() || `Tell me about ${context}`, context);
+      if (playbook) {
+        startPlaybook(playbook, (initialPrompt || "").trim() || "Help with this", context);
+      } else {
+        send((initialPrompt || "").trim() || `Tell me about ${context}`, context);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, context, entity, initialPrompt]);
+  }, [visible, context, entity, initialPrompt, playbook]);
 
   // Persist the conversation to the list as it's created and updated.
   useEffect(() => {
@@ -489,6 +529,7 @@ export default function ConversationOverlay({ visible, onClose, context, initial
                 onGenerate={() => setDocVisible(true)}
                 onOppCreate={oppCreate}
                 onFlowComplete={flowComplete}
+                onOpenDoc={setViewDoc}
                 onSend={(t) => send(t)}
               />
             )}
@@ -547,6 +588,16 @@ export default function ConversationOverlay({ visible, onClose, context, initial
           <DocPanel onClose={() => setDocVisible(false)} />
         </div>
       </div>
+
+      {/* Linked document (e.g. a change order opened from a playbook recap) */}
+      <DocumentViewer
+        doc={viewDoc}
+        onClose={() => setViewDoc(null)}
+        onAsk={(doc) => {
+          setViewDoc(null);
+          send(`Walk me through ${doc.title} (${doc.ref})`);
+        }}
+      />
     </div>
   );
 }

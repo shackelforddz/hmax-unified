@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ASSET_ALERTS, type AssetAlert, type AssetStatus, type AssetCategory } from "@/lib/sales-data";
+import { buildPlaybook } from "@/lib/alert-playbooks";
 import WidgetChat from "@/components/dashboard/widget-chat";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
@@ -103,7 +104,7 @@ function AssetRow({ asset, defaultExpanded, onOpenDrawer }: { asset: AssetAlert;
               <div className="flex flex-wrap gap-2">
                 {/* Recommended action — primary CTA */}
                 <Button
-                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.action, entity: { kind: "asset", id: asset.id } })}
+                  onClick={() => launch({ context: asset.code, prompt: asset.alert!.action, entity: { kind: "asset", id: asset.id }, playbook: buildPlaybook(asset.alert!.action, asset.alert!.detail) })}
                   className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                 >
                   {asset.alert.action}

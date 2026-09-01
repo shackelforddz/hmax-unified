@@ -135,6 +135,41 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
         </div>
       </Card>
 
+      {/* Assets covered */}
+      <Card>
+        <SectionTitle>Assets</SectionTitle>
+        <div className="flex flex-col">
+          {d.assets.map((a) => {
+            const cls = a.status === "Critical" ? "bg-gray-900 text-white" : a.status === "At risk" ? "bg-gray-200 text-gray-700" : "border border-gray-300 text-gray-500";
+            return (
+              <div key={a.code} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-500 w-20 shrink-0">{a.code}</span>
+                <span className="text-sm text-gray-700 flex-1 min-w-0 truncate">{a.type}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${cls}`}>{a.status}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Parts & materials */}
+      <Card>
+        <SectionTitle>Parts &amp; materials</SectionTitle>
+        <div className="flex flex-col">
+          {d.parts.map((pt) => {
+            const label = pt.status === "in-stock" ? "In stock" : pt.status === "ordered" ? "Ordered" : "Backordered";
+            const cls = pt.status === "backordered" ? "bg-gray-900 text-white" : pt.status === "ordered" ? "bg-gray-200 text-gray-700" : "border border-gray-300 text-gray-500";
+            return (
+              <div key={pt.label} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-700 flex-1 min-w-0 truncate">{pt.label}</span>
+                <span className="text-xs text-gray-400 shrink-0">×{pt.qty}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${cls}`}>{label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
       {/* Open risks */}
       <Card>
         <SectionTitle>Open risks</SectionTitle>

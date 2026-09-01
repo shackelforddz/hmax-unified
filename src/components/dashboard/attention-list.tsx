@@ -11,6 +11,7 @@ import {
 } from "@/lib/dashboard-data";
 import AttentionDrawer from "./attention-drawer";
 import { useConversationLauncher } from "./conversation-launcher";
+import { buildPlaybook } from "@/lib/alert-playbooks";
 import { Button } from "@/components/ui/button";
 
 function StatusBadge({ status }: { status: AttentionStatus }) {
@@ -110,7 +111,7 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
                   <div className="flex flex-wrap gap-2">
                     {/* Recommended action — primary CTA */}
                     <Button
-                      onClick={() => launch({ context: item.customer, prompt: flag.action, entity: { kind: "customer", name: item.customer } })}
+                      onClick={() => launch({ context: item.customer, prompt: flag.action, entity: { kind: "customer", name: item.customer }, playbook: buildPlaybook(flag.action, flag.detail) })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       {flag.action}

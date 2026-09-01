@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import OpportunityDrawer from "./opportunity-drawer";
 import OwnerBadge from "./owner-badge";
+import { buildPlaybook } from "@/lib/alert-playbooks";
 
 const REQ_LABELS: { label: string; owner: string }[] = [
   { label: "Account & shipping details", owner: "Sales ops — T. Wu" },
@@ -181,7 +182,20 @@ function OppRow({ opp, onOpenDrawer }: { opp: Opportunity; onOpenDrawer: (opp: O
             <div className="flex flex-wrap gap-2">
               {/* Recommended action — primary CTA */}
               <Button
-                onClick={() => launch({ context: opp.account, prompt: opp.recommendedAction, entity: { kind: "opportunity", id: opp.id } })}
+                onClick={() =>
+                  launch({
+                    context: opp.account,
+                    prompt: opp.recommendedAction,
+                    entity: { kind: "opportunity", id: opp.id },
+                    playbook: buildPlaybook(
+                      opp.recommendedAction,
+                      missing.length > 0
+                        ? `${opp.account} — ${opp.title} (${opp.value} · ${opp.stage}). ${missing.length} input${missing.length > 1 ? "s" : ""} still needed before it can reach Offer: ${missing.map((m) => `${m.label} (owned by ${m.owner})`).join("; ")}.`
+                        : `${opp.account} — ${opp.title} (${opp.value} · ${opp.stage}). Every offer input is in place — it's ready to send.`,
+                      { missing: missing.map((m) => ({ label: m.label, owner: m.owner })) }
+                    ),
+                  })
+                }
                 className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
               >
                 {opp.recommendedAction}

@@ -14,7 +14,7 @@ import { ConversationLauncherContext, type LaunchArgs } from "@/components/dashb
 import { useAppSelector } from "@/store/hooks";
 
 export default function DashboardPage() {
-  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; entity?: LaunchArgs["entity"]; restore?: StoredConversation | null }>({ visible: false });
+  const [conv, setConv] = useState<{ visible: boolean; context?: string; prompt?: string; entity?: LaunchArgs["entity"]; playbook?: LaunchArgs["playbook"]; restore?: StoredConversation | null }>({ visible: false });
   // First-time login — the conversation history starts empty.
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const selectedRole = useAppSelector((s) => s.auth.selectedRole);
@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const isDiagnostics = selectedRole === "Diagnostics";
 
   const openConversation = useCallback((args?: LaunchArgs) => {
-    setConv({ visible: true, context: args?.context, prompt: args?.prompt, entity: args?.entity, restore: null });
+    setConv({ visible: true, context: args?.context, prompt: args?.prompt, entity: args?.entity, playbook: args?.playbook, restore: null });
   }, []);
 
   const openStored = useCallback((rec: StoredConversation) => {
@@ -102,6 +102,7 @@ export default function DashboardPage() {
         context={conv.context}
         initialPrompt={conv.prompt}
         entity={conv.entity}
+        playbook={conv.playbook}
         restore={conv.restore}
         onPersist={persist}
         onClose={() => setConv((c) => ({ ...c, visible: false }))}

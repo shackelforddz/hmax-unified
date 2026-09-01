@@ -8,6 +8,8 @@ import { type CustomWidgetConfig } from "@/lib/custom-widget";
 import { type ContextEntity } from "@/components/dashboard/conversation-launcher";
 import { ChartBody } from "@/components/dashboard/sales/custom-widget-view";
 import { flowById, type GuidedFlow, type FlowField } from "@/lib/guided-flows";
+import { type PlaybookPanel } from "@/lib/alert-playbooks";
+import { type ViewDoc } from "@/components/dashboard/sales/document-viewer";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -1057,9 +1059,11 @@ function SourcesLine() {
 export interface ChatMsg {
   id: number;
   role: "user" | "ai";
-  kind?: "text" | "wizard" | "opp-wizard" | "flow";
+  kind?: "text" | "wizard" | "opp-wizard" | "flow" | "panel";
   /** For kind === "flow": which guided flow to render. */
   flowId?: string;
+  /** For kind === "panel": the interactive alert-playbook panel. */
+  panel?: PlaybookPanel;
   text?: string;
   suggestions?: Suggestions;
   visual?: CustomWidgetConfig;
@@ -1116,6 +1120,114 @@ function SuggestionBlock({ suggestions, onSend }: { suggestions: Suggestions; on
   );
 }
 
+/* ── Alert-playbook interactive panel ────────────────────────────── */
+function PanelBlock({ panel, onSend, onOpenDoc }: { panel: PlaybookPanel; onSend?: (t: string) => void; onOpenDoc?: (doc: ViewDoc) => void }) {
+  if (panel.kind === "options") {
+    return (
+      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+        <p className="text-sm text-gray-900 mb-1">{panel.heading}</p>
+        {panel.note && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{panel.note}</p>}
+        <div className="flex flex-col gap-2">
+          {panel.options.map((o) => (
+            <div key={o.id} className={`rounded-xl border p-3 flex items-center gap-3 ${o.recommended ? "border-gray-900" : "border-gray-200"}`}>
+              {o.avatar && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={o.avatar} alt={o.title} className="w-9 h-9 rounded-full object-cover bg-gray-200 grayscale shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-900 truncate">{o.title}</p>
+                  {o.recommended && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-900 text-white shrink-0">Best fit</span>}
+                </div>
+                {o.subtitle && <p className="text-xs text-gray-400 truncate">{o.subtitle}</p>}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                  {o.meta.map((m) => (
+                    <span key={m.label} className="text-xs text-gray-500"><span className="text-gray-400">{m.label}:</span> {m.value}</span>
+                  ))}
+                </div>
+                {o.tags && o.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {o.tags.map((t) => <span key={t} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{t}</span>)}
+                  </div>
+                )}
+              </div>
+              <Button onClick={() => onSend?.(o.choosePrompt)} className="rounded-full h-auto px-4 py-1.5 text-xs cursor-pointer shrink-0">
+                {o.chooseLabel}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (panel.kind === "recap") {
+    return (
+      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <p className="text-sm text-gray-900">{panel.heading}</p>
+          {panel.doc && onOpenDoc && (
+            <button onClick={() => onOpenDoc(panel.doc!)} className="text-xs text-gray-600 underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer shrink-0">
+              Open {panel.doc.docType.toLowerCase()}
+            </button>
+          )}
+        </div>
+        <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+          {panel.rows.map((r, i) => (
+            <div key={r.label} className={`flex items-start gap-4 px-4 py-2.5 ${i < panel.rows.length - 1 ? "border-b border-gray-100" : ""}`}>
+              <span className="text-xs text-gray-400 w-32 shrink-0 pt-0.5">{r.label}</span>
+              <span className="text-sm text-gray-800 flex-1">{r.value}</span>
+            </div>
+          ))}
+        </div>
+        {panel.note && <p className="text-xs text-gray-500 mt-2.5">{panel.note}</p>}
+      </div>
+    );
+  }
+
+  if (panel.kind === "draft") {
+    return (
+      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+        <p className="text-sm text-gray-900 mb-1">{panel.heading}</p>
+        {panel.note && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{panel.note}</p>}
+        <textarea
+          defaultValue={panel.value}
+          className="w-full h-32 px-3 py-2.5 text-sm text-gray-700 border border-gray-200 rounded-lg outline-none focus:border-gray-400 resize-none bg-white leading-relaxed"
+        />
+        <Button onClick={() => onSend?.(panel.submitPrompt)} className="mt-3 rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+          {panel.submitLabel}
+        </Button>
+      </div>
+    );
+  }
+
+  // form
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-4">
+      <p className="text-sm text-gray-900 mb-1">{panel.heading}</p>
+      {panel.note && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{panel.note}</p>}
+      <div className="flex flex-col gap-3">
+        {panel.fields.map((f) => (
+          <div key={f.label}>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <label className="text-xs text-gray-600">{f.label}</label>
+              <span className="text-[11px] text-gray-400">Reach out to {f.owner}</span>
+            </div>
+            <input
+              type="text"
+              placeholder={f.placeholder}
+              className="w-full h-9 px-3 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 bg-white placeholder-gray-300"
+            />
+          </div>
+        ))}
+      </div>
+      <Button onClick={() => onSend?.(panel.submitPrompt)} className="mt-3 rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+        {panel.submitLabel}
+      </Button>
+    </div>
+  );
+}
+
 interface ThreadProps {
   messages: ChatMsg[];
   typing: boolean;
@@ -1125,10 +1237,11 @@ interface ThreadProps {
   onGenerate: () => void;
   onOppCreate?: () => void;
   onFlowComplete?: (flowId: string) => void;
+  onOpenDoc?: (doc: ViewDoc) => void;
   onSend?: (text: string) => void;
 }
 
-export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onOppCreate, onFlowComplete, onSend }: ThreadProps) {
+export function ChatThread({ messages, typing, context, wizardStep, onWizardStep, onGenerate, onOppCreate, onFlowComplete, onOpenDoc, onSend }: ThreadProps) {
   const lastId = messages[messages.length - 1]?.id;
   return (
     <>
@@ -1207,6 +1320,13 @@ export function ChatThread({ messages, typing, context, wizardStep, onWizardStep
               </div>
             );
           })()
+        ) : m.kind === "panel" && m.panel ? (
+          <div key={m.id} className="flex items-start gap-3 mb-5 animate-message-in">
+            <AiAvatar />
+            <div className="flex-1 min-w-0">
+              <PanelBlock panel={m.panel} onSend={onSend} onOpenDoc={onOpenDoc} />
+            </div>
+          </div>
         ) : (
           <div key={m.id} className="flex items-start gap-3 mb-5 animate-message-in">
             <AiAvatar />

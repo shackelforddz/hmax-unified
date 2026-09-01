@@ -10,6 +10,8 @@ export interface AccountFlag {
   title: string;
   detail: string;
   action: string;
+  /** The asset this flag concerns, for the "Review asset health" playbook. */
+  assetId?: string;
 }
 
 export interface AccountAttention {
@@ -42,6 +44,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
         detail:
           "The largest unit on the account is showing a Y-phase hotspot and elevated DGA, with a reliability escalation open. Worth getting ahead of before the renewal conversation.",
         action: "Review asset health",
+        assetId: "ast-001",
       },
     ],
   },
@@ -64,6 +67,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
         detail:
           "Declining asset health on the largest unit is what surfaced this opportunity — a proactive conversation is warranted.",
         action: "Review asset health",
+        assetId: "ast-004",
       },
     ],
   },

@@ -134,12 +134,17 @@ export const OPS_CONTRACTS: OpsContract[] = RAW_CONTRACTS.map((c) => ({
   progress: contractLengthProgress(c.start, c.end),
 }));
 
+export type PartStatus = "in-stock" | "ordered" | "backordered";
 export interface OpsContractDetail {
   summary: string;
   recommendedActions: string[];
   milestones: { label: string; done: boolean; planned: string; actual?: string }[];
   risks: { title: string; detail: string; level: "Critical" | "High" | "Medium" }[];
   team: { role: string; name: string }[];
+  /** Assets covered by this contract. */
+  assets: { code: string; type: string; status: string }[];
+  /** Parts & materials the contract work depends on. */
+  parts: { label: string; qty: number; status: PartStatus }[];
   related: { customer: string; value: string; region: string };
 }
 
@@ -163,6 +168,17 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { role: "Lead Engineer", name: "Jordan P." },
       { role: "Field Supervisor", name: "Liam O." },
     ],
+    assets: [
+      { code: "AST-001", type: "HVDC converter transformer · Unit S-12", status: "Critical" },
+      { code: "AST-014", type: "HVDC converter transformer · Unit S-14", status: "At risk" },
+      { code: "AST-019", type: "HVDC converter transformer · Unit S-19", status: "In service" },
+    ],
+    parts: [
+      { label: "Converter winding set", qty: 2, status: "ordered" },
+      { label: "HV bushing assembly", qty: 6, status: "in-stock" },
+      { label: "Gasket & seal kit", qty: 3, status: "backordered" },
+      { label: "Cooling fan assembly", qty: 4, status: "in-stock" },
+    ],
     related: { customer: "Xcel Energy", value: "£4.2m", region: "North America" },
   },
   "ct-northsea": {
@@ -184,6 +200,15 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { role: "Lead Engineer", name: "Tom H." },
       { role: "Field Supervisor", name: "Sara B." },
     ],
+    assets: [
+      { code: "AST-021", type: "Protection relay bank · Platform A", status: "At risk" },
+      { code: "AST-022", type: "MV switchgear panel · Platform B", status: "In service" },
+    ],
+    parts: [
+      { label: "Protection relay module", qty: 8, status: "ordered" },
+      { label: "Vacuum circuit breaker", qty: 3, status: "in-stock" },
+      { label: "Busbar insulation set", qty: 2, status: "backordered" },
+    ],
     related: { customer: "Siemens", value: "£2.4m", region: "North Sea" },
   },
   "ct-baltic": {
@@ -202,6 +227,14 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { role: "HSE Officer", name: "Kara M." },
       { role: "Field Engineer", name: "Dev K." },
     ],
+    assets: [
+      { code: "AST-031", type: "Array transformer · WTG cluster 3", status: "At risk" },
+      { code: "AST-032", type: "Array transformer · WTG cluster 4", status: "In service" },
+    ],
+    parts: [
+      { label: "Transformer oil (barrels)", qty: 6, status: "in-stock" },
+      { label: "Bushing gasket kit", qty: 4, status: "ordered" },
+    ],
     related: { customer: "Baltic Wind NL", value: "£2.4m", region: "North Sea" },
   },
   "ct-pacific": {
@@ -218,6 +251,13 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
     team: [
       { role: "Project Manager", name: "Lena Fischer" },
       { role: "Lead Engineer", name: "Priya K." },
+    ],
+    assets: [
+      { code: "AST-041", type: "Protection relay bank · Substation West", status: "In service" },
+    ],
+    parts: [
+      { label: "Relay hardware set", qty: 5, status: "in-stock" },
+      { label: "Firmware licence", qty: 1, status: "ordered" },
     ],
     related: { customer: "Pacific Gas", value: "£440k", region: "North Sea" },
   },

@@ -352,6 +352,35 @@ export const GUIDED_FLOWS: GuidedFlow[] = [
       },
     ],
   },
+  {
+    id: "draft-message",
+    match: /\b(draft|write|send|chase|escalate|notify)\b.*\b(message|email|note|chase|customer|legal|engineering|reliability|qa|supplier|approver|safety|owner|team)\b/,
+    intro: "Let's draft that message — I've pulled the context so you can review and edit before it goes.",
+    cta: "Send message",
+    done: "✓ Message drafted and ready to send.\n\nI've attached the relevant record so the recipient has the full context. Review it, then send — or schedule a reminder to follow up if you don't hear back.",
+    doneSuggestions: ["Edit the message", "Schedule a follow-up reminder", "Send a copy to my manager"],
+    steps: [
+      {
+        label: "Recipient",
+        title: "Who's it for?",
+        sub: "Confirm who you're chasing and how urgent it is.",
+        fields: [
+          { type: "text", label: "To", value: "", star: true },
+          { type: "chips", label: "Priority", options: ["Normal", "High", "Urgent"], value: "High" },
+          { type: "chips", label: "Channel", options: ["Email", "Teams", "Both"], value: "Email" },
+        ],
+      },
+      {
+        label: "Message",
+        title: "What do you want to say?",
+        sub: "I've drafted a starting point from the context — edit as needed.",
+        fields: [
+          { type: "text", label: "Subject", value: "Action needed", star: true },
+          { type: "textarea", label: "Message", value: "Hi — flagging this needs your attention. Could you confirm status and expected turnaround? The relevant details are attached. Thanks.", full: true },
+        ],
+      },
+    ],
+  },
 ];
 
 export function flowFor(prompt: string): GuidedFlow | undefined {

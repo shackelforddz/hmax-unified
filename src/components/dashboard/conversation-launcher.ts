@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import type { Playbook } from "@/lib/alert-playbooks";
 
 /** A specific record the conversation is about, used to render the left
  *  context pane with that entity's detail content (mirrors its drawer). */
@@ -17,6 +18,8 @@ export interface LaunchArgs {
   prompt?: string;
   /** The record this conversation is about (drives the left context pane). */
   entity?: ContextEntity;
+  /** An alert playbook to open with: grounded situation + recommendation + next steps. */
+  playbook?: Playbook;
 }
 
 export type LaunchFn = (args?: LaunchArgs) => void;

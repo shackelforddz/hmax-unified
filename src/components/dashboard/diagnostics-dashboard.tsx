@@ -22,8 +22,12 @@ const faultSignatureAssets = new Set(
   REPORTS_AWAITING.filter((r) => r.faultSignature).map((r) => r.assetId)
 ).size;
 
+// Asset-health KPIs counted from the "Asset reports to review" list below.
+const diagCritical = ASSET_REPORT_ALERTS.filter((a) => a.status === "critical").length;
+const diagAtRisk = ASSET_REPORT_ALERTS.filter((a) => a.status === "at-risk").length;
+
 const KPIS = [
-  { id: "reports-awaiting", label: "Reports awaiting interpretation", value: String(REPORTS_AWAITING.length), trend: "2 vs last week", sparkline: "contracts-at-risk" as const },
+  { id: "reports-awaiting", label: "Reports awaiting interpretation", value: String(ASSET_REPORT_ALERTS.length), trend: "2 vs last week", sparkline: "contracts-at-risk" as const },
   { id: "outstanding-reports", label: "Outstanding reports", value: String(DIAGNOSTICS_STATS.outstandingReports), trend: "3 vs last week", sparkline: "active-contracts" as const },
   { id: "fault-signature", label: "Assets with a fault signature", value: String(faultSignatureAssets), trend: "1 vs last month", sparkline: "portfolio-margin" as const },
 ];
@@ -69,8 +73,8 @@ export default function DiagnosticsDashboard() {
         <div className="tile col-span-4"><FleetMap /></div>
         <div className="col-span-2 flex flex-col gap-4">
           <FleetHealth />
-          <KpiCard id="critical-assets" label="Critical assets" value="2" trend="2 vs last month" sparkline="contracts-at-risk" />
-          <KpiCard id="at-risk" label="At risk (score <60)" value="3" trend="2 vs last month" sparkline="on-time-delivery" />
+          <KpiCard id="critical-assets" label="Critical assets" value={String(diagCritical)} trend="2 vs last month" sparkline="contracts-at-risk" />
+          <KpiCard id="at-risk" label="At risk (score <60)" value={String(diagAtRisk)} trend="2 vs last month" sparkline="on-time-delivery" />
         </div>
 
         {/* ── Field engineers ── */}

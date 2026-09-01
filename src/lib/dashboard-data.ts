@@ -1,3 +1,5 @@
+import { PORTFOLIO_HEALTH } from "@/lib/operations-data";
+
 export interface Conversation {
   id: string;
   title: string;
@@ -428,15 +430,17 @@ export const CONVERSATIONS: Conversation[] = [
 export const KPI_DATA: KpiData[] = [
   {
     id: "active-contracts",
+    // Matches the Contract status widget below (PORTFOLIO_HEALTH.activeContracts).
     label: "Active contracts",
-    value: "24",
+    value: String(PORTFOLIO_HEALTH.activeContracts),
     trend: "2 vs last month",
     sparkline: "active-contracts",
   },
   {
     id: "contracts-at-risk",
+    // At-risk + critical from the Contract status widget below.
     label: "Contracts at risk",
-    value: "14",
+    value: String(PORTFOLIO_HEALTH.atRisk + PORTFOLIO_HEALTH.critical),
     trend: "2 vs last month",
     sparkline: "contracts-at-risk",
   },
@@ -503,15 +507,61 @@ export const ATTENTION_ITEMS: AttentionItem[] = [
     id: "baltic-wind-nl",
     customer: "Baltic Wind NL",
     meta: "Sarah M. · North Sea · £2.4M · In execution",
-    status: "healthy",
+    status: "at-risk",
     category: "scope-variations",
+    flags: [
+      {
+        title: "Two offshore HSE certificates expire before the next visit",
+        detail:
+          "The offshore crew's certifications lapse ahead of the planned window; remobilisation is blocked until they're renewed, putting the maintenance slot at risk.",
+        action: "Schedule Cert Renewal",
+      },
+    ],
   },
   {
     id: "pacific-gas",
     customer: "Pacific Gas",
     meta: "Lena F. · North Sea · £440k",
-    status: "healthy",
+    status: "at-risk",
     category: "site-access",
+    flags: [
+      {
+        title: "Site access is verbal only — no written agreement",
+        detail:
+          "Only a verbal access arrangement is in place; a written site-access agreement is required before the crew can mobilise, holding up the relay upgrade.",
+        action: "Request Written Access",
+      },
+    ],
+  },
+  {
+    id: "comed",
+    customer: "ComEd",
+    meta: "Marcus L. · Midwest · $4.8M · In execution",
+    status: "at-risk",
+    category: "budget-invoicing",
+    flags: [
+      {
+        title: "Progress invoice held pending milestone sign-off",
+        detail:
+          "The substation upgrade milestone is complete but awaiting customer sign-off; a $1.1m progress invoice can't be raised until it clears.",
+        action: "Chase Sign-off",
+      },
+    ],
+  },
+  {
+    id: "aep-ohio",
+    customer: "AEP Ohio",
+    meta: "Priya N. · Midwest · $6.2M · Mobilising",
+    status: "at-risk",
+    category: "progress",
+    flags: [
+      {
+        title: "Install Base profile missing — mobilisation slipping",
+        detail:
+          "The converter replacement can't be scheduled until the Install Base profile is captured; the mobilisation date is at risk of slipping past the planned window.",
+        action: "Request Install Base",
+      },
+    ],
   },
 ];
 

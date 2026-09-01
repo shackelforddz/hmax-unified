@@ -19,10 +19,12 @@ import AssetsTable from "@/components/dashboard/tables/assets-table";
 
 const TABS = ["Overview", "Assets", "Contracts"];
 
-// Asset-health KPIs lead this view.
+// Asset-health KPIs lead this view — counted from the "Assets to review" list below.
+const relCritical = ASSET_REVIEW_ALERTS.filter((a) => a.status === "critical").length;
+const relAtRisk = ASSET_REVIEW_ALERTS.filter((a) => a.status === "at-risk").length;
 const HEALTH_KPIS = [
-  { id: "critical-assets", label: "Critical assets", value: "2", trend: "2 vs last month", sparkline: "contracts-at-risk" as const },
-  { id: "at-risk", label: "At risk (score <60)", value: "3", trend: "2 vs last month", sparkline: "on-time-delivery" as const },
+  { id: "critical-assets", label: "Critical assets", value: String(relCritical), trend: "2 vs last month", sparkline: "contracts-at-risk" as const },
+  { id: "at-risk", label: "At risk (score <60)", value: String(relAtRisk), trend: "2 vs last month", sparkline: "on-time-delivery" as const },
   { id: "overdue-insp", label: "Overdue inspections", value: "5", trend: "1 vs last month", sparkline: "portfolio-margin" as const },
 ];
 

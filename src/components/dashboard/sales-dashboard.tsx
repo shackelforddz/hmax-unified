@@ -20,8 +20,13 @@ import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import OpportunitiesTable from "@/components/dashboard/tables/opportunities-table";
 import ContractsTable from "@/components/dashboard/tables/contracts-table";
 import AssetsTable from "@/components/dashboard/tables/assets-table";
+import { ASSET_ALERTS } from "@/lib/sales-data";
 
 const TABS = ["Overview", "Opportunities", "Contracts", "Assets"];
+
+// Asset-health KPIs are counted from the same alert list the widget shows below.
+const criticalAssets = ASSET_ALERTS.filter((a) => a.status === "critical").length;
+const atRiskAssets = ASSET_ALERTS.filter((a) => a.status === "at-risk").length;
 
 export default function SalesDashboard() {
   const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
@@ -76,8 +81,8 @@ export default function SalesDashboard() {
         </div>
         <div className="col-span-2 flex flex-col gap-4">
           <FleetHealth />
-          <KpiCard id="critical-assets" label="Critical assets" value="2" trend="2 vs last month" sparkline="contracts-at-risk" />
-          <KpiCard id="at-risk" label="At risk (score <60)" value="3" trend="2 vs last month" sparkline="on-time-delivery" />
+          <KpiCard id="critical-assets" label="Critical assets" value={String(criticalAssets)} trend="2 vs last month" sparkline="contracts-at-risk" />
+          <KpiCard id="at-risk" label="At risk (score <60)" value={String(atRiskAssets)} trend="2 vs last month" sparkline="on-time-delivery" />
         </div>
         <div className="col-span-6">
           <AssetAlerts />

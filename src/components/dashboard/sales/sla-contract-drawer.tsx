@@ -5,6 +5,7 @@ import { X, ChevronDown, Check, Circle, FileText, RefreshCw, TrendingUp, UserPlu
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { SLA_CONTRACTS, type SlaContractDetail, type SlaBadge } from "@/lib/sales-data";
+import ContractSections from "@/components/dashboard/operations/contract-sections";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -115,6 +116,9 @@ function DrawerBody({ d, onAction }: { d: SlaContractDetail; onAction: (p: strin
           ))}
         </div>
       </Card>
+
+      {/* Shared contract detail — same as the ops contract drawers */}
+      <ContractSections d={d} />
 
       {/* Related */}
       <Card>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { ACCOUNT_ATTENTION, type AccountAttention, type AccountStatus } from "@/lib/accounts-data";
 import { buildPlaybook } from "@/lib/alert-playbooks";
+import SlaContractDrawer from "./sla-contract-drawer";
 
 function StatusBadge({ status }: { status: AccountStatus }) {
   if (status === "critical") {
@@ -18,7 +19,7 @@ function StatusBadge({ status }: { status: AccountStatus }) {
   return <span className="border border-gray-300 text-gray-500 text-xs px-3 py-1 rounded-full whitespace-nowrap">Watch</span>;
 }
 
-function AccountRow({ item, defaultOpen }: { item: AccountAttention; defaultOpen: boolean }) {
+function AccountRow({ item, defaultOpen, onOpenDrawer }: { item: AccountAttention; defaultOpen: boolean; onOpenDrawer: (contractId: string) => void }) {
   const [expanded, setExpanded] = useState(defaultOpen);
   const launch = useConversationLauncher();
   const entity = { kind: "customer" as const, name: item.account };
@@ -30,8 +31,8 @@ function AccountRow({ item, defaultOpen }: { item: AccountAttention; defaultOpen
           <span
             role="button"
             tabIndex={0}
-            onClick={(e) => { e.stopPropagation(); launch({ context: item.account, prompt: `Summarise the ${item.account} account`, entity }); }}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); launch({ context: item.account, prompt: `Summarise the ${item.account} account`, entity }); } }}
+            onClick={(e) => { e.stopPropagation(); onOpenDrawer(item.contractId); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onOpenDrawer(item.contractId); } }}
             className="underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer transition-colors"
           >
             {item.account}
@@ -86,7 +87,7 @@ function AccountRow({ item, defaultOpen }: { item: AccountAttention; defaultOpen
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => launch({ context: item.account, prompt: `Summarise the ${item.account} account`, entity })}
+                      onClick={() => onOpenDrawer(item.contractId)}
                       className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer"
                     >
                       See Details
@@ -111,6 +112,7 @@ const PRIORITY_OPTIONS: { label: string; value: AccountStatus | "all" }[] = [
 
 export default function AccountsAttention() {
   const [statusFilter, setStatusFilter] = useState<AccountStatus | "all">("all");
+  const [drawerId, setDrawerId] = useState<string | null>(null);
 
   const filtered = ACCOUNT_ATTENTION.filter((a) => statusFilter === "all" || a.status === statusFilter);
   const countFor = (s: AccountStatus | "all") => ACCOUNT_ATTENTION.filter((a) => s === "all" || a.status === s).length;
@@ -118,6 +120,7 @@ export default function AccountsAttention() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <SlaContractDrawer contractId={drawerId} onClose={() => setDrawerId(null)} />
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
@@ -147,7 +150,7 @@ export default function AccountsAttention() {
       {/* Card list */}
       <div className="p-4 flex flex-col gap-3">
         {filtered.length > 0 ? (
-          filtered.map((item) => <AccountRow key={item.id} item={item} defaultOpen={item.id === firstId} />)
+          filtered.map((item) => <AccountRow key={item.id} item={item} defaultOpen={item.id === firstId} onOpenDrawer={setDrawerId} />)
         ) : (
           <p className="text-sm text-gray-400 text-center py-6">No accounts match the selected filter.</p>
         )}

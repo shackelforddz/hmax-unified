@@ -21,6 +21,8 @@ export interface AccountAttention {
   meta: string;    // portfolio value / headline
   status: AccountStatus;
   summary: string; // one-line driver summary shown collapsed
+  /** The SLA contract this account's detail drawer opens. */
+  contractId: string;
   flags: AccountFlag[];
 }
 
@@ -32,6 +34,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
     meta: "$8.2M pipeline · 5-yr HVDC renewal",
     status: "critical",
     summary: "Renewal slipping in Scoping · scope of work missing · critical asset alert",
+    contractId: "sla-xcel",
     flags: [
       {
         title: "$8.2M HVDC renewal stuck in Scoping",
@@ -55,6 +58,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
     meta: "$6.2M pipeline",
     status: "at-risk",
     summary: "Opportunity stalled at Qualified · Install Base profile missing · asset health falling",
+    contractId: "sla-aep",
     flags: [
       {
         title: "$6.2M converter replacement can't reach Offer",
@@ -78,6 +82,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
     meta: "$1.9M pipeline",
     status: "at-risk",
     summary: "Opportunity stalled · written site-access agreement outstanding",
+    contractId: "sla-pacific",
     flags: [
       {
         title: "Relay upgrade expansion stalled",
@@ -94,6 +99,7 @@ export const ACCOUNT_ATTENTION: AccountAttention[] = [
     meta: "$2.1M pipeline",
     status: "watch",
     summary: "In Negotiation · legal T&Cs the only outstanding offer input",
+    contractId: "sla-nv",
     flags: [
       {
         title: "Legal T&Cs outstanding on $2.1M retrofit",

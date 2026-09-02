@@ -135,6 +135,8 @@ export const OPS_CONTRACTS: OpsContract[] = RAW_CONTRACTS.map((c) => ({
 }));
 
 export type PartStatus = "in-stock" | "ordered" | "backordered";
+export type MaintStatus = "Scheduled" | "Overdue" | "Complete";
+export type InvoiceStatus = "Paid" | "Sent" | "Overdue" | "Draft";
 export interface OpsContractDetail {
   summary: string;
   recommendedActions: string[];
@@ -145,6 +147,18 @@ export interface OpsContractDetail {
   assets: { code: string; type: string; status: string }[];
   /** Parts & materials the contract work depends on. */
   parts: { label: string; qty: number; status: PartStatus }[];
+  /** Scheduled maintenance on the covered assets. */
+  maintenance: { task: string; due: string; interval: string; status: MaintStatus }[];
+  /** Field-service visits under the contract. */
+  fieldService: { visit: string; engineer: string; date: string; status: string }[];
+  /** Customer-side contacts. */
+  contacts: { name: string; role: string; email: string; phone: string }[];
+  /** Commercial position — revenue and net margin. */
+  finance: { revenue: string; netMargin: string; asSoldMargin: string; invoiced: string; outstanding: string };
+  /** Invoicing against milestones. */
+  invoices: { code: string; milestone: string; amount: string; status: InvoiceStatus; due: string }[];
+  /** Payment events timeline. */
+  payments: { date: string; event: string; amount: string }[];
   related: { customer: string; value: string; region: string };
 }
 
@@ -179,6 +193,30 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { label: "Gasket & seal kit", qty: 3, status: "backordered" },
       { label: "Cooling fan assembly", qty: 4, status: "in-stock" },
     ],
+    maintenance: [
+      { task: "DGA oil sampling", due: "2026-08-15", interval: "Monthly", status: "Overdue" },
+      { task: "Bushing thermography", due: "2026-09-20", interval: "Quarterly", status: "Scheduled" },
+      { task: "Cooling system service", due: "2026-10-05", interval: "Annual", status: "Scheduled" },
+    ],
+    fieldService: [
+      { visit: "Winding replacement — Unit S-12", engineer: "Daniel Brooks", date: "2026-09-02", status: "In progress" },
+      { visit: "Site commissioning", engineer: "Liam O.", date: "2026-09-28", status: "Scheduled" },
+    ],
+    contacts: [
+      { name: "Karen Ellis", role: "Asset Manager · Xcel Energy", email: "k.ellis@xcelenergy.com", phone: "+1 612 555 0142" },
+      { name: "Raj Patel", role: "Procurement Lead", email: "r.patel@xcelenergy.com", phone: "+1 612 555 0177" },
+    ],
+    finance: { revenue: "£4.2m", netMargin: "16.2%", asSoldMargin: "18.6%", invoiced: "£2.4m", outstanding: "£1.2m" },
+    invoices: [
+      { code: "INV-3301", milestone: "Engineering approval", amount: "£0.8m", status: "Paid", due: "2026-06-30" },
+      { code: "INV-3302", milestone: "Material delivery", amount: "£1.6m", status: "Overdue", due: "2026-08-15" },
+      { code: "INV-3310", milestone: "Field mobilization", amount: "£1.2m", status: "Draft", due: "2026-09-30" },
+    ],
+    payments: [
+      { date: "2026-07-02", event: "INV-3301 paid", amount: "+£0.8m" },
+      { date: "2026-08-15", event: "INV-3302 overdue", amount: "£1.6m" },
+      { date: "2026-09-30", event: "INV-3310 milestone invoice — at risk", amount: "£1.2m" },
+    ],
     related: { customer: "Xcel Energy", value: "£4.2m", region: "North America" },
   },
   "ct-northsea": {
@@ -209,6 +247,29 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { label: "Vacuum circuit breaker", qty: 3, status: "in-stock" },
       { label: "Busbar insulation set", qty: 2, status: "backordered" },
     ],
+    maintenance: [
+      { task: "Relay function test", due: "2026-09-12", interval: "Quarterly", status: "Scheduled" },
+      { task: "Switchgear inspection", due: "2026-08-28", interval: "6-monthly", status: "Overdue" },
+    ],
+    fieldService: [
+      { visit: "Protection-relay extension works", engineer: "Sara B.", date: "2026-09-08", status: "Blocked — CO unsigned" },
+      { visit: "Platform B switchgear service", engineer: "Tom H.", date: "2026-09-18", status: "Scheduled" },
+    ],
+    contacts: [
+      { name: "Ingrid Vos", role: "Programme Manager · Siemens", email: "i.vos@siemens.com", phone: "+44 20 7946 0321" },
+      { name: "Mark Reid", role: "Commercial Contact", email: "m.reid@siemens.com", phone: "+44 20 7946 0388" },
+    ],
+    finance: { revenue: "£2.4m", netMargin: "4.6%", asSoldMargin: "18.6%", invoiced: "£1.1m", outstanding: "£0.68m" },
+    invoices: [
+      { code: "INV-2811", milestone: "Engineering approval", amount: "£0.5m", status: "Paid", due: "2026-05-30" },
+      { code: "INV-2818", milestone: "Material delivery", amount: "£0.6m", status: "Sent", due: "2026-07-30" },
+      { code: "INV-2825", milestone: "CO-118 progress", amount: "£0.68m", status: "Draft", due: "2026-09-05" },
+    ],
+    payments: [
+      { date: "2026-06-04", event: "INV-2811 paid", amount: "+£0.5m" },
+      { date: "2026-08-02", event: "INV-2818 paid", amount: "+£0.6m" },
+      { date: "2026-09-05", event: "INV-2825 blocked until CO-118 signed", amount: "£0.68m" },
+    ],
     related: { customer: "Siemens", value: "£2.4m", region: "North Sea" },
   },
   "ct-baltic": {
@@ -235,6 +296,25 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
       { label: "Transformer oil (barrels)", qty: 6, status: "in-stock" },
       { label: "Bushing gasket kit", qty: 4, status: "ordered" },
     ],
+    maintenance: [
+      { task: "Offshore transformer service", due: "2026-09-08", interval: "6-monthly", status: "Scheduled" },
+      { task: "Oil quality check", due: "2026-07-30", interval: "Quarterly", status: "Complete" },
+    ],
+    fieldService: [
+      { visit: "Array transformer maintenance", engineer: "Dev K.", date: "2026-09-08", status: "Blocked — cert lapse" },
+    ],
+    contacts: [
+      { name: "Femke Bakker", role: "O&M Manager · Baltic Wind NL", email: "f.bakker@balticwind.nl", phone: "+31 10 555 2210" },
+    ],
+    finance: { revenue: "£2.4m", netMargin: "17.1%", asSoldMargin: "18.2%", invoiced: "£1.9m", outstanding: "£0.5m" },
+    invoices: [
+      { code: "INV-4102", milestone: "Field execution", amount: "£1.9m", status: "Paid", due: "2026-08-10" },
+      { code: "INV-4108", milestone: "HSE cert renewal visit", amount: "£0.5m", status: "Draft", due: "2026-09-15" },
+    ],
+    payments: [
+      { date: "2026-08-12", event: "INV-4102 paid", amount: "+£1.9m" },
+      { date: "2026-09-15", event: "INV-4108 pending cert renewal", amount: "£0.5m" },
+    ],
     related: { customer: "Baltic Wind NL", value: "£2.4m", region: "North Sea" },
   },
   "ct-pacific": {
@@ -258,6 +338,24 @@ export const OPS_CONTRACT_DETAILS: Record<string, OpsContractDetail> = {
     parts: [
       { label: "Relay hardware set", qty: 5, status: "in-stock" },
       { label: "Firmware licence", qty: 1, status: "ordered" },
+    ],
+    maintenance: [
+      { task: "Relay firmware upgrade", due: "2026-09-21", interval: "One-off", status: "Scheduled" },
+    ],
+    fieldService: [
+      { visit: "Relay upgrade — Substation West", engineer: "Priya K.", date: "2026-09-01", status: "Blocked — site access" },
+    ],
+    contacts: [
+      { name: "Diego Ramos", role: "Substation Manager · Pacific Gas", email: "d.ramos@pge.com", phone: "+1 415 555 0190" },
+    ],
+    finance: { revenue: "£440k", netMargin: "19.8%", asSoldMargin: "20.1%", invoiced: "£180k", outstanding: "£0" },
+    invoices: [
+      { code: "INV-1904", milestone: "Material delivery", amount: "£180k", status: "Paid", due: "2026-07-10" },
+      { code: "INV-1909", milestone: "Field execution", amount: "£260k", status: "Draft", due: "2026-09-30" },
+    ],
+    payments: [
+      { date: "2026-07-11", event: "INV-1904 paid", amount: "+£180k" },
+      { date: "2026-09-30", event: "INV-1909 pending site access", amount: "£260k" },
     ],
     related: { customer: "Pacific Gas", value: "£440k", region: "North Sea" },
   },

@@ -9,7 +9,7 @@ import { type ContextEntity } from "@/components/dashboard/conversation-launcher
 import { ChartBody } from "@/components/dashboard/sales/custom-widget-view";
 import { flowById, type GuidedFlow, type FlowField } from "@/lib/guided-flows";
 import { type PlaybookPanel } from "@/lib/alert-playbooks";
-import { type ViewDoc } from "@/components/dashboard/sales/document-viewer";
+import { DocContent, type ViewDoc } from "@/components/dashboard/sales/document-viewer";
 
 /* ── Typing indicator ────────────────────────────────────────────── */
 function TypingBubble() {
@@ -1168,18 +1168,23 @@ function PanelBlock({ panel, onSend, onOpenDoc }: { panel: PlaybookPanel; onSend
           <p className="text-sm text-gray-900">{panel.heading}</p>
           {panel.doc && onOpenDoc && (
             <button onClick={() => onOpenDoc(panel.doc!)} className="text-xs text-gray-600 underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer shrink-0">
-              Open {panel.doc.docType.toLowerCase()}
+              Open full document
             </button>
           )}
         </div>
-        <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-          {panel.rows.map((r, i) => (
-            <div key={r.label} className={`flex items-start gap-4 px-4 py-2.5 ${i < panel.rows.length - 1 ? "border-b border-gray-100" : ""}`}>
-              <span className="text-xs text-gray-400 w-32 shrink-0 pt-0.5">{r.label}</span>
-              <span className="text-sm text-gray-800 flex-1">{r.value}</span>
-            </div>
-          ))}
-        </div>
+        {panel.doc ? (
+          // Show the document content inline in the conversation.
+          <DocContent doc={panel.doc} />
+        ) : (
+          <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+            {panel.rows.map((r, i) => (
+              <div key={r.label} className={`flex items-start gap-4 px-4 py-2.5 ${i < panel.rows.length - 1 ? "border-b border-gray-100" : ""}`}>
+                <span className="text-xs text-gray-400 w-32 shrink-0 pt-0.5">{r.label}</span>
+                <span className="text-sm text-gray-800 flex-1">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
         {panel.note && <p className="text-xs text-gray-500 mt-2.5">{panel.note}</p>}
       </div>
     );

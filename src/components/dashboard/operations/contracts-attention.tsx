@@ -137,7 +137,7 @@ function ContractRow({ contract, category, onOpenDrawer }: { contract: OpsContra
                   </div>
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{alert.detail}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => launch({ context: contract.customer, prompt: alert.action, entity: { kind: "contract", id: contract.id }, playbook: buildPlaybook(alert.action, alert.detail, { coCode: alert.title.match(/CO-\d+/)?.[0] }) })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+                    <Button onClick={() => launch({ context: contract.customer, prompt: alert.action, entity: { kind: "contract", id: contract.id }, playbook: buildPlaybook(alert.action, alert.detail, { coCode: alert.title.match(/CO-\d+/)?.[0], title: alert.title }) })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
                       {alert.action}
                     </Button>
                     <Button variant="outline" onClick={() => launch({ context: contract.customer, prompt: alert.title, entity: { kind: "contract", id: contract.id } })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">

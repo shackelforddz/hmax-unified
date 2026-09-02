@@ -111,7 +111,7 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
                   <div className="flex flex-wrap gap-2">
                     {/* Recommended action — primary CTA */}
                     <Button
-                      onClick={() => launch({ context: item.customer, prompt: flag.action, entity: { kind: "customer", name: item.customer }, playbook: buildPlaybook(flag.action, flag.detail) })}
+                      onClick={() => launch({ context: item.customer, prompt: flag.action, entity: { kind: "customer", name: item.customer }, playbook: buildPlaybook(flag.action, flag.detail, { title: flag.title }) })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       {flag.action}

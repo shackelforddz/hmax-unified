@@ -254,13 +254,22 @@ export default function ConversationOverlay({ visible, onClose, context, initial
     timers.current.push(
       setTimeout(() => {
         setTyping(false);
-        push({
+        const recommendation: Omit<ChatMsg, "id"> = {
           role: "ai",
           kind: "text",
           text: `Recommendation — ${pb.recommendation}`,
           suggestions: { prompts: [], actions: pb.steps },
-        });
-        if (pb.panel) push({ role: "ai", kind: "panel", panel: pb.panel });
+        };
+        // For a recap (e.g. a reviewed document) the flow reads best as
+        // summary → linked document → recommendation + next steps, so the
+        // recommendation is pushed last and its next-step buttons show.
+        if (pb.panel?.kind === "recap") {
+          push({ role: "ai", kind: "panel", panel: pb.panel });
+          push(recommendation);
+        } else {
+          push(recommendation);
+          if (pb.panel) push({ role: "ai", kind: "panel", panel: pb.panel });
+        }
       }, 1900)
     );
     // Keep the widget context / customer in sync for the left pane.

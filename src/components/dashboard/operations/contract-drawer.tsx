@@ -170,6 +170,106 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
         </div>
       </Card>
 
+      {/* Maintenance schedule */}
+      <Card>
+        <SectionTitle>Maintenance schedule</SectionTitle>
+        <div className="flex flex-col">
+          {d.maintenance.map((m) => {
+            const cls = m.status === "Overdue" ? "bg-gray-900 text-white" : m.status === "Complete" ? "border border-gray-300 text-gray-500" : "bg-gray-200 text-gray-700";
+            return (
+              <div key={m.task} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-700 truncate">{m.task}</p>
+                  <p className="text-xs text-gray-400">{m.interval} · due {m.due}</p>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${cls}`}>{m.status}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Field service */}
+      <Card>
+        <SectionTitle>Field service</SectionTitle>
+        <div className="flex flex-col">
+          {d.fieldService.map((f) => {
+            const blocked = /blocked/i.test(f.status);
+            return (
+              <div key={f.visit} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-700 truncate">{f.visit}</p>
+                  <p className="text-xs text-gray-400">{f.engineer} · {f.date}</p>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${blocked ? "bg-gray-900 text-white" : "border border-gray-300 text-gray-500"}`}>{f.status}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Revenue & margin */}
+      <Card>
+        <SectionTitle>Revenue &amp; margin</SectionTitle>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          {[
+            { label: "Revenue", value: d.finance.revenue },
+            { label: "Net margin", value: d.finance.netMargin },
+            { label: "As-sold margin", value: d.finance.asSoldMargin },
+            { label: "Invoiced", value: d.finance.invoiced },
+            { label: "Outstanding", value: d.finance.outstanding },
+          ].map((r) => (
+            <div key={r.label}>
+              <p className="text-[11px] text-gray-400 tracking-wider">{r.label}</p>
+              <p className="text-sm text-gray-800 mt-0.5">{r.value}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Invoicing */}
+      <Card>
+        <SectionTitle>Invoicing</SectionTitle>
+        <div className="flex flex-col">
+          {d.invoices.map((inv) => {
+            const cls = inv.status === "Overdue" ? "bg-gray-900 text-white" : inv.status === "Sent" ? "bg-gray-200 text-gray-700" : "border border-gray-300 text-gray-500";
+            return (
+              <div key={inv.code} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-500 w-24 shrink-0">{inv.code}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-700 truncate">{inv.milestone}</p>
+                  <p className="text-xs text-gray-400">due {inv.due}</p>
+                </div>
+                <span className="text-sm text-gray-700 shrink-0">{inv.amount}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${cls}`}>{inv.status}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Payment events */}
+      <Card>
+        <SectionTitle>Payment events</SectionTitle>
+        <div className="flex flex-col">
+          {d.payments.map((pay, i) => (
+            <div key={i} className="flex gap-3 pb-4 last:pb-0">
+              <div className="flex flex-col items-center shrink-0 pt-1.5">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                {i < d.payments.length - 1 && <span className="w-px flex-1 bg-gray-200 mt-1" />}
+              </div>
+              <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-800 leading-snug">{pay.event}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{pay.date}</p>
+                </div>
+                <span className={`text-sm shrink-0 ${pay.amount.startsWith("+") ? "text-gray-700" : "text-gray-500"}`}>{pay.amount}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
       {/* Open risks */}
       <Card>
         <SectionTitle>Open risks</SectionTitle>
@@ -198,6 +298,25 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
               <div>
                 <p className="text-sm text-gray-800">{t.name}</p>
                 <p className="text-xs text-gray-400">{t.role}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Customer contacts */}
+      <Card>
+        <SectionTitle>Customer contacts</SectionTitle>
+        <div className="flex flex-col gap-3">
+          {d.contacts.map((ct) => (
+            <div key={ct.email} className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
+                {ct.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-gray-800">{ct.name}</p>
+                <p className="text-xs text-gray-400">{ct.role}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{ct.email} · {ct.phone}</p>
               </div>
             </div>
           ))}

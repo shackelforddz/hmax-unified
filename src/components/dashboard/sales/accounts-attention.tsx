@@ -72,7 +72,7 @@ function AccountRow({ item, defaultOpen }: { item: AccountAttention; defaultOpen
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">{flag.detail}</p>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      onClick={() => launch({ context: item.account, prompt: flag.action, entity, playbook: buildPlaybook(flag.action, flag.detail) })}
+                      onClick={() => launch({ context: item.account, prompt: flag.action, entity, playbook: buildPlaybook(flag.action, flag.detail, { assetId: flag.assetId, title: flag.title }) })}
                       className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
                     >
                       {flag.action}

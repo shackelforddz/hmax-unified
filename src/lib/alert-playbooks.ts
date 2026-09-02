@@ -59,6 +59,8 @@ export interface PlaybookContext {
   coCode?: string;                              // for "Review change order"
   missing?: { label: string; owner: string }[]; // for "Complete scope of work"
   assetId?: string;                             // for "Review asset health"
+  title?: string;                               // the alert's title, for review docs
+  ref?: string;                                 // an explicit document reference
 }
 
 interface Recipe {
@@ -355,6 +357,16 @@ function schedulePanel(): PlaybookPanel {
   };
 }
 
+// Split a "£320k" / "£1.2m" value into a proportional line item.
+function splitGBP(value: string, fraction: number): string {
+  const m = value.match(/([\d.]+)\s*([km])?/i);
+  if (!m) return value;
+  const num = parseFloat(m[1]) * fraction;
+  const unit = (m[2] ?? "").toLowerCase();
+  const rounded = unit === "m" ? Math.round(num * 100) / 100 : Math.round(num);
+  return `£${rounded}${unit}`;
+}
+
 // Review change order — recap the CO and link the document.
 function changeOrderPanel(coCode?: string): PlaybookPanel | undefined {
   const co = coCode ? CHANGE_ORDERS[coCode] : undefined;
@@ -375,6 +387,18 @@ function changeOrderPanel(coCode?: string): PlaybookPanel | undefined {
     ],
     sections: [
       { heading: "Scope", text: co.scope },
+      {
+        heading: "Cost breakdown",
+        table: {
+          columns: ["Line item", "Amount"],
+          rows: [
+            ["Materials & equipment", splitGBP(co.value, 0.72)],
+            ["Labour & commissioning", splitGBP(co.value, 0.22)],
+            ["Contingency", splitGBP(co.value, 0.06)],
+            ["Total", co.value],
+          ],
+        },
+      },
       { heading: "Schedule impact", text: co.scheduleImpact },
       { heading: "Margin impact", text: co.marginImpact },
     ],
@@ -416,6 +440,33 @@ function healthPanel(assetId?: string): PlaybookPanel {
     label: r.label,
     value: `${r.value}${r.state === "alert" ? " · alert" : r.state === "watch" ? " · watch" : ""}`,
   }));
+  const hp = d.stats.healthPct;
+  const months = ["Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+  const trend = [hp + 34, hp + 26, hp + 18, hp + 12, hp + 6, hp].map((v, i) => ({ label: months[i], value: Math.max(0, Math.min(100, v)) }));
+  const doc: ViewDoc = {
+    kind: "report",
+    docType: "Asset health report",
+    title: `${d.code} — condition & health`,
+    ref: d.code,
+    preview: "text",
+    fields: [
+      { label: "Type", value: d.type },
+      { label: "Status", value: d.stats.status },
+      { label: "Health", value: `${d.stats.healthPct}%` },
+      { label: "Last service", value: d.stats.lastService },
+    ],
+    sections: [
+      { heading: "Health index trend", chart: { unit: "%", threshold: 60, points: trend } },
+      {
+        heading: "Condition readings",
+        table: {
+          columns: ["Parameter", "Reading", "State"],
+          rows: d.readings.map((r) => [r.label, r.value, r.state === "alert" ? "Alert" : r.state === "watch" ? "Watch" : "Normal"]),
+        },
+      },
+      { heading: "Summary", text: d.contextSummary },
+    ],
+  };
   return {
     kind: "recap",
     heading: `${d.code} — ${d.stats.status} · health ${d.stats.healthPct}%`,
@@ -426,6 +477,197 @@ function healthPanel(assetId?: string): PlaybookPanel {
       ...readingRows,
     ],
     note: d.contextSummary,
+    doc,
+  };
+}
+
+// Generic "Review …" — summarise + link the reviewed document.
+const REVIEW_DOCTYPE: Record<string, string> = {
+  "review ncr": "Non-conformance report",
+  "review hse report": "HSE report",
+  "review dga trend": "DGA report",
+  "review electrical tests": "Electrical test report",
+  "review inspection report": "Field inspection report",
+  "review feasibility": "Scope feasibility",
+  "review drawings": "Design drawing",
+  "review site constraints": "Site survey",
+  "review standard": "Engineering bulletin",
+};
+
+// The actual document content — with data tables, trend charts and photos.
+function reviewDoc(key: string, docType: string, ref: string, title: string, situation: string, assetId?: string): ViewDoc {
+  const asset = assetId ? assetId.toUpperCase() : "—";
+  const base = { kind: "report" as const, docType, title, ref, preview: "text" as const };
+
+  if (key === "review dga trend") {
+    return {
+      ...base,
+      fields: [
+        { label: "Asset", value: asset },
+        { label: "Sample date", value: "2026-08-26" },
+        { label: "Lab", value: "Relcare · Chennai" },
+        { label: "Status", value: "Awaiting interpretation" },
+      ],
+      sections: [
+        {
+          heading: "Dissolved gas analysis",
+          table: {
+            columns: ["Gas", "Result (ppm)", "Caution", "Status"],
+            rows: [
+              ["Hydrogen (H₂)", "480", "100", "Alert"],
+              ["Acetylene (C₂H₂)", "6", "1", "Alert"],
+              ["Ethylene (C₂H₄)", "54", "50", "Watch"],
+              ["Methane (CH₄)", "118", "120", "Normal"],
+              ["Ethane (C₂H₆)", "33", "65", "Normal"],
+              ["Carbon monoxide (CO)", "420", "350", "Watch"],
+            ],
+          },
+        },
+        { heading: "Hydrogen trend", chart: { unit: "ppm", threshold: 100, points: [{ label: "Mar", value: 180 }, { label: "Apr", value: 240 }, { label: "May", value: 300 }, { label: "Jun", value: 360 }, { label: "Jul", value: 420 }, { label: "Aug", value: 480 }] } },
+        { heading: "Interpretation", text: situation + " Rising hydrogen with trace acetylene points to a developing thermal fault with possible low-energy arcing, corroborating the Y-phase bushing hotspot." },
+      ],
+    };
+  }
+
+  if (key === "review electrical tests") {
+    return {
+      ...base,
+      fields: [
+        { label: "Asset", value: asset },
+        { label: "Test date", value: "2026-08-22" },
+        { label: "Standard", value: "IEEE C57.152" },
+        { label: "Status", value: "Awaiting review" },
+      ],
+      sections: [
+        {
+          heading: "Test results",
+          table: {
+            columns: ["Test", "Result", "Limit", "Verdict"],
+            rows: [
+              ["Insulation resistance", "1.2 GΩ", "≥1 GΩ", "Pass"],
+              ["Polarization index", "1.4", "≥2.0", "Fail"],
+              ["Winding resistance (Y)", "0.82 Ω", "0.78 ±5%", "Watch"],
+              ["Power factor / tan δ", "0.9%", "≤0.5%", "Fail"],
+              ["Turns ratio dev.", "0.3%", "≤0.5%", "Pass"],
+            ],
+          },
+        },
+        { heading: "Interpretation", text: situation + " Low polarization index and elevated power factor indicate insulation ageing/moisture; recommend a follow-up and trend against the next test." },
+      ],
+    };
+  }
+
+  if (key === "review inspection report") {
+    return {
+      ...base,
+      fields: [
+        { label: "Asset", value: asset },
+        { label: "Engineer", value: "Lena Fischer" },
+        { label: "Date", value: "2026-08-19" },
+        { label: "Type", value: "Visual + thermal" },
+      ],
+      sections: [
+        {
+          heading: "Findings",
+          table: {
+            columns: ["Item", "Observation", "Severity"],
+            rows: [
+              ["Cooling manifold", "Surface corrosion, gasket seepage", "High"],
+              ["Y-phase bushing", "Discolouration near flange", "Watch"],
+              ["Tap-changer", "No visible defect", "Normal"],
+            ],
+          },
+        },
+        { heading: "Notes", text: situation },
+      ],
+      images: [{ caption: "Cooling manifold — corrosion" }, { caption: "Y-phase bushing flange" }, { caption: "Thermal — hotspot" }],
+    };
+  }
+
+  if (key === "review ncr") {
+    return {
+      ...base,
+      fields: [
+        { label: "Reference", value: ref },
+        { label: "Raised by", value: "QA · Radiography" },
+        { label: "Date", value: "2026-08-23" },
+        { label: "Disposition", value: "Open" },
+      ],
+      sections: [
+        {
+          heading: "Measurements",
+          table: {
+            columns: ["Check", "Spec", "Actual", "Result"],
+            rows: [
+              ["Weld porosity (set 2)", "≤2% area", "3.4%", "Fail"],
+              ["Radiographic density", "2.0–4.0", "4.3", "Fail"],
+              ["Surface finish", "Ra ≤3.2", "Ra 2.8", "Pass"],
+            ],
+          },
+        },
+        { heading: "Disposition", text: situation + " Recommend rework of winding set 2 and re-radiography before assembly continues." },
+      ],
+    };
+  }
+
+  if (key === "review hse report") {
+    return {
+      ...base,
+      fields: [
+        { label: "Type", value: "Near-miss" },
+        { label: "Location", value: "North Sea platform" },
+        { label: "Severity", value: "Medium" },
+        { label: "RIDDOR", value: "Under review" },
+      ],
+      sections: [
+        {
+          heading: "Corrective actions",
+          table: {
+            columns: ["Action", "Owner", "Status"],
+            rows: [
+              ["Re-run lifting plan & toolbox talk", "Liam O.", "Closed"],
+              ["RIDDOR reportability check", "HSE", "In progress"],
+              ["Re-induct crew on dropped-load", "Site lead", "Open"],
+            ],
+          },
+        },
+        { heading: "Summary", text: situation },
+      ],
+    };
+  }
+
+  // feasibility / drawings / site constraints / standard — text summary.
+  return {
+    ...base,
+    kind: key === "review drawings" ? "drawing" : "report",
+    preview: key === "review drawings" ? "drawing" : "text",
+    fields: [
+      { label: "Reference", value: ref },
+      { label: "Status", value: "Awaiting your review" },
+    ],
+    sections: [{ heading: "Summary", text: situation }],
+  };
+}
+
+function reviewRecapPanel(action: string, situation: string, ctx?: PlaybookContext): PlaybookPanel {
+  const key = action.trim().toLowerCase();
+  const docType = REVIEW_DOCTYPE[key] ?? "Document";
+  const codeRe = /\b(?:NCR|CO|FR|DWG|FAT|DGA)-[A-Za-z0-9-]+/;
+  const ref =
+    ctx?.ref ||
+    ctx?.title?.match(codeRe)?.[0] ||
+    situation.match(codeRe)?.[0] ||
+    (ctx?.assetId ? ctx.assetId.toUpperCase() : "—");
+  const doc = reviewDoc(key, docType, ref, ctx?.title ?? docType, situation, ctx?.assetId);
+  return {
+    kind: "recap",
+    heading: `${docType}${ref !== "—" ? ` · ${ref}` : ""}`,
+    rows: [
+      { label: "Document", value: docType },
+      { label: "Reference", value: ref },
+      { label: "Status", value: "Awaiting your review" },
+    ],
+    doc,
   };
 }
 
@@ -514,7 +756,7 @@ function certRenewalPanel(): PlaybookPanel {
   };
 }
 
-function panelFor(action: string, ctx?: PlaybookContext): PlaybookPanel | undefined {
+function panelFor(action: string, situation: string, ctx?: PlaybookContext): PlaybookPanel | undefined {
   switch (action.trim().toLowerCase()) {
     case "rebalance crew":
       return crewPanel();
@@ -535,13 +777,15 @@ function panelFor(action: string, ctx?: PlaybookContext): PlaybookPanel | undefi
     case "schedule cert renewal":
       return certRenewalPanel();
     default:
+      // Any other "Review …" action: summarise + link the document.
+      if (action.trim().toLowerCase().startsWith("review")) return reviewRecapPanel(action, situation, ctx);
       return undefined;
   }
 }
 
 export function buildPlaybook(action: string, situation: string, ctx?: PlaybookContext): Playbook {
   const r = RECIPES[action.trim().toLowerCase()] ?? DEFAULT;
-  const panel = panelFor(action, ctx);
+  const panel = panelFor(action, situation, ctx);
   // When an options/form panel drives the interaction, the generic text
   // steps are redundant; the recap panel keeps its steps (e.g. "Raise it").
   const steps = panel && (panel.kind === "options" || panel.kind === "form" || panel.kind === "draft") ? [] : r.steps;

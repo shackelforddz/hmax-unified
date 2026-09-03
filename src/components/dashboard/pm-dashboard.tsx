@@ -16,10 +16,11 @@ import { type CustomWidgetConfig } from "@/lib/custom-widget";
 import DashboardTabs from "@/components/dashboard/dashboard-tabs";
 import WorkOrdersTable from "@/components/dashboard/tables/work-orders-table";
 import ContractsTable from "@/components/dashboard/tables/contracts-table";
+import AssetsTable from "@/components/dashboard/tables/assets-table";
 import ContractStatus from "@/components/dashboard/operations/contract-status";
 import PeopleWidget from "@/components/dashboard/people-widget";
 
-const TABS = ["Overview", "Contracts", "Work Orders"];
+const TABS = ["Overview", "Contracts", "Assets", "Work Orders"];
 
 export default function PmDashboard() {
   const [widgets, setWidgets] = useState<CustomWidgetConfig[]>([]);
@@ -31,6 +32,7 @@ export default function PmDashboard() {
       <div className="flex flex-col gap-4">
         <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
         {tab === "Contracts" && <ContractsTable />}
+        {tab === "Assets" && <AssetsTable />}
         {tab === "Work Orders" && <WorkOrdersTable />}
       </div>
     );

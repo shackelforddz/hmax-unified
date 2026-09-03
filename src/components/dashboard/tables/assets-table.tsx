@@ -21,9 +21,12 @@ function HealthCell({ health }: { health: number }) {
   );
 }
 
+const contractOf = (a: AssetAlert) => ASSET_DETAILS[a.id]?.related.contract ?? "—";
+
 const COLUMNS: Column<AssetAlert>[] = [
   { header: "Asset", cell: (a) => <span className="text-gray-900">{a.code}</span> },
   { header: "Type", cell: (a) => <span className="text-gray-700">{ASSET_DETAILS[a.id]?.type ?? "Power transformer"}</span> },
+  { header: "Contract", cell: (a) => <span className="text-gray-500">{contractOf(a)}</span> },
   { header: "Location", cell: (a) => <span className="text-gray-500">{a.location}</span> },
   { header: "Health", cell: (a) => <HealthCell health={a.health} />, className: "w-40" },
   { header: "Status", cell: (a) => <StatusBadge status={a.status} />, align: "right" },
@@ -31,16 +34,38 @@ const COLUMNS: Column<AssetAlert>[] = [
 
 export default function AssetsTable() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [contract, setContract] = useState("all");
+
+  const contracts = Array.from(new Set(ASSET_ALERTS.map(contractOf))).sort();
+  const rows = contract === "all" ? ASSET_ALERTS : ASSET_ALERTS.filter((a) => contractOf(a) === contract);
+
+  const toolbar = (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-gray-400">Contract</span>
+      <select
+        value={contract}
+        onChange={(e) => setContract(e.target.value)}
+        className="text-xs px-3 py-1 rounded-full border border-gray-200 text-gray-500 bg-white cursor-pointer outline-none hover:border-gray-300 max-w-[240px]"
+      >
+        <option value="all">All</option>
+        {contracts.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
     <>
       <AssetDrawer assetId={drawerId} onClose={() => setDrawerId(null)} />
       <DataTable
         title="Assets"
-        subtitle={`${ASSET_ALERTS.length} monitored assets`}
+        subtitle={`${rows.length} monitored assets`}
         columns={COLUMNS}
-        rows={ASSET_ALERTS}
+        rows={rows}
         getKey={(a) => a.id}
         onRowClick={(a) => setDrawerId(a.id)}
+        toolbar={toolbar}
       />
     </>
   );

@@ -17,17 +17,22 @@ interface Props<T> {
   rows: T[];
   getKey: (row: T) => string;
   onRowClick: (row: T) => void;
+  /** Optional filter controls shown in the header. */
+  toolbar?: React.ReactNode;
 }
 
-export default function DataTable<T>({ title, subtitle, columns, rows, getKey, onRowClick }: Props<T>) {
+export default function DataTable<T>({ title, subtitle, columns, rows, getKey, onRowClick, toolbar }: Props<T>) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-5 pt-5 pb-4 border-b border-gray-100 flex items-start justify-between">
-        <div>
+      <div className="px-5 pt-5 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
+        <div className="min-w-0">
           <h3 className="text-base text-gray-900">{title}</h3>
           {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
         </div>
-        <WidgetChat title={title} />
+        <div className="flex items-center gap-3 shrink-0">
+          {toolbar}
+          <WidgetChat title={title} />
+        </div>
       </div>
 
       <div className="overflow-x-auto no-scrollbar">

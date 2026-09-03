@@ -179,7 +179,7 @@ export function DocContent({ doc }: { doc: ViewDoc }) {
       {doc.sections.map((s) => (
         <div key={s.heading} className="flex flex-col gap-2.5">
           <p className="text-[11px] text-gray-400 tracking-wider">{s.heading}</p>
-          {s.text && <p className="text-sm text-gray-700 leading-relaxed">{s.text}</p>}
+          {s.text && <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{s.text}</p>}
           {s.chart && <DocChartView chart={s.chart} />}
           {s.table && <DocTableView table={s.table} />}
         </div>

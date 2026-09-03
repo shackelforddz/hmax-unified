@@ -6,6 +6,45 @@ import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { OPP_STAGES, OPPORTUNITIES, type Opportunity, type OpportunityDetail } from "@/lib/sales-data";
 import OwnerBadge from "./owner-badge";
+import DocumentViewer, { type ViewDoc } from "./document-viewer";
+
+// The opportunity rendered as a full brief document.
+function opportunityDoc(opp: Opportunity, detail: OpportunityDetail): ViewDoc {
+  const readyCount = opp.requirements.filter((r) => r.done).length;
+  const statusLabel = opp.status === "on-track" ? "On track" : opp.status === "at-risk" ? "At risk" : "Stalled";
+  return {
+    kind: "contract",
+    docType: "Opportunity brief",
+    title: `${opp.account} — ${opp.title}`,
+    ref: opp.id.toUpperCase(),
+    preview: "text",
+    fields: [
+      { label: "Account", value: opp.account },
+      { label: "Value", value: opp.value },
+      { label: "Stage", value: opp.stage },
+      { label: "Owner", value: opp.owner },
+      { label: "Status", value: statusLabel },
+      { label: "Offer readiness", value: `${readyCount} of ${opp.requirements.length}` },
+    ],
+    sections: [
+      { heading: "Summary", text: detail.summary },
+      {
+        heading: "Offer readiness",
+        table: {
+          columns: ["Input", "Owner", "Status"],
+          rows: opp.requirements.map((r) => [r.label, r.owner, r.done ? "Provided" : "Missing"]),
+        },
+      },
+      ...(detail.recommendations.length > 0
+        ? [{ heading: "Recommendations", text: detail.recommendations.map((r) => `• ${r}`).join("\n") }]
+        : []),
+      {
+        heading: "Assets in scope",
+        text: detail.assets.length > 0 ? detail.assets.map((a) => `${a.code} — ${a.note}`).join("; ") : "None scoped yet — still in discovery.",
+      },
+    ],
+  };
+}
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">{children}</div>;
@@ -175,6 +214,7 @@ interface Props {
 export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
   const open = !!(opp && detail);
   const launch = useConversationLauncher();
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
 
   const runAction = (prompt: string) => {
     onClose();
@@ -183,6 +223,11 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
     const known = opp && OPPORTUNITIES.some((o) => o.id === opp.id);
     launch({ context: opp?.account, prompt, entity: known ? { kind: "opportunity", id: opp!.id } : undefined });
   };
+
+  // Close the document viewer when the drawer itself closes.
+  useEffect(() => {
+    if (!open) setViewDoc(null);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -209,14 +254,21 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
             {/* Header */}
             <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-100">
               <div className="flex items-start justify-between">
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-2xl text-gray-900">{opp.account}</h2>
                   <p className="text-sm text-gray-400 mt-0.5">{opp.title}</p>
+                  <button
+                    onClick={() => setViewDoc(opportunityDoc(opp, detail))}
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-600 underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 cursor-pointer transition-colors"
+                  >
+                    <FileText size={13} strokeWidth={1.5} />
+                    View full document
+                  </button>
                 </div>
                 <button
                   onClick={onClose}
                   aria-label="Close"
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
@@ -255,6 +307,18 @@ export default function OpportunityDrawer({ opp, detail, onClose }: Props) {
           </>
         )}
       </div>
+
+      {/* Full opportunity document */}
+      <DocumentViewer
+        doc={viewDoc}
+        onClose={() => setViewDoc(null)}
+        onAsk={(d) => {
+          setViewDoc(null);
+          onClose();
+          const known = opp && OPPORTUNITIES.some((o) => o.id === opp.id);
+          launch({ context: opp?.account, prompt: `Walk me through the ${opp?.account} opportunity brief`, entity: known ? { kind: "opportunity", id: opp!.id } : undefined });
+        }}
+      />
     </>
   );
 }

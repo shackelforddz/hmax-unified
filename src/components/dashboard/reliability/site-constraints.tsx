@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import WidgetChat from "@/components/dashboard/widget-chat";
+import AssetDrawer from "@/components/dashboard/sales/asset-drawer";
 import { SITE_CONSTRAINTS, type ConstraintStatus } from "@/lib/reliability-data";
 
 function StatusBadge({ status }: { status: ConstraintStatus }) {
@@ -12,9 +14,11 @@ function StatusBadge({ status }: { status: ConstraintStatus }) {
 }
 
 export default function SiteConstraints() {
+  const [drawerId, setDrawerId] = useState<string | null>(null);
   const conflicts = SITE_CONSTRAINTS.filter((c) => c.status === "conflict").length;
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
+      <AssetDrawer assetId={drawerId} onClose={() => setDrawerId(null)} />
       <div className="px-5 pt-5 pb-4 border-b border-gray-100 flex items-start justify-between">
         <div>
           <h3 className="text-base text-gray-900">Handover vs site constraints</h3>
@@ -24,7 +28,11 @@ export default function SiteConstraints() {
       </div>
       <div className="p-4 flex flex-col gap-3">
         {SITE_CONSTRAINTS.map((c) => (
-          <div key={c.id} className="border border-gray-200 rounded-2xl px-4 py-3">
+          <button
+            key={c.id}
+            onClick={() => setDrawerId(c.asset.toLowerCase())}
+            className="w-full text-left border border-gray-200 rounded-2xl px-4 py-3 hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
+          >
             <div className="flex items-center justify-between gap-3 mb-2">
               <span className="text-sm text-gray-900">{c.asset} · {c.type}</span>
               <StatusBadge status={c.status} />
@@ -37,7 +45,7 @@ export default function SiteConstraints() {
               <span className="text-gray-400 w-16 shrink-0 tracking-wider text-[10px]">Site</span>
               <span className={`flex-1 min-w-0 ${c.status === "conflict" ? "text-gray-900" : "text-gray-600"}`}>{c.actual}</span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

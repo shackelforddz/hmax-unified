@@ -62,13 +62,14 @@ function RiskChips({ risk }: { risk: RiskProfile }) {
 }
 
 function ContractRow({ contract, category, onOpenDrawer }: { contract: OpsContract; category: AlertCategory | "all"; onOpenDrawer: (id: string) => void }) {
-  const [expanded, setExpanded] = useState(contract.id === "ct-sherco");
+  // Critical contracts open expanded.
+  const [expanded, setExpanded] = useState(contract.status === "critical");
   const launch = useConversationLauncher();
 
   // Category counts for the collapsed summary.
   const counts = CAT_ORDER.map((c) => [c, contract.alerts.filter((a) => a.category === c).length] as const).filter(([, n]) => n > 0);
-  // Alerts shown when expanded (respect the active category filter).
-  const shown = category === "all" ? contract.alerts : contract.alerts.filter((a) => a.category === category);
+  // Alerts shown when expanded (respect the active category filter), capped at 3.
+  const shown = (category === "all" ? contract.alerts : contract.alerts.filter((a) => a.category === category)).slice(0, 3);
 
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden">

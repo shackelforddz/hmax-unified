@@ -172,7 +172,6 @@ export default function AssetAlerts({
   const countFor = (s: AssetStatus | "all", c: AssetCategory | "all") =>
     alerts.filter((a) => (s === "all" || a.status === s) && (c === "all" || a.category === c)).length;
 
-  const firstExpandableId = filtered.find((a) => a.alert)?.id;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -220,7 +219,7 @@ export default function AssetAlerts({
       {/* Cards */}
       <div className="p-4 flex flex-col gap-3">
         {filtered.length > 0 ? (
-          filtered.map((a) => <AssetRow key={a.id} asset={a} defaultExpanded={a.id === firstExpandableId} onOpenDrawer={setDrawerId} />)
+          filtered.map((a) => <AssetRow key={a.id} asset={a} defaultExpanded={a.status === "critical" && !!a.alert} onOpenDrawer={setDrawerId} />)
         ) : (
           <p className="text-sm text-gray-400 text-center py-6">No assets match the selected filters.</p>
         )}

@@ -5,6 +5,7 @@ import { X, ChevronDown, CheckCircle2, Circle, CalendarClock, ClipboardList, Ref
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
 import { OPS_CONTRACTS, OPS_CONTRACT_DETAILS, type OpsContract, type OpsContractDetail, type RiskProfile } from "@/lib/operations-data";
+import { SCOPE_REVIEWS } from "@/lib/reliability-data";
 import ContractSections from "./contract-sections";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -113,6 +114,31 @@ function DrawerBody({ c, d, onAction }: { c: OpsContract; d: OpsContractDetail; 
       <Card>
         <SectionTitle>Risk profile</SectionTitle>
         <RiskProfileView risk={c.risk} />
+        {(() => {
+          const review = SCOPE_REVIEWS.find((r) => r.contractId === c.id);
+          if (!review) return null;
+          const cls =
+            review.verdict === "not-feasible" ? "bg-gray-900 text-white"
+            : review.verdict === "at-risk" ? "bg-gray-200 text-gray-700"
+            : review.verdict === "pending" ? "border border-gray-400 text-gray-700"
+            : "border border-gray-300 text-gray-500";
+          const label =
+            review.verdict === "not-feasible" ? "Not feasible"
+            : review.verdict === "at-risk" ? "At risk"
+            : review.verdict === "pending" ? "Awaiting review"
+            : "Feasible";
+          return (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <p className="text-[11px] text-gray-400 tracking-wider">Scope feasibility</p>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${cls}`}>{label}</span>
+              </div>
+              <p className="text-sm text-gray-700">{review.scope} · {review.value}</p>
+              <p className="text-xs text-gray-500 leading-relaxed mt-1">{review.detail}</p>
+              <p className="text-xs text-gray-400 mt-1.5">Reviewed against handover from {review.from}</p>
+            </div>
+          );
+        })()}
       </Card>
 
       {/* Milestones */}

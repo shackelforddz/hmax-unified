@@ -10,6 +10,7 @@ import { REPORTS_AWAITING } from "@/lib/field-reports-data";
 import { ASSET_SERVICE_HISTORY } from "@/lib/asset-history-data";
 import { ASSET_NAMEPLATE, type Nameplate } from "@/lib/asset-nameplate-data";
 import { ASSET_DRAWINGS } from "@/lib/asset-drawings-data";
+import { SITE_CONSTRAINTS } from "@/lib/reliability-data";
 import { Aging, ScoreCalculation, RiskMatrix, ConditionTrend, ParameterTrend, Diagnostics } from "./asset-condition";
 import DocumentViewer, { type ViewDoc } from "./document-viewer";
 
@@ -198,6 +199,37 @@ export function DrawerBody({ d, cond, nameplate, onAction }: { d: AssetDetail; c
           ))}
         </div>
       </Card>
+
+      {/* Site constraints that apply to this asset */}
+      {(() => {
+        const siteConstraints = SITE_CONSTRAINTS.filter((c) => c.asset === d.code);
+        if (siteConstraints.length === 0) return null;
+        return (
+          <Card>
+            <SectionTitle>Site constraints</SectionTitle>
+            <div className="flex flex-col gap-3">
+              {siteConstraints.map((c) => (
+                <div key={c.id}>
+                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                    <span className="text-sm text-gray-900">{c.type}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${c.status === "conflict" ? "bg-gray-900 text-white" : "border border-gray-300 text-gray-500"}`}>
+                      {c.status === "conflict" ? "Conflict" : "OK"}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2 text-xs">
+                    <span className="text-gray-400 w-16 shrink-0 tracking-wider text-[10px]">Handover</span>
+                    <span className="text-gray-600 flex-1 min-w-0">{c.handover}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 text-xs mt-1">
+                    <span className="text-gray-400 w-16 shrink-0 tracking-wider text-[10px]">Site</span>
+                    <span className={`flex-1 min-w-0 ${c.status === "conflict" ? "text-gray-900" : "text-gray-600"}`}>{c.actual}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })()}
 
       {/* Related */}
       <Card>

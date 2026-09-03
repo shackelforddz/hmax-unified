@@ -37,7 +37,8 @@ function StatusBadge({ status }: { status: AttentionStatus }) {
 }
 
 function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawer: (id: string) => void }) {
-  const [expanded, setExpanded] = useState(item.id === "xcel-energy");
+  // Critical contracts open expanded.
+  const [expanded, setExpanded] = useState(item.status === "critical");
   const launch = useConversationLauncher();
 
   // Healthy customers have no issues to work — no accordion.
@@ -99,7 +100,7 @@ function AttentionRow({ item, onOpenDrawer }: { item: AttentionItem; onOpenDrawe
         <>
           <hr className="border-gray-200" />
           <div className="px-6 py-5 flex flex-col gap-6">
-            {item.flags.map((flag, i) => (
+            {item.flags.slice(0, 3).map((flag, i) => (
               <div key={i} className="flex gap-4">
                 {/* Flag icon */}
                 <div className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-sm text-gray-500 shrink-0 font-mono leading-none">

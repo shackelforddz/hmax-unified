@@ -61,6 +61,11 @@ export interface PlaybookContext {
   assetId?: string;                             // for "Review asset health"
   title?: string;                               // the alert's title, for review docs
   ref?: string;                                 // an explicit document reference
+  // For "Review feasibility" (scope reviews):
+  verdict?: "feasible" | "at-risk" | "not-feasible" | "pending";
+  scope?: string;
+  value?: string;
+  from?: string;
 }
 
 interface Recipe {
@@ -649,6 +654,57 @@ function reviewDoc(key: string, docType: string, ref: string, title: string, sit
   };
 }
 
+/* ── Review feasibility — summarise the scope + a sign-off call ──── */
+const VERDICT_LABEL: Record<NonNullable<PlaybookContext["verdict"]>, string> = {
+  feasible: "Feasible",
+  "at-risk": "At risk",
+  "not-feasible": "Not feasible",
+  pending: "Awaiting review",
+};
+
+function feasibilityAssessment(v: NonNullable<PlaybookContext["verdict"]>): string {
+  switch (v) {
+    case "feasible": return "Checked against the asset's nameplate ratings and site constraints — the scope is deliverable as written with no exceptions.";
+    case "at-risk": return "Deliverable, but only if the flagged condition holds. The margin against the asset's ratings is thin, so there's execution risk if anything moves.";
+    case "not-feasible": return "As written, the scope exceeds the asset's ratings or conflicts with the site constraints. It can't be delivered without a change to the scope.";
+    case "pending": return "Not yet assessed against the asset record and site survey — key technical points are still open.";
+  }
+}
+
+export function feasibilityRecommendation(v: NonNullable<PlaybookContext["verdict"]>): string {
+  switch (v) {
+    case "feasible": return "Looks good to sign off. Approve it and record your sign-off so sales can proceed to offer.";
+    case "at-risk": return "Sign off only conditionally — record the risk and the mitigation (e.g. the cooling upgrade) so it isn't a silent assumption. If the mitigation can't be committed, hand it back.";
+    case "not-feasible": return "Don't sign off as written. Return it to sales with the specific blocker and what would make it feasible.";
+    case "pending": return "Not enough here to sign off yet. Verify the open points against the nameplate and site survey, then record a verdict.";
+  }
+}
+
+function feasibilityPanel(ctx: PlaybookContext, situation: string): PlaybookPanel {
+  const v = ctx.verdict!;
+  const label = VERDICT_LABEL[v];
+  const rows = [
+    { label: "Scope", value: ctx.scope ?? "—" },
+    { label: "Value", value: ctx.value ?? "—" },
+    { label: "Handover from", value: ctx.from ?? "—" },
+    { label: "Verdict", value: label },
+  ];
+  const doc: ViewDoc = {
+    kind: "contract",
+    docType: "Scope feasibility",
+    title: ctx.title ?? "Scope feasibility review",
+    ref: ctx.ref ?? "Scope review",
+    preview: "text",
+    fields: rows,
+    sections: [
+      { heading: "Scope summary", text: situation },
+      { heading: "Feasibility assessment", text: feasibilityAssessment(v) },
+      { heading: "Sign-off recommendation", text: feasibilityRecommendation(v) },
+    ],
+  };
+  return { kind: "recap", heading: `Scope feasibility — ${label}`, rows, doc };
+}
+
 function reviewRecapPanel(action: string, situation: string, ctx?: PlaybookContext): PlaybookPanel {
   const key = action.trim().toLowerCase();
   const docType = REVIEW_DOCTYPE[key] ?? "Document";
@@ -757,6 +813,9 @@ function certRenewalPanel(): PlaybookPanel {
 }
 
 function panelFor(action: string, situation: string, ctx?: PlaybookContext): PlaybookPanel | undefined {
+  // Scope reviews (review feasibility / confirm scope / return to sales) carry
+  // a verdict — summarise the scope and give a sign-off call.
+  if (ctx?.verdict) return feasibilityPanel(ctx, situation);
   switch (action.trim().toLowerCase()) {
     case "rebalance crew":
       return crewPanel();
@@ -789,5 +848,7 @@ export function buildPlaybook(action: string, situation: string, ctx?: PlaybookC
   // When an options/form panel drives the interaction, the generic text
   // steps are redundant; the recap panel keeps its steps (e.g. "Raise it").
   const steps = panel && (panel.kind === "options" || panel.kind === "form" || panel.kind === "draft") ? [] : r.steps;
-  return { situation, recommendation: r.recommendation, steps, panel };
+  // A scope review's recommendation is the sign-off call for its verdict.
+  const recommendation = ctx?.verdict ? feasibilityRecommendation(ctx.verdict) : r.recommendation;
+  return { situation, recommendation, steps, panel };
 }

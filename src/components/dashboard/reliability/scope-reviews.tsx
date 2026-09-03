@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, ScrollText } from "lucide-react";
 import WidgetChat from "@/components/dashboard/widget-chat";
 import { Button } from "@/components/ui/button";
 import { useConversationLauncher } from "@/components/dashboard/conversation-launcher";
+import { buildPlaybook } from "@/lib/alert-playbooks";
 import ContractDrawer from "@/components/dashboard/operations/contract-drawer";
 import { SCOPE_REVIEWS, type ScopeReview, type ScopeVerdict } from "@/lib/reliability-data";
 
@@ -64,7 +65,23 @@ function ScopeRow({ review, defaultExpanded, onOpenDrawer }: { review: ScopeRevi
               <p className="text-sm text-gray-900 mb-2 leading-snug">Technical feasibility review · from {review.from}</p>
               <p className="text-sm text-gray-500 leading-relaxed mb-4">{review.detail}</p>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={() => launch({ context: review.account, prompt: `${review.action} for the ${review.account} scope`, entity })} className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer">
+                <Button
+                  onClick={() =>
+                    launch({
+                      context: review.account,
+                      prompt: `${review.action} for the ${review.account} scope`,
+                      entity,
+                      playbook: buildPlaybook(review.action, review.detail, {
+                        verdict: review.verdict,
+                        scope: review.scope,
+                        value: review.value,
+                        from: review.from,
+                        title: `${review.account} — ${review.scope}`,
+                      }),
+                    })
+                  }
+                  className="rounded-full h-auto px-5 py-2 text-sm cursor-pointer"
+                >
                   {review.action}
                 </Button>
                 <Button variant="outline" onClick={() => launch({ context: review.account, prompt: `Review the ${review.account} scope: ${review.scope}`, entity })} className="rounded-full h-auto px-5 py-2 text-sm text-gray-700 cursor-pointer">

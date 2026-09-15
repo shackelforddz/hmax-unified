@@ -22,7 +22,7 @@ import ContractsTable from "@/components/dashboard/tables/contracts-table";
 import AssetsTable from "@/components/dashboard/tables/assets-table";
 import { ASSET_ALERTS } from "@/lib/sales-data";
 
-const TABS = ["Overview", "Opportunities", "Contracts", "Assets"];
+const TABS = ["Overview", "Leads", "Contracts", "Assets"];
 
 // Asset-health KPIs are counted from the same alert list the widget shows below.
 const criticalAssets = ASSET_ALERTS.filter((a) => a.status === "critical").length;
@@ -37,7 +37,7 @@ export default function SalesDashboard() {
     return (
       <div className="flex flex-col gap-4">
         <DashboardTabs tabs={TABS} active={tab} onChange={setTab} />
-        {tab === "Opportunities" && <OpportunitiesTable />}
+        {tab === "Leads" && <OpportunitiesTable />}
         {tab === "Contracts" && <ContractsTable />}
         {tab === "Assets" && <AssetsTable />}
       </div>
